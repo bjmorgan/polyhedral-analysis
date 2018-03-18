@@ -1,6 +1,17 @@
 class Atom:
+    """
+    Class definition for Atom instances.
+    """
 
     def __init__( self, index, site, label=None ):
+        """
+        Initialise an Atom index.
+
+        Args:
+            index:
+            site:
+            label (:obj:(Str), optional):
+        """
         self.index = index
         self.site = site
         self.label = label
