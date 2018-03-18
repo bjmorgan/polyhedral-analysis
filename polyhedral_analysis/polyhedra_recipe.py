@@ -1,9 +1,30 @@
 from functools import partial
 import numpy as np
 
-def matching_site_indices( structure, reference_structure, species=None ):
+def matching_sites( structure, reference_structure, species=None ):
     """
     Returns a subset of sites from structure (as a list) where each site is the closest to one 
+    site in the reference structure.
+    
+    Args:
+        structure (Structure): The structure being analysed.
+        reference_structure (Structure): A Structure object containing a set of reference sites.
+        
+    Returns:
+        (list([Site,index]))
+    """
+    matched_sites = []
+    for ref_site in reference_structure:
+        dr = [ site.distance( ref_site ) for site in structure ]
+        i = np.argmin( dr )
+        matched_sites.append( [ structure[ i ], i ] )
+    if species:
+        matched_sites = [ s for s in matched_sites if str( s[0].specie ) in species ]
+    return matched_sites
+
+def matching_site_indices( structure, reference_structure, species=None ):
+    """
+    Returns a subset of site indices from structure (as a list) where each site is the closest to one 
     site in the reference structure.
     
     Args:
@@ -13,16 +34,9 @@ def matching_site_indices( structure, reference_structure, species=None ):
             sites will be included in the returned set.
         
     Returns:
-        (list[Site,index])
+        (list[int])
     """
-    matched_sites = []
-    for ref_site in reference_structure:
-        dr = [ site.distance( ref_site ) for site in structure ]
-        i = np.argmin( dr )
-        matched_sites.append( [ structure[ i ], i ] )
-    if species:
-        matched_sites = [ s for s in matched_sites if str( s[0].specie ) in species ]
-    return [ m[1] for m in matched_sites ]
+    return [ m[1] for m in matching_sites( structure, reference_structure, species=species ) ]
 
 def create_matching_site_generator( reference_structure, species=None ):
     """
