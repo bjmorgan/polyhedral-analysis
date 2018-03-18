@@ -8,9 +8,9 @@ class Atom:
         Initialise an Atom index.
 
         Args:
-            index:
-            site:
-            label (:obj:(Str), optional):
+            index (int): numerical index identifying this atom.
+            site  (pymatgen.Site): The pymatgen Site (or PeriodicSite) object describing this atom.
+            label (:obj:(Str), optional): An optional string labelling this atom.
         """
         self.index = index
         self.site = site
