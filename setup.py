@@ -16,7 +16,7 @@ from polyhedral_analysis import __version__ as VERSION
 
 config = {
     'name': 'polyhedral_analysis',
-    'description': 'TODO'
+    'description': 'TODO',
     'long_description': long_description,
     'author': 'Benjamin J. Morgan',
     'author_email':'bjm42@bath.ac.uk',
