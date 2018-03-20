@@ -5,6 +5,7 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries
 from pymatgen.util.coord import pbc_shortest_vectors
 import numpy as np
 from scipy.spatial import ConvexHull
+from itertools import permutations
 
 oct_points = AllCoordinationGeometries().get_geometry_from_name('Octahedron').points
 trigonal_prism_points = AllCoordinationGeometries().get_geometry_from_name('Trigonal prism').points
@@ -22,28 +23,29 @@ def trigonal_prism_symmetry_measure( ag ):
 
 class CoordinationPolyhedron:
 
-    def __init__( self, central_atom, vertices ):
+    def __init__( self, central_atom, vertices, label=None ):
         """
         Initialise a CoordinationPolyhedron object.
  
         Args:
             central_atom (Atom): the central atom.
             vertices (list(Atom)): A list of atoms that define the coordination environment.
-
+            label (:obj:Str, optional): An optional string used to label this coordination polyhedron.
+                if the label is not defined, the label of the central atom will be used.
         Returns:
             None
         """
         self.central_atom = central_atom
         self.central_atom.in_polyhedra.append( self )
         self.vertices = vertices
+        if label:
+            self.label = label
+        else:
+            self.label = central_atom.label
         for vertex, neighbour_list in zip( self.vertices, self.construct_edge_graph().values() ):
             if not vertex.neighbours:
                 vertex.neighbours = {}
             vertex.neighbours[ self.index ] = neighbour_list
-
-    @property
-    def label( self ):
-        return self.central_atom.label
 
     def __repr__( self ):
         if self.label:
@@ -85,14 +87,22 @@ class CoordinationPolyhedron:
         Returns the polyhedron as a Pymatgen AbstractGeometry object.
         """
         return AbstractGeometry( central_site=self.central_atom.coords, bare_coords=self.minimum_image_vertex_coordinates(), 
-                                 include_central_site_in_centroid=True )
+                                 include_central_site_in_centroid=False )
 
     @property
     def symmetry_measure( self ):
-        if self.coordination_number == 6:
-            return oct_symmetry_measure( self.abstract_geometry ), trigonal_prism_symmetry_measure( self.abstract_geometry )
-        else:
-            raise NotImplementedError
+        if self.coordination_number not in symmetry_measures_from_coordination:
+            raise ValueError( 'No symmetry measure objects for coordination number of {}'.format( self.coordination_number ) )
+        msm = {}
+        for string, sm in symmetry_measures_from_coordination[ self.coordination_number ].items():
+            msm[ string ] = sm.minimum_symmetry_measure( self.abstract_geometry )
+        return msm 
+
+    @property
+    def best_fit_geometry( self ):
+        psm = self.symmetry_measure
+        best_fit = min( psm, key=psm.get )
+        return { 'geometry': best_fit, 'symmetry_measure': psm[ best_fit ] }
 
     def minimum_image_vertex_coordinates( self ):
         vertex_frac_coords = [ v.frac_coords for v in self.vertices ]
@@ -153,6 +163,20 @@ class CoordinationPolyhedron:
             edge_list[ self.vertex_indices[i] ] = [ self.vertex_indices[v] for v in connected_vertices[i] ] 
         return edge_list
 
+    @property
+    def vertex_distances( self ):
+        """
+        Returns a list of distances from the central atom to the vertex atoms.
+
+        Args:
+            None
+
+        Returns:
+            list(float): a list of atomic separations.
+        """ 
+        return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+
+    
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations

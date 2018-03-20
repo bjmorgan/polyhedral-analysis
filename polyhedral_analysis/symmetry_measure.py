@@ -19,7 +19,10 @@ class SymmetryMeasure:
         reference_points = AllCoordinationGeometries().get_geometry_from_name( name ).points
         return cls( reference_points, name )
 
-symmetry_measures_to_construct = { 6: [ 'Octahedron', 'Trigonal prism' ] }
+symmetry_measures_to_construct = { 4: [ 'Tetrahedron' ],
+                                   5: [ 'Trigonal bipyramid', 'Square pyramid' ],
+                                   6: [ 'Octahedron', 'Trigonal prism' ],
+                                   7: [ 'Pentagonal bipyramid', 'Square-face capped trigonal prism', 'Face-capped octahedron' ] }
 
 symmetry_measures_from_coordination = {}
 for coordination_number, strings in symmetry_measures_to_construct.items():
