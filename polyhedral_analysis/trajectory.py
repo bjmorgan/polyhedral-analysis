@@ -28,5 +28,13 @@ class Trajectory:
     def structures( self ):
         return self.xdatcar.structures
 
+    #TODO implement different ways of creating a Trajectory object, e.g. 
+    #@class_method
+    #def from_configurations( self, configurations ):
+    #    TODO
 
+    #@class_method
+    #def from_xdatcar( self, xdatcar, … ):
+    #    TODO
+        
  
