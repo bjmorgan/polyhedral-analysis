@@ -7,20 +7,6 @@ import numpy as np
 from scipy.spatial import ConvexHull
 from itertools import permutations
 
-oct_points = AllCoordinationGeometries().get_geometry_from_name('Octahedron').points
-trigonal_prism_points = AllCoordinationGeometries().get_geometry_from_name('Trigonal prism').points
-
-def oct_symmetry_measure( ag ):
-    distorted_points = ag.points_wocs_csc()
-    # TODO: this shouldn't actually be over all permutations, just those that are symmetry-inequivalent under Oh.
-    return min( symmetry_measure( np.array(p), oct_points )['symmetry_measure'] for p in permutations( distorted_points ) )
-
-def trigonal_prism_symmetry_measure( ag ):
-    distorted_points = ag.points_wocs_csc()
-    # TODO: this shouldn't actually be over all permutations, just those that are symmetry-inequivalent under whatever this point group is.
-    return min( symmetry_measure( np.array(p), trigonal_prism_points )['symmetry_measure'] for p in permutations( distorted_points ) )
-
-
 class CoordinationPolyhedron:
 
     def __init__( self, central_atom, vertices, label=None ):
@@ -176,7 +162,45 @@ class CoordinationPolyhedron:
         """ 
         return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
 
-    
+    def equal_vertices( self, other ):
+        """
+        Test whether this CoordinationPolyhedron has vertices with the same labels as
+        another CoordinationPolyhedron.
+
+        Args:
+            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+
+        Returns:
+            (bool): True / False.
+        """
+        return self.vertex_indices == other.vertex_indices
+
+    def equal_edge_graph( self, other ):
+        """
+        Test whether this CoordinationPolyhedron has the same edge graph as
+        another CoordinationPolyhedron.
+
+        Args:
+            other(CoordinationPolyhedraon): The other CoordinationPolyhedrom.
+
+        Returns:
+            (bool): True or False.
+        """
+        return self.edge_graph == other.edge_graph
+
+    def __eq__( self, other ):
+        """
+        Two CoordinationPolyhedron objects are considered equal if they
+        have equal edge graphs.
+
+        Args:
+            other(CoordinationPolyhedraon): The other CoordinationPolyhedrom.
+
+        Returns:
+            (bool): True or False.
+        """
+        return self.equal_edge_graph( other )
+      
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
