@@ -181,7 +181,7 @@ class CoordinationPolyhedron:
         another CoordinationPolyhedron.
 
         Args:
-            other(CoordinationPolyhedraon): The other CoordinationPolyhedrom.
+            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
 
         Returns:
             (bool): True or False.
@@ -194,7 +194,7 @@ class CoordinationPolyhedron:
         have equal edge graphs.
 
         Args:
-            other(CoordinationPolyhedraon): The other CoordinationPolyhedrom.
+            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
 
         Returns:
             (bool): True or False.
