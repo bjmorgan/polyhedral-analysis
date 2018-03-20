@@ -1,16 +1,19 @@
 class Atom:
-    """
-    Class definition for Atom instances.
-    """
+    """Atom class"""
 
     def __init__( self, index, site, label=None ):
         """
-        Initialise an Atom index.
+        Initialise an Atom object.
 
         Args:
             index (int): numerical index identifying this atom.
             site  (pymatgen.Site): The pymatgen Site (or PeriodicSite) object describing this atom.
-            label (:obj:(Str), optional): An optional string labelling this atom.
+            label (:obj:`str`, optional): An optional string labelling this atom.
+
+        Attributes:
+            in_polyhedra (list): TODO
+            neighbours: (None|list): TODO
+
         """
         self.index = index
         self.site = site

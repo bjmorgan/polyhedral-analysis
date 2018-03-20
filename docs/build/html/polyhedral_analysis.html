@@ -1,0 +1,675 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>polyhedral_analysis package &mdash; polyhedral-analysis 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="polyhedral-analysis 0.1 documentation" href="index.html"/>
+        <link rel="up" title="polyhedral_analysis" href="modules.html"/>
+        <link rel="prev" title="polyhedral_analysis" href="modules.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> polyhedral-analysis
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">API documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">polyhedral_analysis</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">polyhedral_analysis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.atom">polyhedral_analysis.atom module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.configuration">polyhedral_analysis.configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.coordination_polyhedron">polyhedral_analysis.coordination_polyhedron module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.polyhedra_recipe">polyhedral_analysis.polyhedra_recipe module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.polyhedron_trajectory">polyhedral_analysis.polyhedron_trajectory module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.symmetry_measure">polyhedral_analysis.symmetry_measure module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis.trajectory">polyhedral_analysis.trajectory module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-polyhedral_analysis">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">polyhedral-analysis</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">polyhedral_analysis</a> &raquo;</li>
+        
+      <li>polyhedral_analysis package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/polyhedral_analysis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="polyhedral-analysis-package">
+<h1>polyhedral_analysis package<a class="headerlink" href="#polyhedral-analysis-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-polyhedral_analysis.atom">
+<span id="polyhedral-analysis-atom-module"></span><h2>polyhedral_analysis.atom module<a class="headerlink" href="#module-polyhedral_analysis.atom" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.atom.Atom">
+<em class="property">class </em><code class="descname">Atom</code><span class="sig-paren">(</span><em>index</em>, <em>site</em>, <em>label=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/atom.html#Atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.atom.Atom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Atom class</p>
+<p>Initialise an Atom object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>index</strong> (<em>int</em>) – numerical index identifying this atom.</li>
+<li><strong>site</strong> (<em>pymatgen.Site</em>) – The pymatgen Site (or PeriodicSite) object describing this atom.</li>
+<li><strong>label</strong> (<code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, optional) – An optional string labelling this atom.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="polyhedral_analysis.atom.Atom.in_polyhedra">
+<code class="descname">in_polyhedra</code><a class="headerlink" href="#polyhedral_analysis.atom.Atom.in_polyhedra" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> – TODO</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.atom.Atom.neighbours">
+<code class="descname">neighbours</code><a class="headerlink" href="#polyhedral_analysis.atom.Atom.neighbours" title="Permalink to this definition">¶</a></dt>
+<dd><p>(None|list): TODO</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.atom.Atom.construct_neighbour_list">
+<code class="descname">construct_neighbour_list</code><span class="sig-paren">(</span><em>structure</em>, <em>cutoff</em>, <em>vertex_atoms</em>, <em>poly_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/atom.html#Atom.construct_neighbour_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.atom.Atom.construct_neighbour_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.atom.Atom.coords">
+<code class="descname">coords</code><a class="headerlink" href="#polyhedral_analysis.atom.Atom.coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.atom.Atom.frac_coords">
+<code class="descname">frac_coords</code><a class="headerlink" href="#polyhedral_analysis.atom.Atom.frac_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.atom.Atom.lattice">
+<code class="descname">lattice</code><a class="headerlink" href="#polyhedral_analysis.atom.Atom.lattice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.configuration">
+<span id="polyhedral-analysis-configuration-module"></span><h2>polyhedral_analysis.configuration module<a class="headerlink" href="#module-polyhedral_analysis.configuration" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.configuration.Configuration">
+<em class="property">class </em><code class="descname">Configuration</code><span class="sig-paren">(</span><em>structure</em>, <em>recipes</em>, <em>config_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/configuration.html#Configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.configuration.Configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="polyhedral_analysis.configuration.Configuration.polyhedra_by_label">
+<code class="descname">polyhedra_by_label</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/configuration.html#Configuration.polyhedra_by_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.configuration.Configuration.polyhedra_by_label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.configuration.Configuration.polyhedra_labels">
+<code class="descname">polyhedra_labels</code><a class="headerlink" href="#polyhedral_analysis.configuration.Configuration.polyhedra_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.coordination_polyhedron">
+<span id="polyhedral-analysis-coordination-polyhedron-module"></span><h2>polyhedral_analysis.coordination_polyhedron module<a class="headerlink" href="#module-polyhedral_analysis.coordination_polyhedron" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron">
+<em class="property">class </em><code class="descname">CoordinationPolyhedron</code><span class="sig-paren">(</span><em>central_atom</em>, <em>vertices</em>, <em>label=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Initialise a CoordinationPolyhedron object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>central_atom</strong> (<a class="reference internal" href="#polyhedral_analysis.atom.Atom" title="polyhedral_analysis.atom.Atom"><em>Atom</em></a>) – the central atom.</li>
+<li><strong>vertices</strong> (<em>list</em><em>(</em><a class="reference internal" href="#polyhedral_analysis.atom.Atom" title="polyhedral_analysis.atom.Atom"><em>Atom</em></a><em>)</em>) – A list of atoms that define the coordination environment.</li>
+<li><strong>(</strong> (<em>label</em>) – obj:Str, optional): An optional string used to label this coordination polyhedron.
+if the label is not defined, the label of the central atom will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.abstract_geometry">
+<code class="descname">abstract_geometry</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.abstract_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the polyhedron as a Pymatgen AbstractGeometry object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.best_fit_geometry">
+<code class="descname">best_fit_geometry</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.best_fit_geometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.construct_edge_graph">
+<code class="descname">construct_edge_graph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.construct_edge_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.construct_edge_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.convex_hull">
+<code class="descname">convex_hull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.convex_hull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.convex_hull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.coordination_number">
+<code class="descname">coordination_number</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.coordination_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.edge_graph">
+<code class="descname">edge_graph</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.edge_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.equal_edge_graph">
+<code class="descname">equal_edge_graph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.equal_edge_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.equal_edge_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test whether this CoordinationPolyhedron has the same edge graph as
+another CoordinationPolyhedron.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron" title="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron"><em>CoordinationPolyhedron</em></a>) – The other CoordinationPolyhedron.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True or False.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(bool)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.equal_vertices">
+<code class="descname">equal_vertices</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.equal_vertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.equal_vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test whether this CoordinationPolyhedron has vertices with the same labels as
+another CoordinationPolyhedron.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron" title="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron"><em>CoordinationPolyhedron</em></a>) – The other CoordinationPolyhedron.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True / False.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(bool)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.faces">
+<code class="descname">faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.faces" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list[int])</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(dict(int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.index">
+<code class="descname">index</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.intersection">
+<code class="descname">intersection</code><span class="sig-paren">(</span><em>other_polyhedron</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.intersection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.minimum_image_vertex_coordinates">
+<code class="descname">minimum_image_vertex_coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#CoordinationPolyhedron.minimum_image_vertex_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.minimum_image_vertex_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.symmetry_measure">
+<code class="descname">symmetry_measure</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.symmetry_measure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_distances">
+<code class="descname">vertex_distances</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_distances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of distances from the central atom to the vertex atoms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of atomic separations.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list(float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_indices">
+<code class="descname">vertex_indices</code><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.coordination_polyhedron.merge_coplanar_simplices">
+<code class="descname">merge_coplanar_simplices</code><span class="sig-paren">(</span><em>complex_hull</em>, <em>tolerance=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/coordination_polyhedron.html#merge_coplanar_simplices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.coordination_polyhedron.merge_coplanar_simplices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.polyhedra_recipe">
+<span id="polyhedral-analysis-polyhedra-recipe-module"></span><h2>polyhedral_analysis.polyhedra_recipe module<a class="headerlink" href="#module-polyhedral_analysis.polyhedra_recipe" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe">
+<em class="property">class </em><code class="descname">PolyhedraRecipe</code><span class="sig-paren">(</span><em>method</em>, <em>coordination_cutoff=None</em>, <em>vertex_graph_cutoff=None</em>, <em>central_atom_list=None</em>, <em>coordination_atom_list=None</em>, <em>central_atom_list_generator=None</em>, <em>coordination_atom_list_generator=None</em>, <em>label=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#PolyhedraRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Defines a “recipe” for defining coordination polyhedra.</p>
+<p>The algorithm for defining the coordination polyhedra must be specified using the keyword <cite>method</cite>.</p>
+<dl class="docutils">
+<dt>Available options are:</dt>
+<dd><ul class="first last simple">
+<li><cite>distance cutoff</cite>: include all coordinating ions within a cutoff distance.</li>
+<li><cite>closest centre</cite>: include all coordinating ions that share a common closest centre atom.</li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.allowed_methods">
+<code class="descname">allowed_methods</code><em class="property"> = ['distance cutoff', 'closest centre']</em><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.allowed_methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.central_atom_list">
+<code class="descname">central_atom_list</code><span class="sig-paren">(</span><em>structure=None</em>, <em>recalculate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#PolyhedraRecipe.central_atom_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.central_atom_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.coordination_atom_list">
+<code class="descname">coordination_atom_list</code><span class="sig-paren">(</span><em>structure=None</em>, <em>recalculate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#PolyhedraRecipe.coordination_atom_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.coordination_atom_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.find_polyhedra">
+<code class="descname">find_polyhedra</code><span class="sig-paren">(</span><em>atoms</em>, <em>structure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#PolyhedraRecipe.find_polyhedra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.PolyhedraRecipe.find_polyhedra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.polyhedra_recipe.create_matching_site_generator">
+<code class="descname">create_matching_site_generator</code><span class="sig-paren">(</span><em>reference_structure</em>, <em>species=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#create_matching_site_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.create_matching_site_generator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reference_structure</strong> (<em>Structure</em>) – </li>
+<li><strong>species</strong> (<code class="xref py py-obj docutils literal"><span class="pre">list[str]</span></code>, optional) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(functools.partial)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.polyhedra_recipe.matching_site_indices">
+<code class="descname">matching_site_indices</code><span class="sig-paren">(</span><em>structure</em>, <em>reference_structure</em>, <em>species=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#matching_site_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.matching_site_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a subset of site indices from structure (as a list) where each site is the closest to one
+site in the reference structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>structure</strong> (<em>Structure</em>) – The structure being analysed.</li>
+<li><strong>reference_structure</strong> (<em>Structure</em>) – A Structure object containing a set of reference sites.</li>
+<li><strong>species</strong> (<code class="xref py py-obj docutils literal"><span class="pre">list[str]</span></code>, optional) – A list of species labels. If this is set, only matching
+sites will be included in the returned set.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(list[int])</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.polyhedra_recipe.matching_sites">
+<code class="descname">matching_sites</code><span class="sig-paren">(</span><em>structure</em>, <em>reference_structure</em>, <em>species=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#matching_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.matching_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a subset of sites from structure (as a list) where each site is the closest to one
+site in the reference structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>structure</strong> (<em>Structure</em>) – The structure being analysed.</li>
+<li><strong>reference_structure</strong> (<em>Structure</em>) – A Structure object containing a set of reference sites.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(list([Site,index]))</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.polyhedra_recipe.polyhedra_from_closest_centre">
+<code class="descname">polyhedra_from_closest_centre</code><span class="sig-paren">(</span><em>central_atoms</em>, <em>coordination_atoms</em>, <em>label=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#polyhedra_from_closest_centre"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.polyhedra_from_closest_centre" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.polyhedra_recipe.polyhedra_from_distance_cutoff">
+<code class="descname">polyhedra_from_distance_cutoff</code><span class="sig-paren">(</span><em>central_atoms</em>, <em>coordination_atoms</em>, <em>cutoff</em>, <em>label=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedra_recipe.html#polyhedra_from_distance_cutoff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedra_recipe.polyhedra_from_distance_cutoff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.polyhedron_trajectory">
+<span id="polyhedral-analysis-polyhedron-trajectory-module"></span><h2>polyhedral_analysis.polyhedron_trajectory module<a class="headerlink" href="#module-polyhedral_analysis.polyhedron_trajectory" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.polyhedron_trajectory.PolyhedronTrajectory">
+<em class="property">class </em><code class="descname">PolyhedronTrajectory</code><span class="sig-paren">(</span><em>polyhedra</em>, <em>config_numbers=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/polyhedron_trajectory.html#PolyhedronTrajectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.polyhedron_trajectory.PolyhedronTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Collects a sequence of polyhedra from different configurations into a trajectory.</p>
+<p>Initialise a PolyhedronTrajectory object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>polyhedra</strong> (<em>list</em><em>(</em><a class="reference internal" href="#polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron" title="polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron"><em>CoordinationPolyhedron</em></a><em>)</em>) – A list of CoordinationPolyhedron objects.</li>
+<li><strong>(</strong> (<em>config_numbers</em>) – obj:list(int), optional): An optional list of configuration numbers
+for each of the polyhedra.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.symmetry_measure">
+<span id="polyhedral-analysis-symmetry-measure-module"></span><h2>polyhedral_analysis.symmetry_measure module<a class="headerlink" href="#module-polyhedral_analysis.symmetry_measure" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.symmetry_measure.SymmetryMeasure">
+<em class="property">class </em><code class="descname">SymmetryMeasure</code><span class="sig-paren">(</span><em>reference_points</em>, <em>string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/symmetry_measure.html#SymmetryMeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.symmetry_measure.SymmetryMeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="classmethod">
+<dt id="polyhedral_analysis.symmetry_measure.SymmetryMeasure.from_name">
+<em class="property">classmethod </em><code class="descname">from_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/symmetry_measure.html#SymmetryMeasure.from_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.symmetry_measure.SymmetryMeasure.from_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="polyhedral_analysis.symmetry_measure.SymmetryMeasure.minimum_symmetry_measure">
+<code class="descname">minimum_symmetry_measure</code><span class="sig-paren">(</span><em>ag</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/symmetry_measure.html#SymmetryMeasure.minimum_symmetry_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.symmetry_measure.SymmetryMeasure.minimum_symmetry_measure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis.trajectory">
+<span id="polyhedral-analysis-trajectory-module"></span><h2>polyhedral_analysis.trajectory module<a class="headerlink" href="#module-polyhedral_analysis.trajectory" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="polyhedral_analysis.trajectory.Trajectory">
+<em class="property">class </em><code class="descname">Trajectory</code><span class="sig-paren">(</span><em>xdatcar</em>, <em>recipes</em>, <em>read_config_numbers=True</em>, <em>config_numbers=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/trajectory.html#Trajectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.trajectory.Trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="polyhedral_analysis.trajectory.Trajectory.structures">
+<code class="descname">structures</code><a class="headerlink" href="#polyhedral_analysis.trajectory.Trajectory.structures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="polyhedral_analysis.trajectory.read_config_numbers_from_xdatcar">
+<code class="descname">read_config_numbers_from_xdatcar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polyhedral_analysis/trajectory.html#read_config_numbers_from_xdatcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polyhedral_analysis.trajectory.read_config_numbers_from_xdatcar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-polyhedral_analysis">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-polyhedral_analysis" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="modules.html" class="btn btn-neutral" title="polyhedral_analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Benjamin Morgan.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

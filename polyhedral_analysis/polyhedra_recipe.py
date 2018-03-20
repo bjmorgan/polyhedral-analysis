@@ -54,7 +54,8 @@ class PolyhedraRecipe:
     """
     Defines a "recipe" for defining coordination polyhedra. 
 
-    The algorithm for defining the coordination polyhedra must be specified using the keyword `method`..
+    The algorithm for defining the coordination polyhedra must be specified using the keyword `method`.
+
     Available options are:
         - `distance cutoff`: include all coordinating ions within a cutoff distance.
         - `closest centre`: include all coordinating ions that share a common closest centre atom.
