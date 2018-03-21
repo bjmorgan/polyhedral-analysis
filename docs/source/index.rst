@@ -7,7 +7,7 @@ polyhedral-analysis
 ===================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: API documentation:
 
    modules
