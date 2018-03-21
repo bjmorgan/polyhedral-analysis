@@ -16,8 +16,9 @@ class CoordinationPolyhedron:
         Args:
             central_atom (Atom): the central atom.
             vertices (list(Atom)): A list of atoms that define the coordination environment.
-            label (:obj:Str, optional): An optional string used to label this coordination polyhedron.
+            label (:obj:`str`, optional): An optional string used to label this coordination polyhedron.
                 if the label is not defined, the label of the central atom will be used.
+
         Returns:
             None
         """
