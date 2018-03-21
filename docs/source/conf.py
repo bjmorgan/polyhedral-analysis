@@ -20,13 +20,25 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../diffusion_analysis'))
+sys.path.insert(0, os.path.abspath('../../diffusion_analysis'))
 
-from unittest import mock
+#from unittest import mock
  
-MOCK_MODULES = ['scipy']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+#MOCK_MODULES = ['scipy', 'scipy.constants', 'scipy.spatial']
+#for mod_name in MOCK_MODULES:
+#    sys.modules[mod_name] = mock.MagicMock()
+
+def run_apidoc(_):
+	from sphinx.apidoc import main
+	import os
+	import sys
+	sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+	cur_dir = os.path.abspath(os.path.dirname(__file__))
+	module = os.path.join(cur_dir,'..','..','polyhedral_analysis')
+	main([None,'-e', '-o', cur_dir, module, '--force'])
+
+def setup(app):
+	app.connect('builder-inited', run_apidoc)
 
 # -- General configuration ------------------------------------------------
 
