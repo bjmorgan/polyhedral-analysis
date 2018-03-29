@@ -102,8 +102,10 @@ class PolyhedraRecipe:
     def find_polyhedra( self, atoms, structure=None ):
         polyhedra_method = { 'distance cutoff': partial( polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff ),
                              'closest centre': polyhedra_from_closest_centre }
-        central_atoms = [ atom for atom in atoms if atom.index in self.central_atom_list( structure ) ]
-        coordination_atoms = [ atom for atom in atoms if atom.index in self.coordination_atom_list( structure ) ]
+        central_atom_list = self.central_atom_list( structure )
+        coordination_atom_list = self.coordination_atom_list( structure )
+        central_atoms = [ atom for atom in atoms if atom.index in central_atom_list ]
+        coordination_atoms = [ atom for atom in atoms if atom.index in coordination_atom_list ]
         return polyhedra_method[ self.method ]( central_atoms=central_atoms, 
                                                 coordination_atoms=coordination_atoms, 
                                                 label=self.label )
