@@ -43,3 +43,6 @@ class Atom:
     @property
     def lattice( self ):
         return self.site.lattice
+
+    def __lt__( self, other ):
+        return self.index < other.index
