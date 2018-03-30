@@ -24,7 +24,9 @@ class CoordinationPolyhedron:
         """
         self.central_atom = central_atom
         self.central_atom.in_polyhedra.append( self )
-        self.vertices = vertices
+        self.vertices = sorted( vertices )
+        for v in self.vertices:
+            v.in_polyhedra.append( self )
         if label:
             self.label = label
         else:
@@ -33,6 +35,7 @@ class CoordinationPolyhedron:
             if not vertex.neighbours:
                 vertex.neighbours = {}
             vertex.neighbours[ self.index ] = neighbour_list
+        self._abstract_geometry = self.construct_abstract_geometry()
 
     def __repr__( self ):
         if self.label:
@@ -66,14 +69,17 @@ class CoordinationPolyhedron:
         for v in self.vertices:
             to_return[ v.index ] = v.neighbours[ self.index ]
         return to_return
-   
-    # should be calculated once upon initialisation and stored 
+  
     @property
     def abstract_geometry( self ):
+        return self._abstract_geometry
+ 
+    def construct_abstract_geometry( self ):
         """
         Returns the polyhedron as a Pymatgen AbstractGeometry object.
         """
-        return AbstractGeometry( central_site=self.central_atom.coords, bare_coords=self.minimum_image_vertex_coordinates(), 
+        return AbstractGeometry( central_site=self.central_atom.coords, 
+                                 bare_coords=self.minimum_image_vertex_coordinates(), 
                                  include_central_site_in_centroid=False )
 
     @property
@@ -201,7 +207,16 @@ class CoordinationPolyhedron:
             (bool): True or False.
         """
         return self.equal_edge_graph( other )
-      
+    
+    def orientation( ag ):
+        to_return = []
+        for point in self.abstract_geometry.points_wocs_ctwocc():
+            for vec in np.array( [ [ 1.0, 0.0, 0.0 ],
+                                   [ 0.0, 1.0, 0.0 ],
+                                   [ 0.0, 0.0, 1.0 ] ] ):
+                to_return.append( cos_theta( vec, point ) )
+        return np.array( to_return ).reshape(-1,3)
+  
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
