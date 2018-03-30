@@ -8,7 +8,11 @@ def read_config_numbers_from_xdatcar( filename ):
 
 class Trajectory:
 
-    def __init__( self, xdatcar, recipes, read_config_numbers=True, config_numbers=None ):
+    def __init__( self, xdatcar, recipes, read_config_numbers=True, 
+                  config_numbers=None, verbose=False ):
+        """
+        Class describing a single simulation trajectory.
+        """
         self.xdatcar = Xdatcar( xdatcar )
         if read_config_numbers and not config_numbers:
             self.config_numbers = read_config_numbers_from_xdatcar( xdatcar )
@@ -21,6 +25,8 @@ class Trajectory:
         # generate polyhedra configurations
         self.configurations = []
         for n, s in zip( self.config_numbers, self.structures ):
+            if verbose:
+                print( 'Reading configuration {}'.format( n ), flush=True )
             c = Configuration( structure=s, recipes=self.recipes, config_number=n )
             self.configurations.append( c )
 
