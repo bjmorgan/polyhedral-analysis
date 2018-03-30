@@ -1,5 +1,6 @@
 from .atom import Atom
 from .symmetry_measure import symmetry_measures_from_coordination
+from .rotational_order_parameters import cos_theta
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry, symmetry_measure
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
 from pymatgen.util.coord import pbc_shortest_vectors
@@ -208,14 +209,24 @@ class CoordinationPolyhedron:
         """
         return self.equal_edge_graph( other )
     
-    def orientation( ag ):
+    def orientation( self, vectors ):
+        """
+        Calculate the orientational alignment of each centroid --> vertex vector.
+
+        Args:
+            vectors (np.array): A Nx3 numpy array, where each row is a vector used
+                                to calculate the projection.
+
+        Returns:
+            (np.array): A N_vertex x N_vector numpy array.
+        """
+        if len( vectors.shape ) == 1:
+            vectors = np.array( [ vectors ] )
         to_return = []
         for point in self.abstract_geometry.points_wocs_ctwocc():
-            for vec in np.array( [ [ 1.0, 0.0, 0.0 ],
-                                   [ 0.0, 1.0, 0.0 ],
-                                   [ 0.0, 0.0, 1.0 ] ] ):
+            for vec in vectors:
                 to_return.append( cos_theta( vec, point ) )
-        return np.array( to_return ).reshape(-1,3)
+        return np.array( to_return ).reshape(-1,vectors.shape[0])
   
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
