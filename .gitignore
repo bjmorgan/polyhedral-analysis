@@ -1,2 +1,4 @@
 **/*pycache*
 **/*.swp
+**/.DS_Store
+**/.coverage
