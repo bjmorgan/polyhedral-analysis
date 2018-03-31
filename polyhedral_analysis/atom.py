@@ -46,3 +46,6 @@ class Atom:
 
     def __lt__( self, other ):
         return self.index < other.index
+
+    def __eq__( self, other ):
+        return self.index == other.index

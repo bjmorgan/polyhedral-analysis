@@ -196,6 +196,21 @@ class CoordinationPolyhedron:
         """
         return self.edge_graph == other.edge_graph
 
+    def equal_members( self, other ):
+        """
+        Test whether this CoordinationPolyhedron has the same member atoms
+        as another CoordinationPolyhedron.
+
+        Args:
+            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+
+        Returns:
+            (bool): True or False.
+        """
+        equal_central_atom = self.central_atom == other.central_atom
+        equal_vertex_atoms = self.vertices == other.vertices
+        return equal_central_atom & equal_vertex_atoms
+
     def __eq__( self, other ):
         """
         Two CoordinationPolyhedron objects are considered equal if they

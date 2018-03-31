@@ -4,6 +4,7 @@ from polyhedral_analysis.atom import Atom
 from pymatgen import Site, Lattice
 import numpy as np
 
+
 class TestAtomInit( unittest.TestCase ):
 
     def test_atom_is_initialised( self ):
@@ -57,6 +58,26 @@ class TestAtom( unittest.TestCase ):
         site.lattice = Mock( spec=Lattice )
         other_atom = Atom( index=index, site=site, label=label )
         self.assertTrue( self.atom < other_atom )
+
+    def test___eq___when_true( self ):
+        index = 123
+        site = Mock( spec=Site )
+        label = 'foo' 
+        site.frac_coords = np.array( [ 1.0, 2.0, 3.0 ] )
+        site.coords = np.array( [ 10.0, 11.0, 12.0 ] )
+        site.lattice = Mock( spec=Lattice )
+        other_atom = Atom( index=index, site=site, label=label )
+        self.assertEqual( self.atom, other_atom )
+
+    def test___eq___when_false( self ):
+        index = 456
+        site = Mock( spec=Site )
+        label = 'foo'
+        site.frac_coords = np.array( [ 1.0, 2.0, 3.0 ] )
+        site.coords = np.array( [ 10.0, 11.0, 12.0 ] )
+        site.lattice = Mock( spec=Lattice )
+        other_atom = Atom( index=index, site=site, label=label )
+        self.assertNotEqual( self.atom, other_atom )
 
 if __name__ == '__main__':
     unittest.main()
