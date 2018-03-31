@@ -49,3 +49,6 @@ class Atom:
 
     def __eq__( self, other ):
         return self.index == other.index
+
+    def __hash__( self ):
+        return self.index
