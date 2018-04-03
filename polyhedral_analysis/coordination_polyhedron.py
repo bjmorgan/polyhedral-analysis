@@ -233,7 +233,7 @@ class CoordinationPolyhedron:
                                 to calculate the projection.
 
         Returns:
-            (np.array): A N_vertex x N_vector numpy array.
+            (np.array): A (N_vertex x N_vector) dimension numpy array.
         """
         if len( vectors.shape ) == 1:
             vectors = np.array( [ vectors ] )
@@ -242,7 +242,19 @@ class CoordinationPolyhedron:
             for vec in vectors:
                 to_return.append( cos_theta( vec, point ) )
         return np.array( to_return ).reshape(-1,vectors.shape[0])
-  
+ 
+    def coordination_distances( self ):
+        """
+        List of distances from the central atom to the vertex atoms.
+
+        Args:
+            None
+
+        Returns:
+            (list): A N_vertex dimension numpy array.
+        """ 
+        return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
