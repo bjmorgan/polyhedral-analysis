@@ -22,7 +22,8 @@ class SymmetryMeasure:
 symmetry_measures_to_construct = { 4: [ 'Tetrahedron' ],
                                    5: [ 'Trigonal bipyramid', 'Square pyramid' ],
                                    6: [ 'Octahedron', 'Trigonal prism' ],
-                                   7: [ 'Pentagonal bipyramid', 'Square-face capped trigonal prism', 'Face-capped octahedron' ] }
+                                   7: [ 'Pentagonal bipyramid', 'Square-face capped trigonal prism', 'Face-capped octahedron' ],
+                                   8: [ 'Cube', 'Square antiprism', 'Square-face bicapped trigonal prism', 'Triangular-face bicapped trigonal prism', 'Dodecahedron with triangular faces', 'Dodecahedron with triangular faces', 'Hexagonal bipyramid', 'Bicapped octahedron (opposed cap faces)', 'Bicapped octahedron (cap faces with one atom in common)', 'Bicapped octahedron (cap faces with one edge in common)' ] }
 
 symmetry_measures_from_coordination = {}
 for coordination_number, strings in symmetry_measures_to_construct.items():
