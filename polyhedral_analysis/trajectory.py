@@ -12,6 +12,23 @@ class Trajectory:
                   config_numbers=None, verbose=False ):
         """
         Class describing a single simulation trajectory.
+
+        Args:
+            xdatcar (str): filename for a VASP XDATCAR file.
+            recipes (list(PolyhedraRecipe): List of `PolyhedraRecipe` recipes, where each recipe
+                defines how to construct a set of `CoordinationPolyhedra` for each configuration.
+            read_config_numbers (:opt:`bool`): Read configuration frame numbers from the XDATCAR.
+            config_numbers (:opt:`list`): Optional list of integers to use as frame numbers for
+                each configuration in the XDATCAR input. If this argument is set, it will override
+                the `read_config_numbers` argument.
+            verbose (:opt:`bool`): verbose output while parsing the XDATCAR input. Default is False.
+
+        Returns:
+            None
+
+        Notes:
+            if `read_config_numbers` is set to False, and `config_numbers` is not set,
+            the XDATCAR configurations will be numbered 1, 2, 3, 4, ….
         """
         self.xdatcar = Xdatcar( xdatcar )
         if read_config_numbers and not config_numbers:
