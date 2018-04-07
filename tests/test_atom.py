@@ -4,7 +4,6 @@ from polyhedral_analysis.atom import Atom
 from pymatgen import Site, Lattice
 import numpy as np
 
-
 class TestAtomInit( unittest.TestCase ):
 
     def test_atom_is_initialised( self ):
