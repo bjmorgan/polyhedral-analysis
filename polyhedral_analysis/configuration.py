@@ -31,12 +31,28 @@ class Configuration:
         for recipe in recipes:
             self.polyhedra.extend( recipe.find_polyhedra( self.atoms, self.structure ) )
         self.central_atoms = sorted( list( set( 
-                                 [ p.central_atom for p in self.polyhedra ] ) ) )
+                                 [ p.central_atom for p in self.polyhedra ] ) ),
+                                 key=lambda x: x.index )
         self.coordination_atoms = sorted( list( set( flatten( 
-                                      [ p.vertices for p in self.polyhedra ] ) ) ) )
+                                      [ p.vertices for p in self.polyhedra ] ) ) ),
+                                      key=lambda x: x.index )
 
     def coordination_atom_by_index( self, index ):
-        return next( atom for atom in self.coordination_atoms if atom.index == index )
+        """
+        Return the coordination atom with a specific index.
+
+        Args:
+            index (int): The atom index to match.
+
+        Returns:
+            (Atom|None): The matching coordination atom. If the desired index does not match
+                         any of the coordination atoms for this configuration, None is returned.
+        """
+        coordination_atom_indices = [ atom.index for atom in self.coordination_atoms ]
+        if index not in coordination_atom_indices:
+            return None
+        else:
+            return self.coordination_atoms[ coordination_atom_indices.index( index ) ] 
 
     @property
     def polyhedra_labels( self ):
