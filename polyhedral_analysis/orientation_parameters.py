@@ -18,12 +18,3 @@ def oct_rotational_order_parameter( ag ):
     Gives 0.33 for a 45° rotated octahedron around one axis.
     """
     return sum( projection_xyz( point ) for point in ag.points_wocs_ctwocc() ) / 6.0
-
-def orientation( ag ):
-    to_return = []
-    for point in ag.points_wocs_ctwocc():
-        for vec in np.array( [ [ 1.0, 0.0, 0.0 ],
-                               [ 0.0, 1.0, 0.0 ],
-                               [ 0.0, 0.0, 1.0 ] ] ):
-            to_return.append( cos_theta( vec, point ) )
-    return np.array( to_return ).reshape(6,3)
