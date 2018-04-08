@@ -27,5 +27,12 @@ class TestTrajectoryInit( unittest.TestCase ):
         self.assertEqual( trajectory.config_numbers, [ 0, 1 ] )
         self.assertEqual( trajectory.configurations, mock_configurations )
 
+class TestTrajectoryHelperFunctions( unittest.TestCase ):
+
+    def test_read_config_numbers_from_xdatcar( self ):
+        example_file = "Direct configuration=  10\nDirect configuration=   20\n"
+        with patch( 'builtins.open', mock_open( read_data=example_file ), create=True ) as m:
+            self.assertEqual( read_config_numbers_from_xdatcar( 'foo' ), [ 10, 20 ] )
+
 if __name__ == '__main__':
     unittest.main()
