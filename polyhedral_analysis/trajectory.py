@@ -37,7 +37,8 @@ class Trajectory:
             self.config_numbers = config_numbers
         else:
             self.config_numbers = list( range( 1, len( self.xdatcar.structures ) + 1 ) ) 
-        assert( len( self.config_numbers ) == len( self.xdatcar.structures ) )
+        if len( self.config_numbers ) != len( self.xdatcar.structures ):
+            raise ValueError( 'number of configuration numbers != number of structures' )
         self.recipes = recipes
         # generate polyhedra configurations
         self.configurations = []
