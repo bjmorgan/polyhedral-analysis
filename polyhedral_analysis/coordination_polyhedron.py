@@ -1,6 +1,6 @@
 from .atom import Atom
 from .symmetry_measure import symmetry_measures_from_coordination
-from .rotational_order_parameters import cos_theta
+from .orientation_parameters import cos_theta
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry, symmetry_measure
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
 from pymatgen.util.coord import pbc_shortest_vectors
