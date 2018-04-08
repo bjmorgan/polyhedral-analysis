@@ -26,6 +26,7 @@ class TestTrajectoryInit( unittest.TestCase ):
         self.assertEqual( trajectory.xdatcar, mock_xdatcar )
         self.assertEqual( trajectory.config_numbers, [ 0, 1 ] )
         self.assertEqual( trajectory.configurations, mock_configurations )
+        self.assertEqual( trajectory.structures, mock_xdatcar.structures )
 
 class TestTrajectoryHelperFunctions( unittest.TestCase ):
 
