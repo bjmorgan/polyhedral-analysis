@@ -10,6 +10,8 @@ def matching_sites( structure, reference_structure, species=None ):
     Args:
         structure (Structure): The structure being analysed.
         reference_structure (Structure): A Structure object containing a set of reference sites.
+        species (:opt:`list(str)`): Optional list of strings specifying a subset of species
+            to return. Default is None, which specifies all species matching species are returned.
         
     Returns:
         (list([Site,index]))
