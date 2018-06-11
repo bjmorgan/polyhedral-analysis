@@ -48,6 +48,20 @@ class Trajectory:
             c = Configuration( structure=s, recipes=self.recipes, config_number=n )
             self.configurations.append( c )
 
+    def extend( self, other, offset=1 ):
+        """
+        Extend this Trajectory with the data from another Trajectory.
+
+        Args:
+            other (`Trajectory`): The trajectory to be appended.
+            offset (int): Offset to apply to the frame numbers.
+
+        Returns:
+            None
+        """
+        self.configurations.extend( other.configurations )
+        self.config_numbers.extend( [ n + offset + self.config_numbers[-1] for n in other.config_numbers ] ) 
+
     @property
     def structures( self ):
         return self.xdatcar.structures
