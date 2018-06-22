@@ -18,6 +18,8 @@ class TestTrajectoryInit( unittest.TestCase ):
         mock_xdatcar = Mock( spec=Xdatcar )
         MockXdatcar.return_value = mock_xdatcar
         mock_configurations = [ Mock( spec=Configuration ), Mock( spec=Configuration ) ]
+        for i, c in enumerate( mock_configurations ):
+            c.config_number = i
         mock_xdatcar.structures = [ Mock( spec=Structure ), Mock( spec=Structure ) ]
         MockConfiguration.side_effect = mock_configurations
         mock_recipe = Mock( spec=PolyhedraRecipe )
@@ -39,6 +41,8 @@ class TestTrajectory( unittest.TestCase ):
         mock_xdatcar = Mock( spec=Xdatcar )
         MockXdatcar.return_value = mock_xdatcar
         mock_configurations = [ Mock( spec=Configuration ), Mock( spec=Configuration ) ]
+        for i, c in enumerate( mock_configurations ):
+            c.config_number = i 
         mock_xdatcar.structures = [ Mock( spec=Structure ), Mock( spec=Structure ) ]
         MockConfiguration.side_effect = mock_configurations
         mock_recipe = Mock( spec=PolyhedraRecipe )
@@ -57,7 +61,13 @@ class TestTrajectory( unittest.TestCase ):
         trajectory1.extend( trajectory2, offset=5 )
         self.assertEqual( trajectory1.config_numbers, [ 0, 1, 6, 7 ] )
         self.assertEqual( len( trajectory1.configurations ), 4 )
+        self.assertEqual( [ c.config_number for c in trajectory1.configurations ], [ 0, 1, 6, 7 ] )
 
+    def test_config_numbers_getter( self ):
+        trajectory = self.trajectory
+        trajectory.configurations[0].config_number = 5
+        trajectory.configurations[1].config_number = 10
+        self.assertEqual( trajectory.config_numbers, [ 5, 10 ] )
 
 class TestTrajectoryHelperFunctions( unittest.TestCase ):
 

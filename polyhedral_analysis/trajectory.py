@@ -1,6 +1,7 @@
 from pymatgen.io.vasp import Xdatcar
 from .configuration import Configuration
 import re
+import copy
 
 def read_config_numbers_from_xdatcar( filename ):
     with open( filename ) as f:
@@ -32,17 +33,17 @@ class Trajectory:
         """
         self.xdatcar = Xdatcar( xdatcar )
         if read_config_numbers and not config_numbers:
-            self.config_numbers = read_config_numbers_from_xdatcar( xdatcar )
+            config_numbers = read_config_numbers_from_xdatcar( xdatcar )
         elif config_numbers:
-            self.config_numbers = config_numbers
+            config_numbers = config_numbers
         else:
-            self.config_numbers = list( range( 1, len( self.xdatcar.structures ) + 1 ) ) 
-        if len( self.config_numbers ) != len( self.xdatcar.structures ):
+            config_numbers = list( range( 1, len( self.xdatcar.structures ) + 1 ) ) 
+        if len( config_numbers ) != len( self.xdatcar.structures ):
             raise ValueError( 'number of configuration numbers != number of structures' )
         self.recipes = recipes
         # generate polyhedra configurations
         self.configurations = []
-        for n, s in zip( self.config_numbers, self.structures ):
+        for n, s in zip( config_numbers, self.structures ):
             if verbose:
                 print( 'Reading configuration {}'.format( n ), flush=True )
             c = Configuration( structure=s, recipes=self.recipes, config_number=n )
@@ -59,8 +60,16 @@ class Trajectory:
         Returns:
             None
         """
-        self.configurations.extend( other.configurations )
-        self.config_numbers.extend( [ n + offset + self.config_numbers[-1] for n in other.config_numbers ] ) 
+        extended_configurations = copy.deepcopy( other.configurations )
+        for c in extended_configurations:
+            c.config_number += offset + self.config_numbers[-1]
+        self.configurations.extend( extended_configurations )
+        #self.config_numbers.extend( [ n + offset + self.config_numbers[-1] for n in other.config_numbers ] ) 
+        # TODO need to update individual configuration numbers
+
+    @property
+    def config_numbers( self ):
+        return [ c.config_number for c in self.configurations ]
 
     @property
     def structures( self ):
