@@ -1,35 +1,28 @@
-import os
+"""
+polyhedral_analysis
+"""
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-readme = 'README.md'
-try:
-    import pypandoc
-    long_description = pypandoc.convert( readme, 'rst')
-except ImportError:
-    long_description = open( readme ).read()
-
+from setuptools import setup, find_packages
 from polyhedral_analysis import __version__ as VERSION
 
-config = {
-    'name': 'polyhedral_analysis',
-    'description': 'TODO',
-    'long_description': long_description,
-    'author': 'Benjamin J. Morgan',
-    'author_email':'bjm42@bath.ac.uk',
-    'url': 'https://github.com/bjmorgan/polyhedral-analysis', 
-    'download_url': "https://github.com/bjmorgan/polyhedral-analysis/archive/%s.tar.gz" % (VERSION),
-    'version': VERSION,
-    'packages': ['polyhedral_analysis'],
-    'license': 'MIT',
-    'install_requires': [ 'numpy',
-                          'pymatgen',
-                          'scipy', 
-                          'coverage==4.3.4',
-                          'codeclimate-test-reporter' ]
-}
+readme = 'README.md'
+long_description = open( readme ).read()
 
-setup(**config)
+setup(
+    name='polyhedral_analysis',
+    version=VERSION,
+    description='A library for analysis of coordination polyhedra from molecular dynamics trajectories',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    author='Benjamin J. Morgan',
+    author_email='bjm42@bath.ac.uk',
+    url='https://github.com/bjmorgan/polyhedral-analysis', 
+    download_url="https://github.com/bjmorgan/polyhedral-analysis/archive/%s.tar.gz" % (VERSION),
+    packages=find_packages( exclude=['docs', 'tests*'] ),
+    license='MIT',
+    install_requires=[ 'numpy',
+                       'pymatgen',
+                       'scipy', 
+                       'coverage==4.3.4',
+                       'codeclimate-test-reporter' ]
+    )
