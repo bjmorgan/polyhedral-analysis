@@ -255,6 +255,36 @@ class CoordinationPolyhedron:
         """ 
         return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
 
+    @property
+    def volume( self ):
+        """
+        Volume of this polyhedron.
+
+        Args:
+            None
+
+        Returns:
+            (float): The volume.
+        """
+        return self.convex_hull().volume
+
+    @classmethod
+    def from_sites( cls, central_site, vertex_sites, label=None ):
+        """
+        Create a CoordinationPolyhedron from a set of `pymatgen` PeriodicSite objects.
+
+        Args:
+            central_site (pymatgen.PeriodicSite): A pymatgen PeriodicSite object describing an atom at the nominal centre of the polyhedron.
+            vertex_sites (list[pymatgen.PeriodicSite): A list of pymatgen PeriodicSite objects describing the atoms at the vertices.
+            label (:obj:`str`, optional): An optional string used to label this coordination polyhedron.
+
+        Returns:
+            (CoordinationPolyhedron): The CoordinationPolyhedron object.
+        """
+        vertices = [ Atom( i, s ) for i, s in enumerate( vertex_sites ) ]
+        central_atom = Atom( -1, central_site )
+        return cls( central_atom=central_atom, vertices=vertices, label=label )
+        
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
