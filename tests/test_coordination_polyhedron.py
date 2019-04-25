@@ -4,6 +4,7 @@ from polyhedral_analysis.atom import Atom
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 from unittest.mock import Mock, MagicMock, patch
 import copy
+import numpy as np
 
 def mock_atom_lt( self, other ):
     return self.index < other.index
@@ -70,6 +71,14 @@ class TestCoordinationPolyhedron( unittest.TestCase ):
         other_coordination_polyhedron.vertices[4].neighbours = { 4: [ 1, 3, 5 ] }
         self.assertTrue( self.coordination_polyhedron.equal_members(
                           other_coordination_polyhedron ) )
+
+    def test_vertex_vectors( self ):
+        vectors = [ np.array( [ 1.0, 0.0, 0.0 ] ),
+                    np.array( [ 0.0, 1.0, 2.0 ] ) ]
+        self.coordination_polyhedron.abstract_geometry.points_wocs_ctwocc.return_value = vectors
+        returned_vectors = self.coordination_polyhedron.vertex_vectors
+        for v1, v2 in zip( vectors, returned_vectors ):
+            np.testing.assert_equal( v1, v2 )
 
 if __name__ == '__main__':
     unittest.main()

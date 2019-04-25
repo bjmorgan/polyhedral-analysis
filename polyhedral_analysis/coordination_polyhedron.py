@@ -55,6 +55,10 @@ class CoordinationPolyhedron:
     @property
     def vertex_indices( self ):
         return [ v.index for v in self.vertices ]
+
+    @property
+    def vertex_vectors( self ):
+        return self._abstract_geometry.points_wocs_ctwocc()
  
     @property
     def coordination_number( self ):
@@ -77,7 +81,7 @@ class CoordinationPolyhedron:
  
     def construct_abstract_geometry( self ):
         """
-        Returns the polyhedron as a Pymatgen AbstractGeometry object.
+        Returns the polyhedron as a ``pymatgen`` :obj:`AbstractGeometry` object.
         """
         return AbstractGeometry( central_site=self.central_atom.coords, 
                                  bare_coords=self.minimum_image_vertex_coordinates(), 
