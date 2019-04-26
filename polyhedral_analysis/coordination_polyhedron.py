@@ -6,7 +6,8 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries
 from pymatgen.util.coord import pbc_shortest_vectors
 import numpy as np
 from scipy.spatial import ConvexHull
-from itertools import permutations
+from itertools import permutations, combinations
+import vg
 
 class CoordinationPolyhedron:
 
@@ -39,6 +40,29 @@ class CoordinationPolyhedron:
         self._abstract_geometry = self.construct_abstract_geometry()
 
     def __repr__( self ):
+        """
+        String representation of a Polyhedron object.
+
+        The output includes the polyhedron label (if this is set), and
+        information about the central and vertex atoms. For each atom
+        the output includes::
+
+            atom_index [ x y z ] atom_species
+
+        Examples:
+
+            >>>> print(polyhedron)
+            Coordination Polyhedron 4c
+            255 [12.71362322 17.90999634 12.74490767] S
+            ----------
+            31 [12.46919306 20.2317206  12.2641591 ] Li
+            55 [13.0016308  17.39863735 10.46318072] Li
+            71 [10.4034848  18.18407515 12.43873978] Li
+            103 [12.17924193 15.66932958 13.34077502] Li
+            159 [13.24242002 18.43469275 15.02193658] Li
+            175 [15.02830461 17.60091516 12.52079631] Li
+
+        """
         if self.label:
             to_return = 'Coordination Polyhedron {}\n'.format( self.label ) 
         else:
@@ -59,6 +83,10 @@ class CoordinationPolyhedron:
     @property
     def vertex_vectors( self ):
         return self._abstract_geometry.points_wocs_ctwocc()
+
+    @property
+    def vertex_coords( self ):
+        return np.array( [ v.coords for v in self.vertices ] )
  
     @property
     def coordination_number( self ):
@@ -176,40 +204,43 @@ class CoordinationPolyhedron:
 
     def equal_vertices( self, other ):
         """
-        Test whether this CoordinationPolyhedron has vertices with the same labels as
-        another CoordinationPolyhedron.
+        Test whether this :obj:`CoordinationPolyhedron` has vertices with the same labels as
+        another :obj:`CoordinationPolyhedron`.
 
         Args:
-            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
             (bool): True / False.
+
         """
         return self.vertex_indices == other.vertex_indices
 
     def equal_edge_graph( self, other ):
         """
-        Test whether this CoordinationPolyhedron has the same edge graph as
-        another CoordinationPolyhedron.
+        Test whether this :obj:`CoordinationPolyhedron` has the same edge graph as
+        another :obj:`CoordinationPolyhedron`.
 
         Args:
-            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
             (bool): True or False.
+
         """
         return self.edge_graph == other.edge_graph
 
     def equal_members( self, other ):
         """
-        Test whether this CoordinationPolyhedron has the same member atoms
-        as another CoordinationPolyhedron.
+        Test whether this :obj:`CoordinationPolyhedron` has the same member atoms
+        as another :obj:`CoordinationPolyhedron`.
 
         Args:
-            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
             (bool): True or False.
+
         """
         equal_central_atom = self.central_atom == other.central_atom
         equal_vertex_atoms = self.vertices == other.vertices
@@ -217,14 +248,15 @@ class CoordinationPolyhedron:
 
     def __eq__( self, other ):
         """
-        Two CoordinationPolyhedron objects are considered equal if they
+        Two :obj:`CoordinationPolyhedron` objects are considered equal if they
         have equal edge graphs.
 
         Args:
-            other(CoordinationPolyhedron): The other CoordinationPolyhedron.
+            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
             (bool): True or False.
+
         """
         return self.equal_edge_graph( other )
     
@@ -238,6 +270,7 @@ class CoordinationPolyhedron:
 
         Returns:
             (np.array): A (N_vertex x N_vector) dimension numpy array.
+
         """
         if len( vectors.shape ) == 1:
             vectors = np.array( [ vectors ] )
@@ -255,9 +288,24 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            (list): A N_vertex dimension numpy array.
+            (list): List of distances.
+
         """ 
         return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+
+
+    def angles( self ):
+        """
+        List of all vertex-centre-vertex angles.
+
+        Args:
+            None
+
+        Returns:
+             (list): List of angles.
+
+        """
+        return [ vg.angle( p1, p2 ) for p1, p2 in combinations( self.vertex_vectors, 2 ) ]
 
     @property
     def volume( self ):

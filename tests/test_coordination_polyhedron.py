@@ -2,7 +2,7 @@ import unittest
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch, PropertyMock
 import copy
 import numpy as np
 
@@ -80,6 +80,15 @@ class TestCoordinationPolyhedron( unittest.TestCase ):
         for v1, v2 in zip( vectors, returned_vectors ):
             np.testing.assert_equal( v1, v2 )
 
+    def test_angles( self ):
+        vertex_vectors = np.array( [ [ 1.0, 0.0, 0.0 ],
+                                     [ 0.0, 1.0, 0.0 ],
+                                     [ 0.0, -1.0, 0.0 ] ] )
+        with patch( 'polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', new_callable=PropertyMock ) as mock_vertex_vectors:
+            mock_vertex_vectors.return_value = vertex_vectors
+            angles = self.coordination_polyhedron.angles()
+            np.testing.assert_equal( angles, [ 90.0, 90.0, 180.0 ] )
+            
 if __name__ == '__main__':
     unittest.main()
 

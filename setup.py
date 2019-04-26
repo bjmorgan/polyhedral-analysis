@@ -24,5 +24,6 @@ setup(
                        'pymatgen',
                        'scipy', 
                        'coverage==4.3.4',
-                       'codeclimate-test-reporter' ]
+                       'codeclimate-test-reporter',
+                       'vg' ]
     )
