@@ -74,6 +74,15 @@ class CoordinationPolyhedron:
         return to_return
 
     def intersection( self, other_polyhedron ):
+        """Returns a list of atom indices for vertex atoms shared with another polyhedron.
+
+        Args:
+            other_polyhedron (:obj:`CoordinationPolyhedron`): The other coordination polyhedron.
+
+        Returns:
+            (list(int)): List of shared vertex indices.
+
+        """
         return list( set( self.vertex_indices ) & set( other_polyhedron.vertex_indices ) )
        
     @property

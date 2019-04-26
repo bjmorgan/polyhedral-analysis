@@ -1,5 +1,5 @@
-polyhedral\_analysis\.configuration module
-==========================================
+polyhedral\_analysis.configuration module
+=========================================
 
 .. automodule:: polyhedral_analysis.configuration
     :members:

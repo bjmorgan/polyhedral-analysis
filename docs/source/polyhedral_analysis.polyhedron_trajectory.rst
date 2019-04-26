@@ -1,5 +1,5 @@
-polyhedral\_analysis\.polyhedron\_trajectory module
-===================================================
+polyhedral\_analysis.polyhedron\_trajectory module
+==================================================
 
 .. automodule:: polyhedral_analysis.polyhedron_trajectory
     :members:

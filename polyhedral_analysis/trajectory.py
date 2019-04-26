@@ -18,11 +18,11 @@ class Trajectory:
             xdatcar (str): filename for a VASP XDATCAR file.
             recipes (list(PolyhedraRecipe): List of `PolyhedraRecipe` recipes, where each recipe
                 defines how to construct a set of `CoordinationPolyhedra` for each configuration.
-            read_config_numbers (:opt:`bool`): Read configuration frame numbers from the XDATCAR.
-            config_numbers (:opt:`list`): Optional list of integers to use as frame numbers for
+            read_config_numbers (:obj:`bool`, optional): Read configuration frame numbers from the XDATCAR.
+            config_numbers (:obj:`list`, optional): Optional list of integers to use as frame numbers for
                 each configuration in the XDATCAR input. If this argument is set, it will override
                 the `read_config_numbers` argument.
-            verbose (:opt:`bool`): verbose output while parsing the XDATCAR input. Default is False.
+            verbose (:obj:`bool`, optional): verbose output while parsing the XDATCAR input. Default is False.
 
         Returns:
             None

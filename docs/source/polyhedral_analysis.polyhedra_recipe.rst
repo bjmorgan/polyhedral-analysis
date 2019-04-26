@@ -1,5 +1,5 @@
-polyhedral\_analysis\.polyhedra\_recipe module
-==============================================
+polyhedral\_analysis.polyhedra\_recipe module
+=============================================
 
 .. automodule:: polyhedral_analysis.polyhedra_recipe
     :members:

@@ -1,5 +1,5 @@
-polyhedral\_analysis\.atom module
-=================================
+polyhedral\_analysis.atom module
+================================
 
 .. automodule:: polyhedral_analysis.atom
     :members:

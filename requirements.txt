@@ -3,3 +3,4 @@ pymatgen>=2017.10.16
 scipy
 codeclimate-test-reporter
 coverage==4.3.4
+vg
