@@ -25,5 +25,6 @@ setup(
                        'scipy', 
                        'coverage==4.3.4',
                        'codeclimate-test-reporter',
-                       'vg' ]
+                       'vg',
+                       'monty' ]
     )
