@@ -1,8 +1,10 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, MagicMock, patch, mock_open
 from polyhedral_analysis.atom import Atom
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from pymatgen import Site, Lattice
 import numpy as np
+import json
 
 class TestAtomInit( unittest.TestCase ):
 
@@ -50,7 +52,7 @@ class TestAtom( unittest.TestCase ):
 
     def test___lt__( self ):
         index = 456
-        site = Mock( spec=Site )
+        site = MagicMock( spec=Site )
         label = 'bar'
         self.frac_coords = np.array( [ 2.0, 3.0, 4.0 ] )
         site.coords = np.array( [ 20.0, 21.0, 22.0 ] )
@@ -77,6 +79,48 @@ class TestAtom( unittest.TestCase ):
         site.lattice = Mock( spec=Lattice )
         other_atom = Atom( index=index, site=site, label=label )
         self.assertNotEqual( self.atom, other_atom )
+
+    def test_as_dict( self ):
+        self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
+        mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
+        mock_other_polyhedra.index = 15
+        self.atom.in_polyhedra = [ mock_other_polyhedra ]
+        expected_dict = { 'index': 123, 
+                          'site': {'key': 'value'}, 
+                          'label': 'foo', 'in_polyhedra': [ 15 ], 
+                          'neighbours': None, 
+                          '@module': 'polyhedral_analysis.atom', 
+                          '@class': 'Atom' }
+        self.assertEqual( self.atom.as_dict(), expected_dict )
+
+    def test_to_json( self ):
+        self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
+        mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
+        mock_other_polyhedra.index = 15
+        self.atom.in_polyhedra = [ mock_other_polyhedra ]
+        expected_dict = { 'index': 123,
+                          'site': {'key': 'value'},
+                          'label': 'foo', 'in_polyhedra': [ 15 ],
+                          'neighbours': None,
+                          '@module': 'polyhedral_analysis.atom',
+                          '@class': 'Atom' }
+        self.assertEqual( self.atom.to(), json.dumps( expected_dict ) )
+
+    def test_to_json_file( self ):
+        self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
+        mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
+        mock_other_polyhedra.index = 15
+        self.atom.in_polyhedra = [ mock_other_polyhedra ]
+        expected_dict = { 'index': 123,
+                          'site': {'key': 'value'},
+                          'label': 'foo', 'in_polyhedra': [ 15 ],
+                          'neighbours': None,
+                          '@module': 'polyhedral_analysis.atom',
+                          '@class': 'Atom' }
+        with patch( 'polyhedral_analysis.atom.zopen', mock_open(), create=True ) as m:
+            self.atom.to( filename='filename' )
+        m.assert_called_once_with( 'filename', 'wt' )
+        m().write.assert_called_once_with( json.dumps( expected_dict ) )
 
 if __name__ == '__main__':
     unittest.main()

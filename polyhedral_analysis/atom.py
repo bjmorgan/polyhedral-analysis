@@ -1,3 +1,8 @@
+from fnmatch import fnmatch
+from monty.io import zopen
+import json
+import os
+
 class Atom:
     """Atom class"""
 
@@ -22,22 +27,60 @@ class Atom:
         self.in_polyhedra = []
         self.neighbours = None
 
+    def as_dict( self ):
+        """
+        json-serializable :obj:`dict` representation of Atom.
+        """
+        d = { 'index': self.index,
+              'site': self.site.as_dict(),
+              'label': self.label,
+              'in_polyhedra': [ p.index for p in self.in_polyhedra ],
+              'neighbours': self.neighbours,
+              '@module': self.__class__.__module__,
+              '@class': self.__class__.__name__ }
+        return d
+
     def __repr__( self ):
         return "{} {}".format( self.index, self.site )
 
-#    def construct_neighbour_list( self, cutoff, vertex_atoms, poly_index ):
-#        vertex_indices = [ v.index for v in vertex_atoms ]
-#        if not self.neighbours:
-#            self.neighbours = {}
-#        self.neighbours[ poly_index ] = []
-#        self.neighbours[ poly_index ] = [ v.index for v in vertex_atoms if self.site.distance( v.site ) < cutoff and v is not self ]
-
+    def to( self, fmt=None, filename=None ):
+        """
+        Outputs the structure to a file or string.
+    
+        Args:
+            fmt (:obj:`str`, optional): Format to ouput to. Defaults to JSON unlees the filename
+                is provided. If fmt is specified this overrides the filename extension
+                in the filename.
+            filename (:obj:`str`, optional): If provided, the output will be written to a file.
+                If `fmt` is not specified, the format will be determined from the filename
+                extension.
+    
+        Returns:
+            (str) if filename is `None`. `None` otherwise.
+        """
+        if not filename:
+            filename = ""
+        if not fmt:
+            fmt = "json"
+        else:
+            fmt = fmt.lower()
+        fname = os.path.basename( filename )
+        if fmt == "json" or fnmatch( fname.lower(), "*.json" ):
+            s = json.dumps( self.as_dict() )
+            if filename:
+                with zopen( filename, 'wt' ) as f:
+                    f.write( '{}'.format(s) )
+            else:
+                return s
+        
     @property
     def frac_coords( self ):
+        """Fractional coordinates"""
         return self.site.frac_coords
 
     @property
     def coords( self ):
+        """Cartesian coordinates"""
         return self.site.coords
 
     @property
