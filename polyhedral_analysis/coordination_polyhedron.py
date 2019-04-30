@@ -269,13 +269,14 @@ class CoordinationPolyhedron:
         """
         return self.equal_edge_graph( other )
     
-    def orientation( self, vectors ):
+    def vertex_vector_projections( self, vectors ):
         """
-        Calculate the orientational alignment of each centroid --> vertex vector.
+        Calculate the projection of each centroid-to-vertex vector on one or more input vectors..
 
         Args:
             vectors (np.array): A Nx3 numpy array, where each row is a vector used
-                                to calculate the projection.
+                                to calculate the projection. `vectors` can also be 
+                                a single length 3 array.
 
         Returns:
             (np.array): A (N_vertex x N_vector) dimension numpy array.
@@ -302,7 +303,6 @@ class CoordinationPolyhedron:
         """ 
         return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
 
-
     def angles( self ):
         """
         List of all vertex-centre-vertex angles.
@@ -316,6 +316,35 @@ class CoordinationPolyhedron:
         """
         return [ vg.angle( p1, p2 ) for p1, p2 in combinations( self.vertex_vectors, 2 ) ]
 
+    def vertex_vector_orientations( self, units='degrees', return_distance=False ):
+        """Returns the angular orientations of each centroid-to-vertex vector.
+
+        The orientation is defined by two angles, theta and phi. 
+        Theta is the angle with respect to [ 0, 0, 1 ] and ranges from 0 to 180 degrees. 
+        Phi is the angle with respect to [ 1, 0, 0 ] and ranges from -180 to +180 degrees.
+
+        Args:
+            units (:obj:`str`, optional): Optionally select the units for the calculated angles.
+                                          Options are `degrees` or `radians`. 
+                                          Default is `degrees`.
+            return_distance (:obj:`bool`, optional): Optionally also return the distance. 
+
+        Returns:
+            (list(tuple)): A list of `(theta,phi)` tuple pairs.
+
+        """
+        vg_units = { 'degrees': 'deg', 
+                     'radians': 'rad' }
+        theta = [ vg.angle( np.array( [ 0.0, 0.0, 1.0 ] ), point, units=vg_units[ units ] ) 
+                      for point in self.vertex_vectors ]
+        phi = [ vg.signed_angle( np.array( [ 1.0, 0.0, 0.0 ] ), point, 
+                                 look=np.array( [ 0.0, 0.0, 1.0 ] ), units=vg_units[ units ] )
+                    for point in self.vertex_vectors ]
+        if return_distance:
+            distance = [ vg.magnitude( point ) for point in self.vertex_vectors ]
+            return list( zip( theta, phi, distance ) )
+        return list( zip( theta, phi ) )
+
     @property
     def volume( self ):
         """
@@ -326,21 +355,22 @@ class CoordinationPolyhedron:
 
         Returns:
             (float): The volume.
+
         """
         return self.convex_hull().volume
 
     @classmethod
     def from_sites( cls, central_site, vertex_sites, label=None ):
         """
-        Create a CoordinationPolyhedron from a set of `pymatgen` PeriodicSite objects.
+        Create a :obj:`CoordinationPolyhedron` from a set of `pymatgen` :obj:`PeriodicSite` objects.
 
         Args:
-            central_site (pymatgen.PeriodicSite): A pymatgen PeriodicSite object describing an atom at the nominal centre of the polyhedron.
-            vertex_sites (list[pymatgen.PeriodicSite): A list of pymatgen PeriodicSite objects describing the atoms at the vertices.
+            central_site (:obj:`pymatgen.PeriodicSite`): A `pymatgen` :obj:`PeriodicSite` object describing an atom at the nominal centre of the polyhedron.
+            vertex_sites (list[:obj:`pymatgen.PeriodicSite`): A list of `pymatgen` :obj`PeriodicSite` objects describing the atoms at the vertices.
             label (:obj:`str`, optional): An optional string used to label this coordination polyhedron.
 
         Returns:
-            (CoordinationPolyhedron): The CoordinationPolyhedron object.
+            (:obj:`CoordinationPolyhedron`): The :obj:`CoordinationPolyhedron` object.
         """
         vertices = [ Atom( i, s ) for i, s in enumerate( vertex_sites ) ]
         central_atom = Atom( -1, central_site )
