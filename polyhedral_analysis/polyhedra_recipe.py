@@ -70,8 +70,10 @@ class PolyhedraRecipe:
                   central_atom_list_generator=None, coordination_atom_list_generator=None,
                   label=None ):
         if method not in PolyhedraRecipe.allowed_methods:
-            raise ValueError( '{} is not a valid recipe method:\n valid methods: {}'.format( 
-                              method, PolyhedraRecipe.allowed_methods ) )
+            methods_string = '\n'.join( [ "    - '{}'".format( m ) 
+                for m in PolyhedraRecipe.allowed_methods ] )
+            raise ValueError( "\n'{}' is not a recognised string for selecting the recipe method.\n Valid methods are:\n{}".format( 
+                              method, methods_string ) )
         self.method = method
         if not (central_atom_list or central_atom_list_generator):
             raise ValueError( 'central_atom_list or central_atom_list_generator must be specified' )
