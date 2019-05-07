@@ -61,6 +61,7 @@ class PolyhedraRecipe:
     Available options are:
         - `distance cutoff`: include all coordinating ions within a cutoff distance.
         - `closest centre`: include all coordinating ions that share a common closest centre atom.
+
     """
 
     allowed_methods = [ 'distance cutoff', 'closest centre' ]
@@ -69,6 +70,22 @@ class PolyhedraRecipe:
                   central_atom_list=None, coordination_atom_list=None,
                   central_atom_list_generator=None, coordination_atom_list_generator=None,
                   label=None ):
+        """
+        Create a :obj:`PolyhedraRecipe` object.
+
+        Args:
+            method (str): Method used for constructing coordination polyhedra. 
+            coordination_cutoff (:obj:`float`, optional):
+            vertex_graph_cutoff (:obj:`float`, optional):
+            central_atom_list (:obj:`list(int)`, optional):
+            coordination_atom_list (:obj:`list(int)`, optional):
+            central_atom_list_generator (:obj:`function`, optional):
+            coordination_atom_list_generator (:obj:`function`, optional):
+
+        Returns:
+            None
+
+        """
         if method not in PolyhedraRecipe.allowed_methods:
             methods_string = '\n'.join( [ "    - '{}'".format( m ) 
                 for m in PolyhedraRecipe.allowed_methods ] )
