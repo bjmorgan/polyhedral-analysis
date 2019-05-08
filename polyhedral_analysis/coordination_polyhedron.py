@@ -376,6 +376,19 @@ class CoordinationPolyhedron:
         central_atom = Atom( -1, central_site )
         return cls( central_atom=central_atom, vertices=vertices, label=label )
         
+    def vertices_by_indices( self, vertex_indices ):
+        """
+        Select a subset of vertices from this polyhedron with a list of vertex indices.
+
+        Args:
+            vertex_indices (list): List of vertex indices (int).
+
+        Returns:
+            (list): A list of :obj:`Atom` objects containing the matching vertices.
+
+        """
+        return [ v for v in self.vertices if v.index in vertex_indices ]
+
 def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
