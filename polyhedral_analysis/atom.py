@@ -20,6 +20,7 @@ class Atom:
             neighbours: (None|dict(list)): Dictionary of lists of neighbours for each 
                 polyhedron this atom is part of. Dictionary keys are the indexes of 
                 each respective polyhedron.
+
         """
         self.index = index
         self.site = site
