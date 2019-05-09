@@ -1,6 +1,21 @@
 # Functions for analysing octahedra
 
 def check_octahedra( polyhedron ):
+    """
+    Check whether a polyhedron is considered an octahedron.
+
+    Args:
+        polyhedron (:obj:`CoordinationPolyhedron`): The :obj:`CoordinationPolyhedron`
+            to be tested.
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If the "best fit" geometry (lowest continuous symmetry
+            measure) is not an octahedron, a ValueError is raised.
+
+    """
     if not polyhedron.best_fit_geometry['geometry'] is 'Octahedron':
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
