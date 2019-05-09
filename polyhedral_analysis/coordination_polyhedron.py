@@ -198,18 +198,26 @@ class CoordinationPolyhedron:
             edge_list[ self.vertex_indices[i] ] = [ self.vertex_indices[v] for v in connected_vertices[i] ] 
         return edge_list
 
-    @property
-    def vertex_distances( self ):
+    def vertex_distances( self, vertex_labels=False ):
         """
         Returns a list of distances from the central atom to the vertex atoms.
 
         Args:
-            None
+            vertex_labels (:obj:`bool`, optional): If set to ``True`` this function will
+                return labels for the vertices with each corresponding distance.
+                Default = ``False``.
 
         Returns:
-            list(float): a list of atomic separations.
+            list (float): A list of atomic separations. If ``vertex_labels=True`` the
+                label for each vertex atom will also be returned with each corresponding distance.
+
         """ 
-        return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+        distances = [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+        if vertex_labels:
+            labels = [ v.label for v in self.vertices ]
+            return list( zip( distances, labels ) )
+        else:
+            return distances
 
     def equal_vertices( self, other ):
         """

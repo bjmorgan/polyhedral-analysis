@@ -5,6 +5,7 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_f
 from unittest.mock import Mock, MagicMock, patch, PropertyMock
 import copy
 import numpy as np
+from pymatgen.core.sites import Site
 
 def mock_atom_lt( self, other ):
     return self.index < other.index
@@ -88,7 +89,30 @@ class TestCoordinationPolyhedron( unittest.TestCase ):
             mock_vertex_vectors.return_value = vertex_vectors
             angles = self.coordination_polyhedron.angles()
             np.testing.assert_equal( angles, [ 90.0, 90.0, 180.0 ] )
-            
+
+    def test_vertex_distances( self ):
+        mock_vertex_distances = [ 2.0, 1.0, 1.0, 1.0, 1.0, 1.5 ]
+        self.coordination_polyhedron.central_atom.site = Mock( spec=Site )
+        self.coordination_polyhedron.central_atom.site.distance = \
+            Mock( side_effect=mock_vertex_distances )
+        for v in self.coordination_polyhedron.vertices:
+            v.site = Mock( spec=Site )
+        vertex_distances = self.coordination_polyhedron.vertex_distances()
+        np.testing.assert_equal( vertex_distances, mock_vertex_distances )
+             
+    def test_vertex_distances_with_vertex_labels( self ):
+        mock_vertex_distances = [ 2.0, 1.0, 1.0, 1.0, 1.0, 1.5 ]
+        mock_labels = [ 'O', 'O', 'F', 'F', 'F', 'F' ]
+        self.coordination_polyhedron.central_atom.site = Mock( spec=Site )
+        self.coordination_polyhedron.central_atom.site.distance = \
+            Mock( side_effect=mock_vertex_distances )
+        for v, mock_label in zip( self.coordination_polyhedron.vertices, mock_labels ):
+            v.site = Mock( spec=Site )
+            v.label = mock_label
+        vertex_distances = self.coordination_polyhedron.vertex_distances( vertex_labels=True )
+        np.testing.assert_equal( vertex_distances, 
+            list( zip( mock_vertex_distances, mock_labels ) ) )
+             
 if __name__ == '__main__':
     unittest.main()
 
