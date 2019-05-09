@@ -1,6 +1,10 @@
 # Functions for analysing octahedra
 
-def opposite_vertex_pairs( polyhedron ):
+def check_octahedra( polyhedron ):
+    if not polyhedron.best_fit_geometry['geometry'] is 'Octahedron':
+        raise ValueError( 'This polyhedron is not recognised a an octahedron' )
+
+def opposite_vertex_pairs( polyhedron, check=True ):
     """
     For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
@@ -11,7 +15,8 @@ def opposite_vertex_pairs( polyhedron ):
         (list): a list of 3 pairse of vertices.
 
     """
-    assert polyhedron.best_fit_geometry['geometry'] is 'Octahedron'
+    if check:
+        check_octahedra( polyhedron )
     vertex_pairs = []
     seen_indices = []
     for v1 in polyhedron.vertices:
@@ -22,3 +27,9 @@ def opposite_vertex_pairs( polyhedron ):
         vertex_pairs.append( [ v1, v2 ] )
         seen_indices.extend( [ v1.index, v2.index ] )
     return vertex_pairs
+
+def opposite_vertex_distances( polyhedron, check=True ):
+    if check:
+        check_octahedra( polyhedron )
+    distances = [ vp[0].site.distance( vp[1].site ) for vp in opposite_vertex_pairs( polyhedron ) ]
+    return distances
