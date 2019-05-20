@@ -83,7 +83,7 @@ class Trajectory:
             p = multiprocessing.Pool( ncores )
             args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
                 for n, s in zip( config_numbers, structures ) ]
-            configurations = p.imap( cls._get_configuration, progress_bar( args ) )
+            configurations = p.map( cls._get_configuration, progress_bar( args ) )
         else:
             configurations = []
             for n, s in progress_bar( zip( config_numbers, structures ) ):
