@@ -26,5 +26,6 @@ setup(
                        'coverage==4.3.4',
                        'codeclimate-test-reporter',
                        'vg',
-                       'monty' ]
+                       'monty',
+                       'tqdm' ]
     )
