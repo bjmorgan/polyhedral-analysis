@@ -66,15 +66,23 @@ def generator_from_atom_argument( arg ):
 
     """
     if type( arg ) is str:
-        return lambda s: s.indices_from_symbol( arg )
+        return partial( _get_indices_from_str, arg=arg )
     elif type( arg ) in [ list, tuple ]:
         if type( arg[0] ) is str:
-            return lambda s: flatten(
-                [ s.indices_from_symbol( sp ) for sp in arg ] )
+            return partial( _get_indices_from_list_str, arg=arg )
         elif type( arg[0] ) is int:
-            return lambda s: arg
+            return partial( _get_indices_from_list_int, arg=arg )
     elif callable( arg ):
         return arg
+
+def _get_indices_from_str( structure, arg ):
+    return structure.indices_from_symbol( arg )
+
+def _get_indices_from_list_str( structure, arg ):
+    return flatten( [ s.indices_from_symbol( sp ) for sp in arg ] )
+
+def _get_indices_from_list_int( structure, arg ):
+    return arg
 
 class PolyhedraRecipe:
 

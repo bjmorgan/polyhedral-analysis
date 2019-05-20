@@ -5,6 +5,9 @@ import copy
 from monty.io import zopen
 import pickle
 from .utils import flatten
+import multiprocessing
+from tqdm import tqdm, tqdm_notebook
+from functools import partial
 
 def read_config_numbers_from_xdatcar( filename ):
     with zopen( filename ) as f:
@@ -34,7 +37,14 @@ class Trajectory:
             c.config_number = n
 
     @classmethod
-    def from_structures( cls, structures, recipes, config_numbers=None, verbose=False ):
+    def _get_configuration( cls, args ):
+         return Configuration( structure=args['structure'], 
+                               recipes=args['recipes'], 
+                               config_number=args['config_number'] )
+    
+    @classmethod
+    def from_structures( cls, structures, recipes, config_numbers=None, verbose=False, 
+                         ncores=None, progress=False ):
         """
         Generate a :obj:`Trajectory` object by applying one or more polyhedral recipes to
         a series of `pymatgen` :obj:`Structure` objects.,
@@ -49,21 +59,38 @@ class Trajectory:
                 configurations will be numnbered 1, 2, 3 ….
             verbose (:obj:`bool`, optional): verbose output while parsing the input structures.
                 Default is False.
+            ncores (:obj:`int`, optional): TODO.
+            progress (:obj:`str`, optional): Show a progress bar.
+               Setting to ``True`` gives a simple progress bar.
+               Setting to ``"notebook"`` gives a Jupyter notebook compatible progress bar.
+               Default is ``False``.
 
         Returns:
             None
         """
+        if progress == True:
+            progress_bar = partial( tqdm, unit=' configurations' )
+        elif progress == 'notebook':
+            progress_bar = partial( tqdm_notebook, unit=' configurations' )
+        else:
+            progress_bar = lambda x: x
         if not config_numbers:
             config_numbers = list( range( 1, len( self.structures ) + 1 ) ) 
         if len( config_numbers ) != len( structures ):
             raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
         # generate polyhedra configurations
-        configurations = []
-        for n, s in zip( config_numbers, structures ):
-            if verbose:
-                print( 'Reading configuration {}'.format( n ), flush=True )
-            c = Configuration( structure=s, recipes=recipes, config_number=n )
-            configurations.append( c )
+        if ncores:
+            p = multiprocessing.Pool( ncores )
+            args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
+                for n, s in zip( config_numbers, structures ) ]
+            configurations = p.imap( cls._get_configuration, progress_bar( args ) )
+        else:
+            configurations = []
+            for n, s in progress_bar( zip( config_numbers, structures ) ):
+                if verbose:
+                    print( 'Reading configuration {}'.format( n ), flush=True )
+                c = Configuration( structure=s, recipes=recipes, config_number=n )
+                configurations.append( c )
         return cls( structures=structures, configurations=configurations, config_numbers=config_numbers )
 
     def extend( self, other, offset=0 ):
@@ -144,12 +171,23 @@ class Trajectory:
         return cls.from_structures( structures, recipes, config_numbers, verbose )
 
     @classmethod
-    def from_xdatcars( cls, filenames, recipes, verbose=False ):
+    def from_xdatcars( cls, filenames, recipes, verbose=False, ncores=None, progress=None ):
         """
         TODO
         """
-        xdatcars = [ Xdatcar( f ) for f in filenames ]
+        if ncores and len( filenames ) > 1:
+            p = multiprocessing.Pool( ncores )
+            xdatcars = p.map( _get_xdatcar, filenames )
+        else:
+            xdatcars = [ Xdatcar( f ) for f in filenames ]
         structures = flatten( [ x.structures for x in xdatcars ] )
         config_numbers = list( range( 1, len( structures ) + 1 ) )
-        return cls.from_structures( structures, recipes, config_numbers, verbose ) 
+        return cls.from_structures( structures, recipes, config_numbers, verbose, ncores=ncores,
+            progress=progress ) 
  
+def _get_xdatcar( filename ):
+    """
+    Internal method to support multiprocessing.
+    """
+    return Xdatcar( filename )
+
