@@ -79,7 +79,7 @@ def _get_indices_from_str( structure, arg ):
     return structure.indices_from_symbol( arg )
 
 def _get_indices_from_list_str( structure, arg ):
-    return flatten( [ s.indices_from_symbol( sp ) for sp in arg ] )
+    return flatten( [ structure.indices_from_symbol( sp ) for sp in arg ] )
 
 def _get_indices_from_list_int( structure, arg ):
     return arg
