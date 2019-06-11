@@ -137,7 +137,7 @@ class Trajectory:
 
     @classmethod
     def from_xdatcar( cls, filename, recipes, read_config_numbers=True, config_numbers=None,
-                      verbose=False ):
+                      verbose=False, progress=None, ncores=None ):
         """
         Args:
             filename (str): Filename for a VASP XDATCAR file.
@@ -168,7 +168,8 @@ class Trajectory:
             config_numbers = list( range( 1, len( structures ) + 1 ) )
         if len( config_numbers ) != len( structures ):
             raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
-        return cls.from_structures( structures, recipes, config_numbers, verbose )
+        return cls.from_structures( structures, recipes, config_numbers, verbose=verbose, progress=progress,
+                                    ncores=ncores )
 
     @classmethod
     def from_xdatcars( cls, filenames, recipes, verbose=False, ncores=None, progress=None ):
