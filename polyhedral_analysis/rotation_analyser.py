@@ -6,6 +6,8 @@ import numpy as np
 class RotationAnalyser(object):
     
     def __init__(self, reference_points):
+        if len(reference_points.shape)==2:
+            reference_points = np.array([reference_points])
         self.reference_points = reference_points
             
     def discrete_orientation(self, points):
@@ -33,7 +35,9 @@ class RotationAnalyser(object):
         3. Find all proper rotations using det(M_rot)>0.
         4. Calculate the rotational distance """
         points -= np.mean(points, axis=0, dtype=float)
-        sm = [ symmetry_measure(points,p) for p in permutations(self.reference_points) ]
+        sm = []
+        for rp in self.reference_points:
+            sm.extend( [ symmetry_measure(points,p) for p in permutations(rp) ] )
         min_sm =  min([s['symmetry_measure'] for s in sm])
         pure_rot_sm = [s for s in sm if math.isclose(s['symmetry_measure'],min_sm)]
         proper_rot_sm = [ s for s in pure_rot_sm if np.linalg.det(s['rotation_matrix']) > 0 ]
