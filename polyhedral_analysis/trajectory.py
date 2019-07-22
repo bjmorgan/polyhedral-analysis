@@ -80,10 +80,10 @@ class Trajectory:
             raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
         # generate polyhedra configurations
         if ncores:
-            p = multiprocessing.Pool( ncores )
-            args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
-                for n, s in zip( config_numbers, structures ) ]
-            configurations = p.map( cls._get_configuration, progress_bar( args ) )
+            with multiprocessing.Pool( ncores ) as p:
+                args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
+                    for n, s in zip( config_numbers, structures ) ]
+                configurations = p.map( cls._get_configuration, progress_bar( args ) )
         else:
             configurations = []
             for n, s in progress_bar( zip( config_numbers, structures ) ):
