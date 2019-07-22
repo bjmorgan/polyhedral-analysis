@@ -415,3 +415,4 @@ def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
     for i, j in triangles_to_merge:
         merged_simplices.append( np.unique( [ complex_hull.simplices[i], complex_hull.simplices[j] ] ) ) 
     return merged_simplices # note: this simplex is not ordered: should not be used to construct the edge_graph.
+
