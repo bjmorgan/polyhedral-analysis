@@ -86,11 +86,11 @@ def _get_indices_from_list_int( structure, arg ):
 
 class PolyhedraRecipe:
 
-    allowed_methods = [ 'distance cutoff', 'closest centre' ]
+    allowed_methods = [ 'distance cutoff', 'closest centre', 'nearest neighbours' ]
 
     def __init__( self, method, central_atoms, vertex_atoms, 
                   coordination_cutoff=None, vertex_graph_cutoff=None,
-                  label=None ):
+                  label=None, n_neighbours=None ):
         """
         Create a :obj:`PolyhedraRecipe` object.
 
@@ -100,18 +100,21 @@ class PolyhedraRecipe:
 
                     - `distance cutoff`: include all coordinating ions within a cutoff distance.
                     - `closest centre`: include all coordinating ions that share a common closest centre atom.
+                    - `nearest neighbours`: include n nearest neighbours to each centre atom.
             coordination_cutoff (:obj:`float`, optional): Cutoff distance for vertex atoms to
                 be considered as coordinated to a central atom.
             central_atoms (various): Defines the set of atoms considered polyhedron centres.
             vertex_atoms  (various): Defines the set of atoms considered polyhedron vertices.
             vertex_graph_cutoff (:obj:`float`, optional): TODO.
+            n_neighbours (:obj:`int`, optional): Optionally set the maximum number of neighbours to include.
             label (str): Label for this recipe.
 
         Returns:
             None
 
         Notes:
-            `central_atoms` and `vertex_atoms` both define how to select a subset of
+            `central_atoms`, `vertex_atoms`, and `nearest_neighbours` define how to select 
+            a subset of
             atoms from a single :obj:`Structure`. How this is implemented depends on
             the argument type provided when initialising a :obj:`PolyhedraRecipe` instance.
 
@@ -138,6 +141,7 @@ class PolyhedraRecipe:
         self._vertex_atom_list = None
         self.coordination_cutoff = coordination_cutoff
         self.vertex_graph_cutoff = vertex_graph_cutoff
+        self.n_neighbours = n_neighbours
         self.label = label
 
     def central_atom_list( self, structure=None, recalculate=False ):
@@ -158,11 +162,13 @@ class PolyhedraRecipe:
 
     def find_polyhedra( self, atoms, structure=None ):
         polyhedra_method = { 'distance cutoff': partial( polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff ),
-                             'closest centre': polyhedra_from_closest_centre }
+                             'closest centre': polyhedra_from_closest_centre,
+                             'nearest neighbours': partial( polyhedra_from_nearest_neighbours, nn=self.n_neighbours ) }
         central_atom_list = self.central_atom_list( structure )
         vertex_atom_list = self.vertex_atom_list( structure )
         central_atoms = [ atom for atom in atoms if atom.index in central_atom_list ]
         vertex_atoms = [ atom for atom in atoms if atom.index in vertex_atom_list ]
+        
         return polyhedra_method[ self.method ]( central_atoms=central_atoms, 
                                                 vertex_atoms=vertex_atoms, 
                                                 label=self.label )
@@ -173,6 +179,15 @@ def polyhedra_from_distance_cutoff( central_atoms, vertex_atoms, cutoff, label=N
         vertices = [ a for a in vertex_atoms if a.site.distance( c_atom.site ) <= cutoff ]
         polyhedra.append( CoordinationPolyhedron( central_atom=c_atom, 
                                                   vertices=vertices, 
+                                                  label=label ) )
+    return polyhedra
+
+def polyhedra_from_nearest_neighbours( central_atoms, vertex_atoms, nn, label=None ):
+    polyhedra = []
+    for c_atom in central_atoms:
+        vertices = sorted( vertex_atoms, key=lambda atom: atom.site.distance( c_atom.site ) )[:nn]
+        polyhedra.append( CoordinationPolyhedron( central_atom=c_atom,
+                                                  vertices=vertices,
                                                   label=label ) )
     return polyhedra
 
