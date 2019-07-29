@@ -177,8 +177,8 @@ class Trajectory:
         TODO
         """
         if ncores and len( filenames ) > 1:
-            p = multiprocessing.Pool( ncores )
-            xdatcars = p.map( _get_xdatcar, filenames )
+            with multiprocessing.Pool( ncores ) as p:
+                xdatcars = p.map( _get_xdatcar, filenames )
         else:
             xdatcars = [ Xdatcar( f ) for f in filenames ]
         structures = flatten( [ x.structures for x in xdatcars ] )
