@@ -175,8 +175,12 @@ class PolyhedraRecipe:
 
 def polyhedra_from_distance_cutoff( central_atoms, vertex_atoms, cutoff, label=None ):
     polyhedra = []
-    for c_atom in central_atoms:
-        vertices = [ a for a in vertex_atoms if a.site.distance( c_atom.site ) <= cutoff ]
+    lattice = central_atoms[0].site.lattice
+    distance_matrix = lattice.get_all_distances( [ c.frac_coords for c in central_atoms ],
+                                                 [ v.frac_coords for v in vertex_atoms ] )
+    for dr, c_atom in zip( distance_matrix, central_atoms ):
+        indices = np.where( dr <= cutoff )[0]
+        vertices = [ vertex_atoms[i] for i in indices ]
         polyhedra.append( CoordinationPolyhedron( central_atom=c_atom, 
                                                   vertices=vertices, 
                                                   label=label ) )
