@@ -185,7 +185,7 @@ class Trajectory:
         config_numbers = list( range( 1, len( structures ) + 1 ) )
         return cls.from_structures( structures, recipes, config_numbers, verbose, ncores=ncores,
             progress=progress ) 
- 
+
 def _get_xdatcar( filename ):
     """
     Internal method to support multiprocessing.

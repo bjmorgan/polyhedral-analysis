@@ -70,7 +70,7 @@ class CoordinationPolyhedron:
         to_return += '{}\n'.format( self.central_atom )
         to_return += '----------\n'
         for v in self.vertices:
-            to_return += '{}\n'.format( v )
+            to_return += '{}\n\n'.format( v )
         return to_return
 
     def intersection( self, other_polyhedron ):
