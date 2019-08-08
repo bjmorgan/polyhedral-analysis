@@ -79,18 +79,13 @@ class Trajectory:
         if len( config_numbers ) != len( structures ):
             raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
         # generate polyhedra configurations
+        args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
+            for n, s in zip( config_numbers, structures ) ]
         if ncores:
             with multiprocessing.Pool( ncores ) as p:
-                args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
-                    for n, s in zip( config_numbers, structures ) ]
                 configurations = p.map( cls._get_configuration, progress_bar( args ) )
         else:
-            configurations = []
-            for n, s in progress_bar( zip( config_numbers, structures ) ):
-                if verbose:
-                    print( 'Reading configuration {}'.format( n ), flush=True )
-                c = Configuration( structure=s, recipes=recipes, config_number=n )
-                configurations.append( c )
+            configurations = list(map( cls._get_configuration, progress_bar( args ) ) )
         return cls( structures=structures, configurations=configurations, config_numbers=config_numbers )
 
     def extend( self, other, offset=0 ):
