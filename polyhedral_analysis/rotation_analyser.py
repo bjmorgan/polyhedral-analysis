@@ -69,6 +69,8 @@ class RotationAnalyser(object):
         Returns:
             (dict): Dictionary describing the orientation, with keys:
                 - ``orientation_index`` (int): Index of this particular orientation.
+                - ``reference_geometry_index`` (int): Index of the reference geometry
+                    the closest discrete orientation is equivalent to.
                 - ``rotational_distance`` (float): Angle of rotation from the relevant
                     reference orientation, in radians.
                 - ``symmetry_measure`` (float): The continuous symmetry measure (CSM)
@@ -86,7 +88,9 @@ class RotationAnalyser(object):
         trace = np.trace(proper_rot_matrices, axis1=1, axis2=2 )
         rot_distance = np.arccos((trace-1.0)/2.0)
         index = np.argmin(rot_distance)
+        reference_geometry_index = index%len(self.reference_points)
         return {'orientation_index': index,
+                'reference_geometry_index': reference_geometry_index,
                 'rotational_distance': rot_distance[index], 
                 'symmetry_measure': proper_rot_sm[index]['symmetry_measure'] }
 
