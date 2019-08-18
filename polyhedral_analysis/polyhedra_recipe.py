@@ -174,6 +174,8 @@ class PolyhedraRecipe:
                                                 label=self.label )
 
 def polyhedra_from_distance_cutoff( central_atoms, vertex_atoms, cutoff, label=None ):
+    if not central_atoms:
+        return []
     polyhedra = []
     lattice = central_atoms[0].site.lattice
     distance_matrix = lattice.get_all_distances( [ c.frac_coords for c in central_atoms ],
