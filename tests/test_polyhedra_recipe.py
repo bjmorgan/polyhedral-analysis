@@ -1,8 +1,11 @@
 import unittest
 import numpy as np
 from polyhedral_analysis.polyhedra_recipe import ( PolyhedraRecipe,
-                                                   matching_sites )
+                                                   matching_sites,
+                                                   polyhedra_from_distance_cutoff )
 from pymatgen import Structure, Lattice
+from polyhedral_analysis.atom import Atom
+from unittest.mock import Mock
 
 class TestPolyhedraRecipeInit( unittest.TestCase ):
 
@@ -50,6 +53,16 @@ class TestPolyhedraRecipeFunctions( unittest.TestCase ):
         self.assertEqual( len( matched_sites ), 1 )
         self.assertEqual( matched_sites[0], [ structure[0], 0 ] )
 
+    def test_polyhedra_from_distance_cutoff_with_no_central_atoms_returns_empty_list(self):
+        # If an empty list of central atoms is passed in, and empty list of polyhedra
+        # should be returned.
+        central_atoms = []
+        vertex_atoms = [ Mock(spec=Atom), Mock(spec=Atom) ]
+        cutoff = 1.0
+        polyhedra = polyhedra_from_distance_cutoff( central_atoms=central_atoms,
+                                                    vertex_atoms=vertex_atoms,
+                                                    cutoff=cutoff )
+        self.assertEqual( polyhedra, [] )
 
 if __name__ == '__main__':
     unittest.main()
