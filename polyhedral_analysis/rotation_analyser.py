@@ -73,6 +73,8 @@ class RotationAnalyser(object):
                     the closest discrete orientation is equivalent to.
                 - ``rotational_distance`` (float): Angle of rotation from the relevant
                     reference orientation, in radians.
+                - ``all_rotational_distances`` (np.array(float)): Array of angles of rotation
+                    from each reference orientation.
                 - ``symmetry_measure`` (float): The continuous symmetry measure (CSM)
                   for this polyhedron (J. Am. Chem. Soc., 114, 7843-7851 (1992)) 
 
@@ -93,6 +95,7 @@ class RotationAnalyser(object):
                 'reference_geometry_index': reference_geometry_index,
                 'rotational_distance': rot_distance[index], 
                 'symmetry_measure': proper_rot_sm[index]['symmetry_measure'] }
+                'all_rotational_distances': rot_distance}
 
     def polyhedron_orientation(self, polyhedron):
         points = polyhedron.abstract_geometry.points_wocs_csc()
