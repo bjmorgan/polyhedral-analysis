@@ -94,7 +94,7 @@ class RotationAnalyser(object):
         return {'orientation_index': index,
                 'reference_geometry_index': reference_geometry_index,
                 'rotational_distance': rot_distance[index], 
-                'symmetry_measure': proper_rot_sm[index]['symmetry_measure'] }
+                'symmetry_measure': proper_rot_sm[index]['symmetry_measure'],
                 'all_rotational_distances': rot_distance}
 
     def polyhedron_orientation(self, polyhedron):
