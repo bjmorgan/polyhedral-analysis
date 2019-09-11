@@ -68,24 +68,23 @@ class Trajectory:
         Returns:
             None
         """
-        if progress == True:
-            progress_bar = partial( tqdm, unit=' configurations' )
-        elif progress == 'notebook':
-            progress_bar = partial( tqdm_notebook, unit=' configurations' )
-        else:
-            progress_bar = lambda x: x
+        args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
+            for n, s in zip( config_numbers, structures ) ]
+        if progress:
+            progress_kwargs = { 'total': len(args),
+                                'unit': ' configurations' }
         if not config_numbers:
             config_numbers = list( range( 1, len( self.structures ) + 1 ) ) 
         if len( config_numbers ) != len( structures ):
             raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
         # generate polyhedra configurations
-        args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
-            for n, s in zip( config_numbers, structures ) ]
         if ncores:
             with multiprocessing.Pool( ncores ) as p:
-                configurations = p.map( cls._get_configuration, progress_bar( args ) )
+                configurations = list(tqdm_notebook(p.imap( cls._get_configuration, args ), 
+                                                            **progress_kwargs ) )
         else:
-            configurations = list(map( cls._get_configuration, progress_bar( args ) ) )
+            configurations = list(tqdm_notebook(map( cls._get_configuration, args ),
+                                                            **progress_kwargs ) )
         return cls( structures=structures, configurations=configurations, config_numbers=config_numbers )
 
     def extend( self, other, offset=0 ):
