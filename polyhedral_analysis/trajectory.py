@@ -1,4 +1,5 @@
-from pymatgen.io.vasp import Xdatcar, Structure
+from pymatgen.io.vasp import Xdatcar
+from pymatgen.core.structure import Structure
 from .configuration import Configuration
 import re
 import copy
