@@ -57,7 +57,7 @@ class Trajectory:
                 defines how to construct a set of `CoordinationPolyhedra` for each configuration.
             config_numbers (:obj:`list`, optional): Optional list of integers to use as frame 
                 numbers for each structure. If this argument is not set, the
-                configurations will be numnbered 1, 2, 3 ….
+                configurations will be numbered 1, 2, 3 ….
             verbose (:obj:`bool`, optional): verbose output while parsing the input structures.
                 Default is False.
             ncores (:obj:`int`, optional): TODO.
