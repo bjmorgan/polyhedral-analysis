@@ -69,24 +69,32 @@ class Trajectory:
         Returns:
             None
         """
-        args = [ { 'structure': s, 'recipes': recipes, 'config_number': n }
-            for n, s in zip( config_numbers, structures ) ]
+        args = [{'structure': s, 
+                 'recipes': recipes,
+                  'config_number': n}
+                for n, s in zip( config_numbers, structures )]
         if progress:
-            progress_kwargs = { 'total': len(args),
-                                'unit': ' configurations' }
+            progress_kwargs = {'total': len(args),
+                               'unit': ' configurations'}
+            if progress == 'notebook':
+                pbar = tqdm_notebook
+            else:
+                pbar = tqdm
         if not config_numbers:
-            config_numbers = list( range( 1, len( self.structures ) + 1 ) ) 
-        if len( config_numbers ) != len( structures ):
-            raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
+            config_numbers = list(range(1, len(self.structures) + 1 )) 
+        if len(config_numbers) != len(structures):
+            raise ValueError('number of configuration numbers != number of structures: {}, {}'.format(config_numbers, len(structures)))
         # generate polyhedra configurations
         if ncores:
-            with multiprocessing.Pool( ncores ) as p:
-                configurations = list(tqdm_notebook(p.imap( cls._get_configuration, args ), 
-                                                            **progress_kwargs ) )
+            with multiprocessing.Pool(ncores) as p:
+                configurations = list(pbar(p.imap(cls._get_configuration, args), 
+                                                  **progress_kwargs))
         else:
-            configurations = list(tqdm_notebook(map( cls._get_configuration, args ),
-                                                            **progress_kwargs ) )
-        return cls( structures=structures, configurations=configurations, config_numbers=config_numbers )
+            configurations = list(pbar(map(cls._get_configuration, args),
+                                           **progress_kwargs))
+        return cls(structures=structures, 
+                   configurations=configurations, 
+                   config_numbers=config_numbers)
 
     def extend( self, other, offset=0 ):
         """
