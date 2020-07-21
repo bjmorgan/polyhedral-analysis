@@ -211,3 +211,31 @@ def polyhedra_from_closest_centre( central_atoms, vertex_atoms, label=None ):
                                                   label=label ) )
     return polyhedra
 
+def polyhedra_from_atom_indices(central_atoms, vertex_atoms, central_indices, vertex_indices, label=None):
+    """Construct a set of polyhedra from lists of atom indices for central and vertex atoms.
+
+    Args:
+        central_atoms (list(Atom)): List of Atom objects describing the set of possible centre atoms.
+        vertex_atoms (list(Atom)): List of Atom objects describing the set of possible vertex atoms.
+        central_indices (list(int)): List of integer indices specifying each central atom.
+        vertex_indices (list(list(in)): Nested list of integer indices for the vertex atoms in each polyhedron.
+
+    Returns:
+        (list(CoordinationPolyhedron))
+
+    Raises:
+        ValueError: If the lengths of the central_indices and vertex_indices lists are unequal.
+
+    """
+    if len(central_indices) != len(vertex_indices):
+        raise ValueError('central_indices and vertex_indices are different lengths: '
+                         f'{len(central_indices)} vs. {len(vertex_indices)}.')
+        polyhedra = []
+        for ic, iv in zip(central_indices, vertex_indices):
+            central_atom = next(atom for atom in central_atoms if atom.index == ic)
+            vertex_atoms = [atom for atom in vertex_atoms if atom.index in iv]
+            polyhedra.append(CoordinationPolyhedron(central_atom=central_atom,
+                                                    vertices=vertex_atoms,
+                                                    label=label))
+        return polyhedra 
+
