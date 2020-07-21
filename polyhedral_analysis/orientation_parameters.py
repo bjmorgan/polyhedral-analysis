@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np # type: ignore
 
 def cos_theta( a, b ):
     return np.dot( a, b ) / ( np.linalg.norm(a) * np.linalg.norm(b) )

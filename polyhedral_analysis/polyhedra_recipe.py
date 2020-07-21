@@ -1,9 +1,14 @@
 from functools import partial
-import numpy as np
+import numpy as np # type: ignore
 from .coordination_polyhedron import CoordinationPolyhedron
 from .utils import flatten
+from pymatgen.core.structure import Structure
+from pymatgen.core.sites import Site
+from typing import Optional, List, Tuple, Callable, Union
 
-def matching_sites( structure, reference_structure, species=None ):
+def matching_sites(structure: Structure, 
+                   reference_structure: Structure,
+                   species: Optional[List[str]] = None) -> List[Tuple[Site, int]]:
     """
     Returns a subset of sites from structure (as a list) where each site is the closest to one 
     site in the reference structure.
@@ -15,18 +20,21 @@ def matching_sites( structure, reference_structure, species=None ):
             to return. Default is None, which specifies all species matching species are returned.
         
     Returns:
-        (list([Site,index]))
+        (list[tuple(Site,int)])
+
     """
     matched_sites = []
     for ref_site in reference_structure:
-        dr = [ site.distance( ref_site ) for site in structure ]
-        i = np.argmin( dr )
-        matched_sites.append( [ structure[ i ], i ] )
+        dr = [site.distance(ref_site) for site in structure]
+        i = np.argmin(dr)
+        matched_sites.append((structure[i], i))
     if species:
-        matched_sites = [ s for s in matched_sites if str( s[0].specie ) in species ]
+        matched_sites = [(s, i) for s, i in matched_sites if str(s[0].specie) in species]
     return matched_sites
 
-def matching_site_indices( structure, reference_structure, species=None ):
+def matching_site_indices(structure: Structure,
+                          reference_structure: Structure,
+                          species: Optional[List[str]] = None) -> List[int]:
     """
     Returns a subset of site indices from structure (as a list) where each site is the closest to one 
     site in the reference structure.
@@ -39,21 +47,24 @@ def matching_site_indices( structure, reference_structure, species=None ):
         
     Returns:
         (list[int])
-    """
-    return [ m[1] for m in matching_sites( structure, reference_structure, species=species ) ]
 
-def create_matching_site_generator( reference_structure, species=None ):
+    """
+    return [m[1] for m in matching_sites( structure, reference_structure, species=species)]
+
+def create_matching_site_generator(reference_structure: Structure,
+                                   species: Optional[List[str]] = None) -> Callable:
     """
     Args:
         reference_structure (Structure):
         species (:obj:`list[str]`, optional):
 
     Returns:
-        (functools.partial): 
-    """
-    return partial( matching_site_indices, reference_structure=reference_structure, species=species )
+        (func): 
 
-def generator_from_atom_argument( arg ):
+    """
+    return partial(matching_site_indices, reference_structure=reference_structure, species=species)
+
+def generator_from_atom_argument(arg: Union[str, List, Callable]) -> Callable:
     """
     Returns a generator function for selecting a subset of sites from a pymatgen :obj:`Structure` object.
 
@@ -65,15 +76,19 @@ def generator_from_atom_argument( arg ):
             returns an appropriate list of site indices.
 
     """
-    if type( arg ) is str:
-        return partial( _get_indices_from_str, arg=arg )
-    elif type( arg ) in [ list, tuple ]:
-        if type( arg[0] ) is str:
-            return partial( _get_indices_from_list_str, arg=arg )
-        elif type( arg[0] ) is int:
-            return partial( _get_indices_from_list_int, arg=arg )
-    elif callable( arg ):
+    if callable(arg):
         return arg
+    if type(arg) is str:
+        return partial(_get_indices_from_str, arg=arg)
+    elif type(arg) in [list, tuple]:
+        if type(arg[0]) is str:
+            return partial(_get_indices_from_list_str, arg=arg)
+        elif type(arg[0]) is int:
+            return partial(_get_indices_from_list_int, arg=arg)
+        else:
+            raise TypeError
+    else:
+        raise TypeError
 
 def _get_indices_from_str( structure, arg ):
     return structure.indices_from_symbol( arg )
@@ -88,9 +103,9 @@ class PolyhedraRecipe:
 
     allowed_methods = [ 'distance cutoff', 'closest centre', 'nearest neighbours' ]
 
-    def __init__( self, method, central_atoms, vertex_atoms, 
-                  coordination_cutoff=None, vertex_graph_cutoff=None,
-                  label=None, n_neighbours=None ):
+    def __init__(self, method, central_atoms, vertex_atoms, 
+                 coordination_cutoff=None, vertex_graph_cutoff=None,
+                 label=None, n_neighbours=None):
         """
         Create a :obj:`PolyhedraRecipe` object.
 
@@ -160,35 +175,35 @@ class PolyhedraRecipe:
             raise ValueError( 'Needs structure argument' )
         return self._vertex_atom_list
 
-    def find_polyhedra( self, atoms, structure=None ):
-        polyhedra_method = { 'distance cutoff': partial( polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff ),
-                             'closest centre': polyhedra_from_closest_centre,
-                             'nearest neighbours': partial( polyhedra_from_nearest_neighbours, nn=self.n_neighbours ) }
-        central_atom_list = self.central_atom_list( structure )
-        vertex_atom_list = self.vertex_atom_list( structure )
-        central_atoms = [ atom for atom in atoms if atom.index in central_atom_list ]
-        vertex_atoms = [ atom for atom in atoms if atom.index in vertex_atom_list ]
+    def find_polyhedra(self, atoms, structure=None):
+        polyhedra_method = {'distance cutoff': partial(polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff),
+                            'closest centre': polyhedra_from_closest_centre,
+                            'nearest neighbours': partial(polyhedra_from_nearest_neighbours, nn=self.n_neighbours)}
+        central_atom_list = self.central_atom_list(structure)
+        vertex_atom_list = self.vertex_atom_list(structure)
+        central_atoms = [atom for atom in atoms if atom.index in central_atom_list]
+        vertex_atoms = [atom for atom in atoms if atom.index in vertex_atom_list]
         
-        return polyhedra_method[ self.method ]( central_atoms=central_atoms, 
-                                                vertex_atoms=vertex_atoms, 
-                                                label=self.label )
+        return polyhedra_method[self.method](central_atoms=central_atoms, 
+                                             vertex_atoms=vertex_atoms, 
+                                             label=self.label)
 
-def polyhedra_from_distance_cutoff( central_atoms, vertex_atoms, cutoff, label=None ):
+def polyhedra_from_distance_cutoff(central_atoms, vertex_atoms, cutoff, label=None):
     if not central_atoms:
         return []
     polyhedra = []
     lattice = central_atoms[0].site.lattice
-    distance_matrix = lattice.get_all_distances( [ c.frac_coords for c in central_atoms ],
-                                                 [ v.frac_coords for v in vertex_atoms ] )
+    distance_matrix = lattice.get_all_distances([c.frac_coords for c in central_atoms],
+                                                [v.frac_coords for v in vertex_atoms])
     for dr, c_atom in zip( distance_matrix, central_atoms ):
         indices = np.where( dr <= cutoff )[0]
-        vertices = [ vertex_atoms[i] for i in indices ]
-        polyhedra.append( CoordinationPolyhedron( central_atom=c_atom, 
-                                                  vertices=vertices, 
-                                                  label=label ) )
+        vertices = [vertex_atoms[i] for i in indices]
+        polyhedra.append(CoordinationPolyhedron(central_atom=c_atom, 
+                                                vertices=vertices, 
+                                                label=label))
     return polyhedra
 
-def polyhedra_from_nearest_neighbours( central_atoms, vertex_atoms, nn, label=None ):
+def polyhedra_from_nearest_neighbours(central_atoms, vertex_atoms, nn, label=None):
     polyhedra = []
     for c_atom in central_atoms:
         vertices = sorted( vertex_atoms, key=lambda atom: atom.site.distance( c_atom.site ) )[:nn]
@@ -197,7 +212,7 @@ def polyhedra_from_nearest_neighbours( central_atoms, vertex_atoms, nn, label=No
                                                   label=label ) )
     return polyhedra
 
-def polyhedra_from_closest_centre( central_atoms, vertex_atoms, label=None ):
+def polyhedra_from_closest_centre(central_atoms, vertex_atoms, label=None):
     coordination_coords = [ co_atom.coords for co_atom in vertex_atoms ]
     central_coords = [ c_atom.coords for c_atom in central_atoms ]
     closest_site_index = [ np.argmin( [ a.site.distance( c_atom.site ) 

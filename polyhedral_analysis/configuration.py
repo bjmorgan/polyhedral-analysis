@@ -1,9 +1,16 @@
-from .atom import Atom
-from .utils import flatten
+from polyhedral_analysis.atom import Atom
+from polyhedral_analysis.utils import flatten
+from pymatgen.core.structure import Structure
+from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+from typing import Optional, List, Union
 
 class Configuration:
 
-    def __init__( self, structure, recipes, config_number=None ):
+    def __init__(self, 
+                 structure: Structure, 
+                 recipes: List[PolyhedraRecipe],
+                 config_number: Optional[List[int]] = None) -> None:
         """
         A Configuration object describes a single atomic geometry.
 
@@ -23,21 +30,23 @@ class Configuration:
             coordination_atoms (list(Atom)): A list of atoms that define the vertices of 
                 the coordination polyhedra.
          """
-        self.structure = structure
         self.config_number = config_number
-        self.atoms = [ Atom( index=i, site=site, label=site.species_string ) 
-                       for i, site in enumerate( self.structure.sites ) ]
+        self.atoms = [Atom(index=i, 
+                           site=site, 
+                           label=site.species_string) 
+                      for i, site in enumerate(structure.sites)]
         self.polyhedra = []
         for recipe in recipes:
-            self.polyhedra.extend( recipe.find_polyhedra( self.atoms, self.structure ) )
-        self.central_atoms = sorted( list( set( 
-                                 [ p.central_atom for p in self.polyhedra ] ) ),
-                                 key=lambda x: x.index )
-        self.coordination_atoms = sorted( list( set( flatten( 
-                                      [ p.vertices for p in self.polyhedra ] ) ) ),
-                                      key=lambda x: x.index )
+            self.polyhedra.extend(recipe.find_polyhedra(self.atoms, structure))
+        self.central_atoms = sorted(list(set(
+                                 [p.central_atom for p in self.polyhedra])),
+                                 key=lambda x: x.index)
+        self.coordination_atoms = sorted(list(set(flatten(
+                                      [p.vertices for p in self.polyhedra]))),
+                                      key=lambda x: x.index)
 
-    def coordination_atom_by_index( self, index ):
+    def coordination_atom_by_index(self,
+                                   index: int) -> Union[int, None]:
         """
         Return the coordination atom with a specific index.
 
@@ -55,8 +64,9 @@ class Configuration:
             return self.coordination_atoms[ coordination_atom_indices.index( index ) ] 
 
     @property
-    def polyhedra_labels( self ):
-        return [ p.label for p in self.polyhedra ]
+    def polyhedra_labels(self) -> List[str]:
+        return [p.label for p in self.polyhedra]
 
-    def polyhedra_by_label( self, label ):
-        return [ p for p in self.polyhedra if p.label == label ]
+    def polyhedra_by_label(self,
+                           label: str) -> List[CoordinationPolyhedron]:
+        return [p for p in self.polyhedra if p.label == label]
