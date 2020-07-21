@@ -1,6 +1,8 @@
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+
 # Functions for analysing octahedra
 
-def check_octahedra( polyhedron ):
+def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
     """
     Check whether a polyhedron is considered an octahedron.
 
@@ -19,7 +21,7 @@ def check_octahedra( polyhedron ):
     if not polyhedron.best_fit_geometry['geometry'] is 'Octahedron':
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
-def opposite_vertex_pairs( polyhedron, check=True ):
+def opposite_vertex_pairs(polyhedron, check=True):
     """
     For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
@@ -31,7 +33,7 @@ def opposite_vertex_pairs( polyhedron, check=True ):
 
     """
     if check:
-        check_octahedra( polyhedron )
+        check_octahedra(polyhedron)
     vertex_pairs = []
     seen_indices = []
     for v1 in polyhedron.vertices:

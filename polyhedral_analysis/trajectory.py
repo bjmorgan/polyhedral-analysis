@@ -1,13 +1,13 @@
-from pymatgen.io.vasp import Xdatcar
+from pymatgen.io.vasp import Xdatcar # type: ignore
 from pymatgen.core.structure import Structure
 from .configuration import Configuration
 import re
 import copy
-from monty.io import zopen
+from monty.io import zopen # type: ignore
 import pickle
 from .utils import flatten
-import multiprocessing
-from tqdm import tqdm, tqdm_notebook
+import multiprocessing # type: ignore
+from tqdm import tqdm, tqdm_notebook # type: ignore
 from functools import partial
 
 def read_config_numbers_from_xdatcar( filename ):
@@ -80,6 +80,8 @@ class Trajectory:
                 pbar = tqdm_notebook
             else:
                 pbar = tqdm
+        else:
+            pbar = iter
         if not config_numbers:
             config_numbers = list(range(1, len(self.structures) + 1 )) 
         if len(config_numbers) != len(structures):

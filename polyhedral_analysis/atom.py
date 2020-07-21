@@ -1,12 +1,19 @@
 from fnmatch import fnmatch
-from monty.io import zopen
+from monty.io import zopen # type: ignore
 import json
 import os
+from pymatgen.core.sites import Site
+from pymatgen.core.lattice import Lattice
+from typing import List, Dict, Optional, Union
+import numpy as np # type: ignore
 
 class Atom:
     """Atom class"""
 
-    def __init__( self, index, site, label=None ):
+    def __init__(self,
+                 index: int,
+                 site: Site,
+                 label: Optional[str] = None) -> None:
         """
         Initialise an Atom object.
 
@@ -17,7 +24,7 @@ class Atom:
 
         Attributes:
             in_polyhedra (list): List of polyhedra that this atom is part of.
-            neighbours: (None|dict(list)): Dictionary of lists of neighbours for each 
+            neighbours: (dict(int: list)): Dictionary of lists of neighbours for each 
                 polyhedron this atom is part of. Dictionary keys are the indexes of 
                 each respective polyhedron.
 
@@ -25,26 +32,36 @@ class Atom:
         self.index = index
         self.site = site
         self.label = label
-        self.in_polyhedra = []
-        self.neighbours = None
+        self.in_polyhedra: List = []
+        self._neighbours: Dict = {}
 
-    def as_dict( self ):
+    @property
+    def neighbours(self) -> Dict[int, List]:
+        if len(self._neighbours) != len(self.in_polyhedra):
+            for p in self.in_polyhedra:
+                p.construct_edge_graph()
+                p.update_vertex_neighbours()
+        return self._neighbours
+       
+    def as_dict(self):
         """
         json-serializable :obj:`dict` representation of Atom.
         """
-        d = { 'index': self.index,
-              'site': self.site.as_dict(),
-              'label': self.label,
-              'in_polyhedra': [ p.index for p in self.in_polyhedra ],
-              'neighbours': self.neighbours,
-              '@module': self.__class__.__module__,
-              '@class': self.__class__.__name__ }
+        d = {'index': self.index,
+             'site': self.site.as_dict(),
+             'label': self.label,
+             'in_polyhedra': [p.index for p in self.in_polyhedra],
+             'neighbours': self.neighbours,
+             '@module': self.__class__.__module__,
+             '@class': self.__class__.__name__}
         return d
 
-    def __repr__( self ):
-        return "{} {}".format( self.index, self.site )
+    def __repr__(self) -> str:
+        return "{} {}".format(self.index, self.site)
 
-    def to( self, fmt=None, filename=None ):
+    def to(self,
+           fmt: Optional[str] = None,
+           filename: Optional[str] = None) -> Union[None, str]:
         """
         Outputs the structure to a file or string.
     
@@ -65,34 +82,41 @@ class Atom:
             fmt = "json"
         else:
             fmt = fmt.lower()
-        fname = os.path.basename( filename )
-        if fmt == "json" or fnmatch( fname.lower(), "*.json" ):
-            s = json.dumps( self.as_dict() )
+        fname = os.path.basename(filename)
+        if fmt == "json" or fnmatch(fname.lower(), "*.json"):
+            s = json.dumps(self.as_dict())
             if filename:
-                with zopen( filename, 'wt' ) as f:
-                    f.write( '{}'.format(s) )
+                with zopen(filename, 'wt') as f:
+                    f.write('{}'.format(s))
+                return None
             else:
                 return s
+        else:
+            raise ValueError(f'Output format "{fmt}" not recognised')
         
     @property
-    def frac_coords( self ):
+    def frac_coords(self) -> np.ndarray:
         """Fractional coordinates"""
         return self.site.frac_coords
 
     @property
-    def coords( self ):
+    def coords(self) -> np.ndarray:
         """Cartesian coordinates"""
         return self.site.coords
 
     @property
-    def lattice( self ):
+    def lattice(self) -> Lattice:
         return self.site.lattice
 
-    def __lt__( self, other ):
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, Atom):
+            return NotImplemented
         return self.index < other.index
 
-    def __eq__( self, other ):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Atom):
+            return NotImplemented
         return self.index == other.index
 
-    def __hash__( self ):
+    def __hash__(self) -> int:
         return self.index
