@@ -20,6 +20,7 @@ setup(
     download_url="https://github.com/bjmorgan/polyhedral-analysis/archive/%s.tar.gz" % (VERSION),
     packages=find_packages( exclude=['docs', 'tests*'] ),
     license='MIT',
+    python_requires='>=3.7',
     install_requires=['numpy',
                       'pymatgen',
                       'scipy', 
