@@ -16,11 +16,13 @@ class SymmetryMeasure:
     def minimum_symmetry_measure(self,
                                  ag: AbstractGeometry) -> float:
         distorted_points = ag.points_wocs_csc()
-        return min(symmetry_measure(np.array(p), self.reference_points )['symmetry_measure'] 
-                   for p in permutations(distorted_points))
+        to_return =  min(symmetry_measure(np.array(p), self.reference_points )['symmetry_measure'] 
+                         for p in permutations(distorted_points))
+        assert isinstance(to_return, float)
+        return to_return
 
     @classmethod
-    def from_name(cls, name):
+    def from_name(cls, name: str) -> SymmetryMeasure:
         reference_points = AllCoordinationGeometries().get_geometry_from_name(name).points
         return cls(reference_points, name)
 

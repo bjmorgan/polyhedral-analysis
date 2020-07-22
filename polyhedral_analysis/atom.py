@@ -1,10 +1,11 @@
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from fnmatch import fnmatch
 from monty.io import zopen # type: ignore
 import json
 import os
 from pymatgen.core.sites import Site
 from pymatgen.core.lattice import Lattice
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Any
 import numpy as np # type: ignore
 
 class Atom:
@@ -32,23 +33,23 @@ class Atom:
         self.index = index
         self.site = site
         self.label = label
-        self.in_polyhedra: List = []
-        self._neighbours: Dict = {}
+        self.in_polyhedra: List[CoordinationPolyhedron] = []
+        self._neighbours: Dict[int, List[int]] = {}
 
     @property
-    def neighbours(self) -> Dict[int, List]:
+    def neighbours(self) -> Dict[int, List[int]]:
         if len(self._neighbours) != len(self.in_polyhedra):
             for p in self.in_polyhedra:
                 p.construct_edge_graph()
                 p.update_vertex_neighbours()
         return self._neighbours
        
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, Any]:
         """
         json-serializable :obj:`dict` representation of Atom.
         """
         d = {'index': self.index,
-             'site': self.site.as_dict(),
+             'site': self.site.as_dict(), # type: ignore
              'label': self.label,
              'in_polyhedra': [p.index for p in self.in_polyhedra],
              'neighbours': self.neighbours,
@@ -106,7 +107,9 @@ class Atom:
 
     @property
     def lattice(self) -> Lattice:
-        return self.site.lattice
+        l = self.site.lattice
+        assert isinstance(l, Lattice)
+        return l 
 
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, Atom):
@@ -120,3 +123,8 @@ class Atom:
 
     def __hash__(self) -> int:
         return self.index
+   
+    def distance(self, other: Atom) -> float:
+        d = self.site.distance(other.site) # type: ignore
+        assert isinstance(d, float)
+        return d

@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, TypeVar, Sequence
+
+T = TypeVar('T')
 
 """
 Utility functions
 """
 
-def flatten(this_list: List[List]) -> List:
+def flatten(this_list: Sequence[Sequence[T]]) -> List[T]:
     """Flattens a nested list.
 
     Args:
@@ -15,3 +17,4 @@ def flatten(this_list: List[List]) -> List:
 
     """
     return [item for sublist in this_list for item in sublist]
+

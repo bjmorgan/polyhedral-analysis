@@ -3,6 +3,7 @@ from itertools import permutations
 import math
 import numpy as np # type: ignore
 from typing import Dict, Union
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
 class RotationAnalyser(object):
     """Class for analysing rotational orientation of polyhedra.
@@ -102,6 +103,8 @@ class RotationAnalyser(object):
                 'symmetry_measure': proper_rot_sm[index]['symmetry_measure'],
                 'all_rotational_distances': rot_distance}
 
-    def polyhedron_orientation(self, polyhedron):
+    def polyhedron_orientation(self, 
+                               polyhedron: CoordinationPolyhedron) -> Dict[str, Union[int, float]]:
         points = polyhedron.abstract_geometry.points_wocs_csc()
-        return self.discrete_orientation( points )
+        return self.discrete_orientation(points)
+

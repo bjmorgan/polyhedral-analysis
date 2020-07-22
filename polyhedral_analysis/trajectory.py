@@ -1,27 +1,24 @@
 from pymatgen.io.vasp import Xdatcar # type: ignore
 from pymatgen.core.structure import Structure
-from .configuration import Configuration
+from polyhedral_analysis.configuration import Configuration
+from polyhedral_analysis.utils import flatten
+from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
+from polyhedral_analysis.configuration import Configuration
 import re
 import copy
 from monty.io import zopen # type: ignore
 import pickle
-from .utils import flatten
-import multiprocessing # type: ignore
+import multiprocessing
 from tqdm import tqdm, tqdm_notebook # type: ignore
 from functools import partial
-
-def read_config_numbers_from_xdatcar( filename ):
-    with zopen( filename ) as f:
-        file_string = f.read()
-        try: # attempt to decode byte object
-            file_string = file_string.decode()
-        except AttributeError:
-            pass
-        return [ int(s) for s in re.findall( 'Direct configuration=\s+(\d+)', file_string ) ]
+from typing import List, Optional, Union, Any, Dict
 
 class Trajectory:
 
-    def __init__( self, structures, configurations, config_numbers=None ):
+    def __init__(self,
+                 structures: List[Structure],
+                 configurations: List[Configuration]) -> None:
+        """TODO"""
         for s in structures:
             if not isinstance( s, Structure ):
                 raise TypeError( "structures argument should contain pymatgen Structure objects" )
@@ -30,22 +27,20 @@ class Trajectory:
                 raise TypeError( "configurations argument should contain Configuration objects" )
         self._structures = structures
         self._configurations = configurations
-        if not config_numbers:
-            config_numbers = list( range( 1, len( self.structures ) + 1 ) )
-        if len( config_numbers ) != len( self.structures ):
-            raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( self.structures ) ) )
-        for n, c in zip( config_numbers, self._configurations ):
-            c.config_number = n
 
     @classmethod
-    def _get_configuration( cls, args ):
-         return Configuration( structure=args['structure'], 
-                               recipes=args['recipes'], 
-                               config_number=args['config_number'] )
+    def _get_configuration(cls,
+                           args: Dict[str, Any]) -> Configuration:
+         return Configuration(structure=args['structure'], 
+                              recipes=args['recipes'])
     
     @classmethod
-    def from_structures( cls, structures, recipes, config_numbers=None, verbose=False, 
-                         ncores=None, progress=False ):
+    def from_structures(cls,
+                        structures: List[Structure],
+                        recipes: List[PolyhedraRecipe],
+                        verbose: bool = False,
+                        ncores: Optional[int] = None,
+                        progress: Union[bool, str] = False) -> Trajectory:
         """
         Generate a :obj:`Trajectory` object by applying one or more polyhedral recipes to
         a series of `pymatgen` :obj:`Structure` objects.,
@@ -55,9 +50,6 @@ class Trajectory:
                 :obj:`Structure`` objects.
             recipes (list(PolyhedraRecipe): List of `PolyhedraRecipe` recipes, where each recipe
                 defines how to construct a set of `CoordinationPolyhedra` for each configuration.
-            config_numbers (:obj:`list`, optional): Optional list of integers to use as frame 
-                numbers for each structure. If this argument is not set, the
-                configurations will be numbered 1, 2, 3 ….
             verbose (:obj:`bool`, optional): verbose output while parsing the input structures.
                 Default is False.
             ncores (:obj:`int`, optional): TODO.
@@ -69,10 +61,8 @@ class Trajectory:
         Returns:
             None
         """
-        args = [{'structure': s, 
-                 'recipes': recipes,
-                  'config_number': n}
-                for n, s in zip( config_numbers, structures )]
+        args = [{'structure': structure, 
+                 'recipes': recipes} for structure in structures]
         if progress:
             progress_kwargs = {'total': len(args),
                                'unit': ' configurations'}
@@ -82,10 +72,6 @@ class Trajectory:
                 pbar = tqdm
         else:
             pbar = iter
-        if not config_numbers:
-            config_numbers = list(range(1, len(self.structures) + 1 )) 
-        if len(config_numbers) != len(structures):
-            raise ValueError('number of configuration numbers != number of structures: {}, {}'.format(config_numbers, len(structures)))
         # generate polyhedra configurations
         if ncores:
             with multiprocessing.Pool(ncores) as p:
@@ -95,10 +81,11 @@ class Trajectory:
             configurations = list(pbar(map(cls._get_configuration, args),
                                            **progress_kwargs))
         return cls(structures=structures, 
-                   configurations=configurations, 
-                   config_numbers=config_numbers)
+                   configurations=configurations)
 
-    def extend( self, other, offset=0 ):
+    def extend(self, 
+               other: Trajectory,
+               offset: int = 0) -> None:
         """
         Extend this Trajectory with the data from another Trajectory.
 
@@ -109,91 +96,74 @@ class Trajectory:
         Returns:
             None
         """
-        extended_configurations = copy.deepcopy( other.configurations )
-        for c in extended_configurations:
-            c.config_number += offset + self.config_numbers[-1]
-        self.configurations.extend( extended_configurations )
-        #self.config_numbers.extend( [ n + offset + self.config_numbers[-1] for n in other.config_numbers ] ) 
-        # TODO need to update individual configuration numbers
+        extended_configurations = copy.deepcopy(other.configurations)
+        self.configurations.extend(extended_configurations)
 
-    def __add__( self, other ):
+    def __add__(self, other: object) -> Trajectory:
         """TODO"""
+        if not isinstance(other, Trajectory):
+            return NotImplemented
         summed_structures = self.structures + other.structures
         summed_configurations = self.configurations + other.configurations
-        new_trajectory = Trajectory( summed_structures, summed_configurations )
+        new_trajectory = Trajectory(summed_structures, summed_configurations)
         return new_trajectory
 
     @property
-    def config_numbers( self ):
-        return [ c.config_number for c in self.configurations ]
-
-    @property
-    def structures( self ):
+    def structures(self) -> List[Structure]:
         return self._structures
 
     @property
-    def configurations( self ):
+    def configurations(self) -> List[Configuration]:
         return self._configurations
 
-    #TODO implement different ways of creating a Trajectory object, e.g. 
-    #@class_method
-    #def from_configurations( self, configurations ):
-    #    TODO
-
     @classmethod
-    def from_xdatcar( cls, filename, recipes, read_config_numbers=True, config_numbers=None,
-                      verbose=False, progress=None, ncores=None ):
+    def from_xdatcar(cls,
+                     filename: str,
+                     recipes: List[PolyhedraRecipe],
+                     verbose: bool = False,
+                     progress: Union[str, bool] = False,
+                     ncores: Optional[int] = None) -> Trajectory:
         """
         Args:
             filename (str): Filename for a VASP XDATCAR file.
             recipes (list(:obj:`PolyhedraRecipe`): List of `PolyhedraRecipe` recipes, 
                 where each recipe defines how to construct a set of `CoordinationPolyhedra` 
                 for each configuration.
-            read_config_numbers (:obj:`bool`, optional): Read configuration frame numbers from the XDATCAR.
-            config_numbers (:obj:`list`, optional): Optional list of integers to use as frame numbers for
-                each configuration in the XDATCAR input. If this argument is set, it will override
-                the `read_config_numbers` argument.
-
-                      config_numbers=None, verbose=False ):
 
         Returns:
             (:obj:`Trajectory`): a :obj:`Trajectory` object.
 
-        Notes:
-            If `read_config_numbers` is set to False, and `config_numbers` is not set,
-            the XDATCAR configurations will be numbered 1, 2, 3, 4, ….
         """
         xdatcar = Xdatcar( filename )
         structures = xdatcar.structures
-        if read_config_numbers and not config_numbers:
-            config_numbers = read_config_numbers_from_xdatcar( filename )
-        elif config_numbers:
-            config_numbers = config_numbers
-        else:
-            config_numbers = list( range( 1, len( structures ) + 1 ) )
-        if len( config_numbers ) != len( structures ):
-            raise ValueError( 'number of configuration numbers != number of structures: {}, {}'.format( config_numbers, len( structures ) ) )
-        return cls.from_structures( structures, recipes, config_numbers, verbose=verbose, progress=progress,
-                                    ncores=ncores )
+        return cls.from_structures(structures, recipes, verbose=verbose, progress=progress,
+                                    ncores=ncores)
 
     @classmethod
-    def from_xdatcars( cls, filenames, recipes, verbose=False, ncores=None, progress=None ):
+    def from_xdatcars(cls,
+                      filenames: List[str],
+                      recipes: List[PolyhedraRecipe],
+                      verbose: bool = False,
+                      ncores: Optional[int] = None,
+                      progress: Union[bool, str] = False) -> Trajectory:
         """
         TODO
         """
-        if ncores and len( filenames ) > 1:
-            with multiprocessing.Pool( ncores ) as p:
-                xdatcars = p.map( _get_xdatcar, filenames )
+        if ncores and len(filenames) > 1:
+            with multiprocessing.Pool(ncores) as p:
+                xdatcars = p.map(_get_xdatcar, filenames)
         else:
-            xdatcars = [ Xdatcar( f ) for f in filenames ]
-        structures = flatten( [ x.structures for x in xdatcars ] )
-        config_numbers = list( range( 1, len( structures ) + 1 ) )
-        return cls.from_structures( structures, recipes, config_numbers, verbose, ncores=ncores,
-            progress=progress ) 
+            xdatcars = [Xdatcar(f) for f in filenames]
+        structures = flatten([x.structures for x in xdatcars])
+        return cls.from_structures(structures,
+                                   recipes,
+                                   verbose,
+                                   ncores=ncores,
+                                   progress=progress) 
 
-def _get_xdatcar( filename ):
+def _get_xdatcar(filename: str) -> Xdatcar:
     """
     Internal method to support multiprocessing.
     """
-    return Xdatcar( filename )
+    return Xdatcar(filename)
 

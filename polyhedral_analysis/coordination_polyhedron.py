@@ -9,8 +9,10 @@ from scipy.spatial import ConvexHull # type: ignore
 from itertools import permutations, combinations
 import vg # type: ignore
 from collections import Counter
-from typing import List, Optional, Dict, Union, Set
+from typing import List, Optional, Dict, Union, Set, Tuple
 import typing
+from pymatgen.core.sites import Site
+from pymatgen.core.structure import Structure
 
 class CoordinationPolyhedron:
 
@@ -216,7 +218,7 @@ class CoordinationPolyhedron:
         return Counter([v.label for v in self.vertices])
 
     def vertex_distances(self,
-                         vertex_labels: bool = False) -> List[float]:
+                         vertex_labels: bool = False) -> Union[List[float], List[Tuple[float, Optional[str]]]]:
         """
         Returns a list of distances from the central atom to the vertex atoms.
 
@@ -230,14 +232,14 @@ class CoordinationPolyhedron:
                 label for each vertex atom will also be returned with each corresponding distance.
 
         """ 
-        distances = [self.central_atom.site.distance(v.site) for v in self.vertices]
+        distances = [self.central_atom.distance(v) for v in self.vertices]
         if vertex_labels:
             labels = [v.label for v in self.vertices]
             return list(zip(distances, labels))
         else:
             return distances
 
-    def equal_vertices(self, other):
+    def equal_vertices(self, other: object) -> bool:
         """
         Test whether this :obj:`CoordinationPolyhedron` has vertices with the same labels as
         another :obj:`CoordinationPolyhedron`.
@@ -249,9 +251,11 @@ class CoordinationPolyhedron:
             (bool): True / False.
 
         """
+        if not isinstance(other, CoordinationPolyhedron):
+            raise TypeError
         return self.vertex_indices == other.vertex_indices
 
-    def equal_edge_graph(self, other):
+    def equal_edge_graph(self, other: object) -> bool:
         """
         Test whether this :obj:`CoordinationPolyhedron` has the same edge graph as
         another :obj:`CoordinationPolyhedron`.
@@ -263,9 +267,11 @@ class CoordinationPolyhedron:
             (bool): True or False.
 
         """
+        if not isinstance(other, CoordinationPolyhedron):
+            raise TypeError
         return self.edge_graph == other.edge_graph
 
-    def equal_members( self, other ):
+    def equal_members(self, other: object) -> bool:
         """
         Test whether this :obj:`CoordinationPolyhedron` has the same member atoms
         as another :obj:`CoordinationPolyhedron`.
@@ -277,11 +283,13 @@ class CoordinationPolyhedron:
             (bool): True or False.
 
         """
+        if not isinstance(other, CoordinationPolyhedron):
+            raise TypeError
         equal_central_atom = self.central_atom == other.central_atom
         equal_vertex_atoms = self.vertices == other.vertices
         return equal_central_atom & equal_vertex_atoms
 
-    def __eq__( self, other ):
+    def __eq__(self, other: object) -> bool:
         """
         Two :obj:`CoordinationPolyhedron` objects are considered equal if they
         have equal edge graphs.
@@ -293,9 +301,11 @@ class CoordinationPolyhedron:
             (bool): True or False.
 
         """
+        if not isinstance(other, CoordinationPolyhedron):
+            return NotImplemented
         return self.equal_edge_graph( other )
     
-    def vertex_vector_projections( self, vectors ):
+    def vertex_vector_projections(self, vectors: np.ndarray) -> np.ndarray:
         """
         Calculate the projection of each centroid-to-vertex vector on one or more input vectors..
 
@@ -308,15 +318,15 @@ class CoordinationPolyhedron:
             (np.array): A (N_vertex x N_vector) dimension numpy array.
 
         """
-        if len( vectors.shape ) == 1:
-            vectors = np.array( [ vectors ] )
+        if len(vectors.shape) == 1:
+            vectors = np.array([vectors])
         to_return = []
         for point in self.abstract_geometry.points_wocs_ctwocc():
             for vec in vectors:
-                to_return.append( cos_theta( vec, point ) )
-        return np.array( to_return ).reshape(-1,vectors.shape[0])
+                to_return.append(cos_theta(vec, point))
+        return np.array(to_return).reshape(-1,vectors.shape[0])
  
-    def coordination_distances( self ):
+    def coordination_distances(self) -> List[float]:
         """
         List of distances from the central atom to the vertex atoms.
 
@@ -327,9 +337,9 @@ class CoordinationPolyhedron:
             (list): List of distances.
 
         """ 
-        return [ self.central_atom.site.distance( v.site ) for v in self.vertices ]
+        return [self.central_atom.distance(v) for v in self.vertices]
 
-    def angles( self ):
+    def angles(self) -> List[float]:
         """
         List of all vertex-centre-vertex angles.
 
@@ -340,9 +350,11 @@ class CoordinationPolyhedron:
              (list): List of angles.
 
         """
-        return [ vg.angle( p1, p2 ) for p1, p2 in combinations( self.vertex_vectors, 2 ) ]
+        return [vg.angle(p1, p2) for p1, p2 in combinations(self.vertex_vectors, 2)]
 
-    def vertex_vector_orientations(self, units='degrees', return_distance=False):
+    def vertex_vector_orientations(self,
+                                   units: str = 'degrees',
+                                   return_distance: bool = False) -> List[Tuple[float, ...]]:
         """Returns the angular orientations of each centroid-to-vertex vector.
 
         The orientation is defined by two angles, theta and phi. 
@@ -362,17 +374,17 @@ class CoordinationPolyhedron:
         vg_units = {'degrees': 'deg', 
                     'radians': 'rad'}
         theta = [vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units]) 
-                      for point in self.vertex_vectors ]
+                      for point in self.vertex_vectors]
         phi = [vg.signed_angle(np.array([1.0, 0.0, 0.0]), point, 
                                look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
                     for point in self.vertex_vectors]
         if return_distance:
             distance = [vg.magnitude(point) for point in self.vertex_vectors]
-            return list(zip( theta, phi, distance))
+            return list(zip(theta, phi, distance))
         return list(zip(theta, phi))
 
     @property
-    def volume(self):
+    def volume(self) -> float:
         """
         Volume of this polyhedron.
 
@@ -383,10 +395,15 @@ class CoordinationPolyhedron:
             (float): The volume.
 
         """
-        return self.convex_hull().volume
+        v = self.convex_hull().volume
+        assert isinstance(v, float)
+        return v
 
     @classmethod
-    def from_sites(cls, central_site, vertex_sites, label=None):
+    def from_sites(cls,
+                   central_site: Site,
+                   vertex_sites: List[Site],
+                   label: Optional[str] = None) -> CoordinationPolyhedron:
         """
         Create a :obj:`CoordinationPolyhedron` from a set of `pymatgen` :obj:`PeriodicSite` objects.
 
@@ -402,7 +419,8 @@ class CoordinationPolyhedron:
         central_atom = Atom(-1, central_site)
         return cls(central_atom=central_atom, vertices=vertices, label=label)
         
-    def vertices_by_indices(self, vertex_indices):
+    def vertices_by_indices(self,
+                            vertex_indices: List[int]) -> List[Atom]:
         """
         Select a subset of vertices from this polyhedron with a list of vertex indices.
 
@@ -415,11 +433,12 @@ class CoordinationPolyhedron:
         """
         return [v for v in self.vertices if v.index in vertex_indices]
 
-def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
+def merge_coplanar_simplices(convex_hull: ConvexHull,
+                             tolerance: float = 0.1) -> List[List[int]]:
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
-    for i, e1 in enumerate(complex_hull.equations):
-        for j, e2 in enumerate(complex_hull.equations[i+1:], i+1):
+    for i, e1 in enumerate(convex_hull.equations):
+        for j, e2 in enumerate(convex_hull.equations[i+1:], i+1):
             if np.all(e1 == e2):
                 continue
             dr = e1 - e2
@@ -427,10 +446,10 @@ def merge_coplanar_simplices( complex_hull, tolerance=0.1 ):
             if distance < tolerance:
                 triangles_to_merge.append([i, j])
     merged_simplices = []
-    for i, s in enumerate(complex_hull.simplices):
+    for i, s in enumerate(convex_hull.simplices):
         if i not in np.unique(triangles_to_merge):
             merged_simplices.append(s)
     for i, j in triangles_to_merge:
-        merged_simplices.append(np.unique([complex_hull.simplices[i], complex_hull.simplices[j]])) 
+        merged_simplices.append(np.unique([convex_hull.simplices[i], convex_hull.simplices[j]])) 
     return merged_simplices # note: this simplex is not ordered: should not be used to construct the edge_graph.
 
