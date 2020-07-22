@@ -29,13 +29,12 @@ def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
 
 def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
                           check: bool = True) -> VertexPairs:
-    """
-    For an octahedral polyhedron, find the pairs of vertices opposite each other.
+    """For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
     Args:
         polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
         check: (Optional, :obj:`bool`): Optional flag to set whether to check that this
-            polyhedron is an octahedron. Defulat is `True`.
+            polyhedron is an octahedron. Default is `True`.
 
     Returns:
         (tuple): 3 pairs of vertex atoms.
@@ -43,6 +42,7 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
     """
     if check:
         check_octahedra(polyhedron)
+    assert {len(n) for n in polyhedron.edge_graph.values()} == {4}, "Edge graph does not describe an octahedron."
     vertex_pairs = []
     seen_indices: List[int] = []
     for v1 in polyhedron.vertices:
@@ -56,7 +56,17 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
 
 def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
                               check: bool = True) -> Tuple[float, float, float]:
-    if check:
-        check_octahedra(polyhedron)
-    distances = tuple(vp[0].distance(vp[1]) for vp in opposite_vertex_pairs(polyhedron))
+    """For an octahedral polyhedron, return the distances between pairs of cis- vertices.
+
+    Args:
+        polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
+        check: (Optional, :obj:`bool`): Optional flag to set whether to check that this polyhedron
+            is an octahedron. Default is `True`.
+
+    Returns:
+        (tuple): a length-3 tuple of distances.
+
+    """
+    distances = tuple(vp[0].distance(vp[1]) 
+                      for vp in opposite_vertex_pairs(polyhedron, check=check))
     return (distances[0], distances[1], distances[2])

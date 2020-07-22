@@ -219,7 +219,7 @@ class CoordinationPolyhedron:
     def vertex_count(self) -> typing.Counter[Union[str, None]]:
         return Counter([v.label for v in self.vertices])
 
-    def vertex_distances(self) -> Tuple[float]:
+    def vertex_distances(self) -> Tuple[float, ...]:
         """
         Returns a tuple of distances from the central atom to the vertex atoms.
 
@@ -233,7 +233,7 @@ class CoordinationPolyhedron:
         distances = tuple(self.central_atom.distance(v) for v in self.vertices)
         return distances
 
-    def vertex_distances_and_labels(self) -> Tuple[Tuple[float, str]]:
+    def vertex_distances_and_labels(self) -> Tuple[Tuple[float, Optional[str]], ...]:
         """
         Returns a tuple of distances and species labels from the central atom to the vertex atoms.
 
