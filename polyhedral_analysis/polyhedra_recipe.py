@@ -233,8 +233,8 @@ def polyhedra_from_distance_cutoff(central_atoms: List[Atom],
     lattice = central_atoms[0].site.lattice
     distance_matrix = lattice.get_all_distances([c.frac_coords for c in central_atoms],
                                                 [v.frac_coords for v in vertex_atoms])
-    for dr, c_atom in zip( distance_matrix, central_atoms ):
-        indices = np.where( dr <= cutoff )[0]
+    for dr, c_atom in zip(distance_matrix, central_atoms):
+        indices = np.where(dr <= cutoff)[0]
         vertices = [vertex_atoms[i] for i in indices]
         polyhedra.append(CoordinationPolyhedron(central_atom=c_atom, 
                                                 vertices=vertices, 
@@ -248,9 +248,9 @@ def polyhedra_from_nearest_neighbours(central_atoms: List[Atom],
     polyhedra = []
     for c_atom in central_atoms:
         vertices = sorted(vertex_atoms, key=lambda atom: atom.distance(c_atom))[:nn]
-        polyhedra.append(CoordinationPolyhedron( central_atom=c_atom,
-                                                  vertices=vertices,
-                                                  label=label))
+        polyhedra.append(CoordinationPolyhedron(central_atom=c_atom,
+                                                vertices=vertices,
+                                                label=label))
     return polyhedra
 
 def polyhedra_from_closest_centre(central_atoms: List[Atom],
@@ -264,9 +264,9 @@ def polyhedra_from_closest_centre(central_atoms: List[Atom],
     polyhedra = []
     for i, c_atom in enumerate(central_atoms):
         vertices = [co for c, co in zip( closest_site_index, vertex_atoms) if c == i]
-        polyhedra.append(CoordinationPolyhedron( central_atom=c_atom, 
-                                                  vertices=vertices, 
-                                                  label=label))
+        polyhedra.append(CoordinationPolyhedron(central_atom=c_atom, 
+                                                vertices=vertices, 
+                                                label=label))
     return polyhedra
 
 def polyhedra_from_atom_indices(central_atoms: List[Atom],
