@@ -37,7 +37,7 @@ def matching_sites(structure: Structure,
         i = np.argmin(dr)
         matched_sites.append((structure[i], i))
     if species:
-        matched_sites = [(s, i) for s, i in matched_sites if str(s[0].specie) in species]
+        matched_sites = [(s, i) for s, i in matched_sites if s.species_string in species]
     return matched_sites
 
 def matching_site_indices(structure: Structure,
