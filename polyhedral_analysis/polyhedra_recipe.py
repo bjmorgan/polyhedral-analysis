@@ -27,7 +27,8 @@ def matching_sites(structure: Structure,
             to return. Default is None, which specifies all species matching species are returned.
         
     Returns:
-        (list[tuple(Site,int)])
+        (list[tuple(Site,int)]): A list of length-2 tuples for each matching site. Each tuple
+            contains the corresponding pymatgen Site, and the site index.
 
     """
     matched_sites = []

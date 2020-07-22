@@ -219,27 +219,34 @@ class CoordinationPolyhedron:
     def vertex_count(self) -> typing.Counter[Union[str, None]]:
         return Counter([v.label for v in self.vertices])
 
-    def vertex_distances(self,
-                         vertex_labels: bool = False) -> Union[List[float], List[Tuple[float, Optional[str]]]]:
+    def vertex_distances(self) -> Tuple[float]:
         """
-        Returns a list of distances from the central atom to the vertex atoms.
+        Returns a tuple of distances from the central atom to the vertex atoms.
 
         Args:
-            vertex_labels (:obj:`bool`, optional): If set to ``True`` this function will
-                return labels for the vertices with each corresponding distance.
-                Default = ``False``.
+            None
 
         Returns:
-            list (float): A list of atomic separations. If ``vertex_labels=True`` the
-                label for each vertex atom will also be returned with each corresponding distance.
+            tuple (float): A tuple of distances between each vertex and the central atom..
+
+        """
+        distances = tuple(self.central_atom.distance(v) for v in self.vertices)
+        return distances
+
+    def vertex_distances_and_labels(self) -> Tuple[Tuple[float, str]]:
+        """
+        Returns a tuple of distances and species labels from the central atom to the vertex atoms.
+
+        Args:
+            None
+
+        Returns:
+            tuple(tuple(float, str)): A tuple of length-2 tuples, containing for each vertex the
+                distance from the central atom and the species label of the vertex atom.
 
         """ 
-        distances = [self.central_atom.distance(v) for v in self.vertices]
-        if vertex_labels:
-            labels = [v.label for v in self.vertices]
-            return list(zip(distances, labels))
-        else:
-            return distances
+        return tuple(zip(self.vertex_distances(), 
+                         self.vertex_labels))
 
     def equal_vertices(self, other: object) -> bool:
         """
