@@ -6,8 +6,12 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.sites import Site
 from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable
 from polyhedral_analysis.atom import Atom
+from typing_extensions import Protocol
 
-AtomSpec = Union[str, List[str], List[int], Callable[[Structure], Sequence[int]]]
+class IndexGenerator(Protocol):
+    def __call__(self, structures: List[Structure]) -> Sequence[int]: ...
+
+AtomSpec = Union[str, List[str], List[int], IndexGenerator]
 
 def matching_sites(structure: Structure, 
                    reference_structure: Structure,
@@ -52,7 +56,7 @@ def matching_site_indices(structure: Structure,
         (list[int])
 
     """
-    return [m[1] for m in matching_sites( structure, reference_structure, species=species)]
+    return [m[1] for m in matching_sites(structure, reference_structure, species=species)]
 
 def create_matching_site_generator(reference_structure: Structure,
                                    species: Optional[List[str]] = None) -> Callable[[Structure], List[int]]:
@@ -67,7 +71,7 @@ def create_matching_site_generator(reference_structure: Structure,
     """
     return partial(matching_site_indices, reference_structure=reference_structure, species=species)
 
-def generator_from_atom_argument(arg: AtomSpec) -> Union[partial[Sequence[int]], Callable[[Structure], Sequence[int]]]:
+def generator_from_atom_argument(arg: AtomSpec) -> IndexGenerator:
     """
     Returns a generator function for selecting a subset of sites from a pymatgen :obj:`Structure` object.
 

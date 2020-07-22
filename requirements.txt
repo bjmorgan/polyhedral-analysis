@@ -6,3 +6,4 @@ coverage==4.3.4
 vg
 monty
 tqdm
+typing-extensions

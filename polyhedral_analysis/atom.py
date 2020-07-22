@@ -1,4 +1,5 @@
-from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+from __future__ import annotations
+
 from fnmatch import fnmatch
 from monty.io import zopen # type: ignore
 import json
@@ -7,6 +8,10 @@ from pymatgen.core.sites import Site
 from pymatgen.core.lattice import Lattice
 from typing import List, Dict, Optional, Union, Any
 import numpy as np # type: ignore
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
 class Atom:
     """Atom class"""

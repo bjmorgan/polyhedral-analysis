@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.symmetry_measure import symmetry_measures_from_coordination
 from polyhedral_analysis.orientation_parameters import cos_theta
