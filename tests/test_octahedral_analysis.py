@@ -3,8 +3,10 @@ from unittest.mock import Mock, patch
 from polyhedral_analysis.octahedral_analysis import check_octahedra
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_pairs
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_distances
+from polyhedral_analysis.octahedral_analysis import isomer_is_trans, isomer_is_cis, isomer_is_fac, isomer_is_mer
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
+from collections import Counter
 
 class TestOctahedralAnalysis(unittest.TestCase):
 
@@ -72,6 +74,94 @@ class TestOctahedralAnalysis(unittest.TestCase):
         with patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
             mock_opposite_vertex_pairs.return_value = vertex_pairs
             self.assertEqual(opposite_vertex_distances(mock_polyhedron), (1.0, 2.0, 3.0)) 
+
+    def test_isomer_is_trans_raises_ValueError_if_not_2_plus_4_coordinate(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        mock_polyhedron.vertex_count = Counter(['A', 'A', 'A', 'B', 'B', 'B'])
+        with self.assertRaises(ValueError):
+            isomer_is_trans(mock_polyhedron)
+
+    def test_isomer_is_trans_return_True_for_trans_coordination(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        vertex_labels = ['A', 'A', 'A', 'A', 'B', 'B']
+        mock_polyhedron.vertex_count = Counter(vertex_labels)
+        vertices = [Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom),
+                    Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom)]
+        for v, l in zip(vertices, vertex_labels):
+            v.label = l
+        vertex_pairs = ((vertices[0], vertices[1]),
+                        (vertices[2], vertices[3]),
+                        (vertices[4], vertices[5]))
+        with patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
+            mock_opposite_vertex_pairs.return_value = vertex_pairs
+            self.assertEqual(isomer_is_trans(mock_polyhedron), True)
+
+    def test_isomer_is_trans_return_False_for_cisomer_is_coordination(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        vertex_labels = ['A', 'A', 'A', 'B', 'A', 'B']
+        mock_polyhedron.vertex_count = Counter(vertex_labels)
+        vertices = [Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom),
+                    Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom)]
+        for v, l in zip(vertices, vertex_labels):
+            v.label = l
+        vertex_pairs = ((vertices[0], vertices[1]),
+                        (vertices[2], vertices[3]),
+                        (vertices[4], vertices[5]))
+        with patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
+            mock_opposite_vertex_pairs.return_value = vertex_pairs
+            self.assertEqual(isomer_is_trans(mock_polyhedron), False)
+
+    def test_isomer_is_cisomer_is_returns_not_isomer_is_trans(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        with patch('polyhedral_analysis.octahedral_analysis.isomer_is_trans') as mock_isomer_is_trans:
+            mock_isomer_is_trans.return_value = True
+            self.assertEqual(isomer_is_cis(mock_polyhedron), False)
+            mock_isomer_is_trans.return_value = False
+            self.assertEqual(isomer_is_cis(mock_polyhedron), True)
+
+    def test_isomer_is_fac_raises_ValueError_if_not_3_plus_3_coordinate(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        mock_polyhedron.vertex_count = Counter(['A', 'A', 'A', 'A', 'B', 'B'])
+        with self.assertRaises(ValueError):
+            isomer_is_fac(mock_polyhedron)
+
+    def test_isomer_is_fac_return_True_for_fac_coordination(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        vertex_labels = ['A', 'B', 'A', 'B', 'A', 'B']
+        mock_polyhedron.vertex_count = Counter(vertex_labels)
+        vertices = [Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom),
+                    Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom)]
+        for v, l in zip(vertices, vertex_labels):
+            v.label = l
+        vertex_pairs = ((vertices[0], vertices[1]),
+                        (vertices[2], vertices[3]),
+                        (vertices[4], vertices[5]))
+        with patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
+            mock_opposite_vertex_pairs.return_value = vertex_pairs
+            self.assertEqual(isomer_is_fac(mock_polyhedron), True)
+
+    def test_isomer_is_fac_return_False_for_mer_coordination(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        vertex_labels = ['A', 'A', 'B', 'A', 'B', 'B']
+        mock_polyhedron.vertex_count = Counter(vertex_labels)
+        vertices = [Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom),
+                    Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom)]
+        for v, l in zip(vertices, vertex_labels):
+            v.label = l
+        vertex_pairs = ((vertices[0], vertices[1]),
+                        (vertices[2], vertices[3]),
+                        (vertices[4], vertices[5]))
+        with patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
+            mock_opposite_vertex_pairs.return_value = vertex_pairs
+            self.assertEqual(isomer_is_fac(mock_polyhedron), False)
+
+    def test_isomer_is_mer_returns_not_isomer_is_fac(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        with patch('polyhedral_analysis.octahedral_analysis.isomer_is_fac') as mock_isomer_is_fac:
+            mock_isomer_is_fac.return_value = True
+            self.assertEqual(isomer_is_mer(mock_polyhedron), False)
+            mock_isomer_is_fac.return_value = False
+            self.assertEqual(isomer_is_mer(mock_polyhedron), True)
 
 if __name__ == '__main__':
     unittest.main()
