@@ -1,7 +1,9 @@
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure # type: ignore
 from itertools import permutations
 import math
-import numpy as np
+import numpy as np # type: ignore
+from typing import Dict, Union
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
 class RotationAnalyser(object):
     """Class for analysing rotational orientation of polyhedra.
@@ -20,7 +22,8 @@ class RotationAnalyser(object):
 
     """
     
-    def __init__(self, reference_points):
+    def __init__(self,
+                 reference_points: np.ndarray) -> None:
         """Initialise a RotationAnalyser instance.
 
         Args:
@@ -35,13 +38,14 @@ class RotationAnalyser(object):
             None
 
         """ 
-        if len(reference_points.shape)==2:
+        if len(reference_points.shape) == 2:
             reference_points = np.array([reference_points])
-        if len(reference_points.shape)==1:
+        if len(reference_points.shape) == 1:
             raise ValueError('Reference points must all contain the same number of coordinates')
         self.reference_points = reference_points
             
-    def discrete_orientation(self, points):
+    def discrete_orientation(self, 
+                             points: np.ndarray) -> Dict[str, Union[int, float]]:
         """Find the discrete "closest orientation" for an input polyhedron of points.
         
         For example, a tetrahedon has 12 pure rotation symmetry operations. A distorted
@@ -99,6 +103,8 @@ class RotationAnalyser(object):
                 'symmetry_measure': proper_rot_sm[index]['symmetry_measure'],
                 'all_rotational_distances': rot_distance}
 
-    def polyhedron_orientation(self, polyhedron):
+    def polyhedron_orientation(self, 
+                               polyhedron: CoordinationPolyhedron) -> Dict[str, Union[int, float]]:
         points = polyhedron.abstract_geometry.points_wocs_csc()
-        return self.discrete_orientation( points )
+        return self.discrete_orientation(points)
+

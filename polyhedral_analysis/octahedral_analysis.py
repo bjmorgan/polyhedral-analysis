@@ -1,6 +1,14 @@
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+from polyhedral_analysis.atom import Atom
+from typing import List, Tuple
+
 # Functions for analysing octahedra
 
-def check_octahedra( polyhedron ):
+VertexPairs = Tuple[Tuple[Atom, Atom],
+                    Tuple[Atom, Atom],
+                    Tuple[Atom, Atom]]
+
+def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
     """
     Check whether a polyhedron is considered an octahedron.
 
@@ -19,32 +27,46 @@ def check_octahedra( polyhedron ):
     if not polyhedron.best_fit_geometry['geometry'] is 'Octahedron':
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
-def opposite_vertex_pairs( polyhedron, check=True ):
-    """
-    For an octahedral polyhedron, find the pairs of vertices opposite each other.
+def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
+                          check: bool = True) -> VertexPairs:
+    """For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
     Args:
         polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
+        check: (Optional, :obj:`bool`): Optional flag to set whether to check that this
+            polyhedron is an octahedron. Default is `True`.
 
     Returns:
-        (list): a list of 3 pairse of vertices.
+        (tuple): 3 pairs of vertex atoms.
 
     """
     if check:
-        check_octahedra( polyhedron )
+        check_octahedra(polyhedron)
+    assert {len(n) for n in polyhedron.edge_graph.values()} == {4}, "Edge graph does not describe an octahedron."
     vertex_pairs = []
-    seen_indices = []
+    seen_indices: List[int] = []
     for v1 in polyhedron.vertices:
+        v1_neighbours = [polyhedron.vertices[v] for v in v1.neighbours[polyhedron.index]]
         if v1.index in seen_indices:
             continue
-        v2 = [ v for v in polyhedron.vertices 
-            if v not in [ v1 ] + polyhedron.vertices_by_indices( v1.neighbours[ polyhedron.index ] ) ][0]
-        vertex_pairs.append( [ v1, v2 ] )
-        seen_indices.extend( [ v1.index, v2.index ] )
-    return vertex_pairs
+        v2 = next(v for v in polyhedron.vertices if v not in [v1, *v1_neighbours])
+        vertex_pairs.append((v1, v2))
+        seen_indices.extend([v1.index, v2.index])
+    return (vertex_pairs[0], vertex_pairs[1], vertex_pairs[2])
 
-def opposite_vertex_distances( polyhedron, check=True ):
-    if check:
-        check_octahedra( polyhedron )
-    distances = [ vp[0].site.distance( vp[1].site ) for vp in opposite_vertex_pairs( polyhedron ) ]
-    return distances
+def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
+                              check: bool = True) -> Tuple[float, float, float]:
+    """For an octahedral polyhedron, return the distances between pairs of cis- vertices.
+
+    Args:
+        polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
+        check: (Optional, :obj:`bool`): Optional flag to set whether to check that this polyhedron
+            is an octahedron. Default is `True`.
+
+    Returns:
+        (tuple): a length-3 tuple of distances.
+
+    """
+    distances = tuple(vp[0].distance(vp[1]) 
+                      for vp in opposite_vertex_pairs(polyhedron, check=check))
+    return (distances[0], distances[1], distances[2])

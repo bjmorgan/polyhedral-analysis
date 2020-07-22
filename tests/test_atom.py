@@ -6,40 +6,40 @@ from pymatgen import Site, Lattice
 import numpy as np
 import json
 
-class TestAtomInit( unittest.TestCase ):
+class TestAtomInit(unittest.TestCase):
 
-    def test_atom_is_initialised( self ):
+    def test_atom_is_initialised(self):
         index = 123
-        site = Mock( spec=Site )
+        site = Mock(spec=Site)
         label = 'foo'
-        atom = Atom( index=index, site=site, label=label )
-        self.assertEqual( atom.index, index )
-        self.assertEqual( atom.site, site )
-        self.assertEqual( atom.label, label )
-        self.assertEqual( atom.in_polyhedra, [] )
-        self.assertEqual( atom.neighbours, None )
+        atom = Atom(index=index, site=site, label=label)
+        self.assertEqual(atom.index, index)
+        self.assertEqual(atom.site, site)
+        self.assertEqual(atom.label, label)
+        self.assertEqual(atom.in_polyhedra, [])
+        self.assertEqual(atom.neighbours, {})
 
-    def test_atom_is_initialised_without_label( self ):
+    def test_atom_is_initialised_without_label(self):
         index = 123
-        site = Mock( spec=Site )
-        atom = Atom( index=index, site=site )
-        self.assertEqual( atom.index, index )
-        self.assertEqual( atom.site, site )
-        self.assertEqual( atom.label, None )
-        self.assertEqual( atom.in_polyhedra, [] )
-        self.assertEqual( atom.neighbours, None )
+        site = Mock(spec=Site)
+        atom = Atom(index=index, site=site)
+        self.assertEqual(atom.index, index)
+        self.assertEqual(atom.site, site)
+        self.assertEqual(atom.label, None)
+        self.assertEqual(atom.in_polyhedra, [])
+        self.assertEqual(atom.neighbours, {})
 
-class TestAtom( unittest.TestCase ):
+class TestAtom(unittest.TestCase):
 
-    def setUp( self ):
+    def setUp(self):
         index = 123
-        site = Mock( spec=Site )
+        site = Mock(spec=Site)
         label = 'foo'
-        site.frac_coords = np.array( [ 1.0, 2.0, 3.0 ] )
-        site.coords = np.array( [ 10.0, 11.0, 12.0 ] )
-        site.lattice = Mock( spec=Lattice )
+        site.frac_coords = np.array([1.0, 2.0, 3.0])
+        site.coords = np.array([10.0, 11.0, 12.0])
+        site.lattice = Mock(spec=Lattice )
         self.site = site
-        self.atom = Atom( index=index, site=site, label=label )
+        self.atom = Atom(index=index, site=site, label=label)
        
     def test_frac_coords( self ):
         np.testing.assert_array_equal( self.atom.frac_coords, self.site.frac_coords )
@@ -81,43 +81,43 @@ class TestAtom( unittest.TestCase ):
         self.assertNotEqual( self.atom, other_atom )
 
     def test_as_dict( self ):
-        self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
-        mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
+        self.atom.site.as_dict = Mock(return_value = {'key': 'value'})
+        mock_other_polyhedra = Mock(spec=CoordinationPolyhedron)
         mock_other_polyhedra.index = 15
-        self.atom.in_polyhedra = [ mock_other_polyhedra ]
-        expected_dict = { 'index': 123, 
-                          'site': {'key': 'value'}, 
-                          'label': 'foo', 'in_polyhedra': [ 15 ], 
-                          'neighbours': None, 
-                          '@module': 'polyhedral_analysis.atom', 
-                          '@class': 'Atom' }
-        self.assertEqual( self.atom.as_dict(), expected_dict )
+        self.atom.in_polyhedra = [mock_other_polyhedra]
+        expected_dict = {'index': 123, 
+                         'site': {'key': 'value'}, 
+                         'label': 'foo', 'in_polyhedra': [15], 
+                         'neighbours': {}, 
+                         '@module': 'polyhedral_analysis.atom', 
+                         '@class': 'Atom'}
+        self.assertEqual(self.atom.as_dict(), expected_dict)
 
     def test_to_json( self ):
         self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
         mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
         mock_other_polyhedra.index = 15
         self.atom.in_polyhedra = [ mock_other_polyhedra ]
-        expected_dict = { 'index': 123,
-                          'site': {'key': 'value'},
-                          'label': 'foo', 'in_polyhedra': [ 15 ],
-                          'neighbours': None,
-                          '@module': 'polyhedral_analysis.atom',
-                          '@class': 'Atom' }
-        self.assertEqual( self.atom.to(), json.dumps( expected_dict ) )
+        expected_dict = {'index': 123,
+                         'site': {'key': 'value'},
+                         'label': 'foo', 'in_polyhedra': [15],
+                         'neighbours': {},
+                         '@module': 'polyhedral_analysis.atom',
+                         '@class': 'Atom' }
+        self.assertEqual(self.atom.to(), json.dumps(expected_dict))
 
     def test_to_json_file( self ):
         self.atom.site.as_dict = Mock( return_value = { 'key': 'value' } )
         mock_other_polyhedra = Mock( spec=CoordinationPolyhedron )
         mock_other_polyhedra.index = 15
-        self.atom.in_polyhedra = [ mock_other_polyhedra ]
-        expected_dict = { 'index': 123,
-                          'site': {'key': 'value'},
-                          'label': 'foo', 'in_polyhedra': [ 15 ],
-                          'neighbours': None,
-                          '@module': 'polyhedral_analysis.atom',
-                          '@class': 'Atom' }
-        with patch( 'polyhedral_analysis.atom.zopen', mock_open(), create=True ) as m:
+        self.atom.in_polyhedra = [mock_other_polyhedra]
+        expected_dict = {'index': 123,
+                         'site': {'key': 'value'},
+                         'label': 'foo', 'in_polyhedra': [15],
+                         'neighbours': {},
+                         '@module': 'polyhedral_analysis.atom',
+                         '@class': 'Atom'}
+        with patch('polyhedral_analysis.atom.zopen', mock_open(), create=True) as m:
             self.atom.to( filename='filename' )
         m.assert_called_once_with( 'filename', 'wt' )
         m().write.assert_called_once_with( json.dumps( expected_dict ) )

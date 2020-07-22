@@ -20,12 +20,13 @@ setup(
     download_url="https://github.com/bjmorgan/polyhedral-analysis/archive/%s.tar.gz" % (VERSION),
     packages=find_packages( exclude=['docs', 'tests*'] ),
     license='MIT',
-    install_requires=[ 'numpy',
-                       'pymatgen',
-                       'scipy', 
-                       'coverage==4.3.4',
-                       'codeclimate-test-reporter',
-                       'vg',
-                       'monty',
-                       'tqdm' ]
+    install_requires=['numpy',
+                      'pymatgen',
+                      'scipy', 
+                      'coverage==4.3.4',
+                      'codeclimate-test-reporter',
+                      'vg',
+                      'monty',
+                      'tqdm',
+                      'typing-extensions']
     )

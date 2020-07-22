@@ -1,9 +1,15 @@
-from .atom import Atom
-from .utils import flatten
+from polyhedral_analysis.atom import Atom
+from polyhedral_analysis.utils import flatten
+from pymatgen.core.structure import Structure
+from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
+from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+from typing import Optional, List, Union
 
 class Configuration:
 
-    def __init__( self, structure, recipes, config_number=None ):
+    def __init__(self, 
+                 structure: Structure, 
+                 recipes: List[PolyhedraRecipe]) -> None:
         """
         A Configuration object describes a single atomic geometry.
 
@@ -11,8 +17,6 @@ class Configuration:
             structure (pymatgen.Structure): A pymatgen Structure object for this configuration.
             recipes (list(PolyhedraRecipe): A list of PolyhedraRecipe objects used to construct
                 polyhedra for this configuration.
-            config_number (:obj:`int`): An optional integer value to identify this configuration
-                in a sequence (e.g. the frame number in a trajectory).
  
         Attributes:
             atoms (list(Atom)): A list of atoms that make up this configuration.
@@ -23,21 +27,22 @@ class Configuration:
             coordination_atoms (list(Atom)): A list of atoms that define the vertices of 
                 the coordination polyhedra.
          """
-        self.structure = structure
-        self.config_number = config_number
-        self.atoms = [ Atom( index=i, site=site, label=site.species_string ) 
-                       for i, site in enumerate( self.structure.sites ) ]
-        self.polyhedra = []
+        self.atoms = [Atom(index=i, 
+                           site=site, 
+                           label=site.species_string) 
+                      for i, site in enumerate(structure.sites)]
+        self.polyhedra: List[CoordinationPolyhedron] = []
         for recipe in recipes:
-            self.polyhedra.extend( recipe.find_polyhedra( self.atoms, self.structure ) )
-        self.central_atoms = sorted( list( set( 
-                                 [ p.central_atom for p in self.polyhedra ] ) ),
-                                 key=lambda x: x.index )
-        self.coordination_atoms = sorted( list( set( flatten( 
-                                      [ p.vertices for p in self.polyhedra ] ) ) ),
-                                      key=lambda x: x.index )
+            self.polyhedra.extend(recipe.find_polyhedra(self.atoms, structure))
+        self.central_atoms = sorted(list(set(
+                                 [p.central_atom for p in self.polyhedra])),
+                                 key=lambda x: x.index)
+        self.coordination_atoms = sorted(list(set(flatten(
+                                      [p.vertices for p in self.polyhedra]))),
+                                      key=lambda x: x.index)
 
-    def coordination_atom_by_index( self, index ):
+    def coordination_atom_by_index(self,
+                                   index: int) -> Union[Atom, None]:
         """
         Return the coordination atom with a specific index.
 
@@ -48,15 +53,16 @@ class Configuration:
             (Atom|None): The matching coordination atom. If the desired index does not match
                          any of the coordination atoms for this configuration, None is returned.
         """
-        coordination_atom_indices = [ atom.index for atom in self.coordination_atoms ]
+        coordination_atom_indices = [atom.index for atom in self.coordination_atoms]
         if index not in coordination_atom_indices:
             return None
         else:
-            return self.coordination_atoms[ coordination_atom_indices.index( index ) ] 
+            return self.coordination_atoms[coordination_atom_indices.index(index)] 
 
     @property
-    def polyhedra_labels( self ):
-        return [ p.label for p in self.polyhedra ]
+    def polyhedra_labels(self) -> List[Union[str, None]]:
+        return [p.label for p in self.polyhedra]
 
-    def polyhedra_by_label( self, label ):
-        return [ p for p in self.polyhedra if p.label == label ]
+    def polyhedra_by_label(self,
+                           label: str) -> List[CoordinationPolyhedron]:
+        return [p for p in self.polyhedra if p.label == label]
