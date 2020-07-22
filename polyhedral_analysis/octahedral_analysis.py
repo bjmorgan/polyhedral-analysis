@@ -4,6 +4,10 @@ from typing import List, Tuple
 
 # Functions for analysing octahedra
 
+VertexPairs = Tuple[Tuple[Atom, Atom],
+                    Tuple[Atom, Atom],
+                    Tuple[Atom, Atom]]
+
 def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
     """
     Check whether a polyhedron is considered an octahedron.
@@ -24,15 +28,17 @@ def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
 def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
-                          check: bool = True) -> Tuple[Tuple[Atom, Atom], Tuple[Atom, Atom], Tuple[Atom, Atom]]:
+                          check: bool = True) -> VertexPairs:
     """
     For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
     Args:
         polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
+        check: (Optional, :obj:`bool`): Optional flag to set whether to check that this
+            polyhedron is an octahedron. Defulat is `True`.
 
     Returns:
-        (tuple): 3 pairs of vertices.
+        (tuple): 3 pairs of vertex atoms.
 
     """
     if check:
@@ -40,10 +46,10 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
     vertex_pairs = []
     seen_indices: List[int] = []
     for v1 in polyhedron.vertices:
+        v1_neighbours = [polyhedron.vertices[v] for v in v1.neighbours[polyhedron.index]]
         if v1.index in seen_indices:
             continue
-        v2 = [v for v in polyhedron.vertices 
-              if v not in [v1] + polyhedron.vertices_by_indices(v1.neighbours[polyhedron.index])][0]
+        v2 = next(v for v in polyhedron.vertices if v not in [v1, *v1_neighbours])
         vertex_pairs.append((v1, v2))
         seen_indices.extend([v1.index, v2.index])
     return (vertex_pairs[0], vertex_pairs[1], vertex_pairs[2])
