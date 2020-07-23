@@ -2,11 +2,12 @@ import unittest
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
-from unittest.mock import Mock, patch, PropertyMock
+from unittest.mock import Mock, patch, PropertyMock, call
 import copy
 import numpy as np
 
 module_str = 'polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron'
+
 
 def mock_atom_lt(self, other):
     return self.index < other.index
@@ -117,6 +118,78 @@ class TestCoordinationPolyhedron(unittest.TestCase):
     def test_vertex_indices(self):
         self.assertEqual(self.coordination_polyhedron.vertex_indices, [
                          1, 2, 3, 4, 5, 6])
+
+    def test_vertex_coords(self):
+        coords = np.array([[1.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0],
+                           [0.0, 0.0, 1.0],
+                           [-1.0, 0.0, 0.0],
+                           [0.0, -1.0, 0.0],
+                           [0.0, 0.0, -1.0]])
+        for v, c in zip(self.coordination_polyhedron.vertices, coords):
+            v.coords = c
+        np.testing.assert_array_equal(self.coordination_polyhedron.vertex_coords, coords)
+
+    def test_vertex_labels(self):
+        labels = ['A', 'B', 'C', 'D', 'E', 'F']
+        for v, l in zip(self.coordination_polyhedron.vertices, labels):
+            v.label = l
+        self.assertEqual(self.coordination_polyhedron.vertex_labels, labels)
+
+    def test_coordination_number(self):
+        self.assertEqual(self.coordination_polyhedron.coordination_number,
+                         len(self.coordination_polyhedron.vertices))
+
+    def test_index(self):
+        self.assertEqual(self.coordination_polyhedron.index,
+                         self.coordination_polyhedron.central_atom.index)
+
+    def test_edge_graph_if_cached(self):
+        edge_graph = {1: [2, 3, 4, 5],
+                      2: [1, 3, 5, 6],
+                      3: [1, 2, 4, 6],
+                      4: [1, 3, 5, 6],
+                      5: [1, 2, 4, 6],
+                      6: [2, 3, 4, 5]}
+        self.coordination_polyhedron._edge_graph = edge_graph
+        self.assertEqual(self.coordination_polyhedron.edge_graph, edge_graph)
+
+    def test_edge_graph_if_not_cached(self):
+        edge_graph = {1: [2, 3, 4, 5],
+                      2: [1, 3, 5, 6],
+                      3: [1, 2, 4, 6],
+                      4: [1, 3, 5, 6],
+                      5: [1, 2, 4, 6],
+                      6: [2, 3, 4, 5]}
+        self.coordination_polyhedron.construct_edge_graph = Mock(return_value=edge_graph)
+        self.coordination_polyhedron.update_vertex_neighbours = Mock()
+        self.assertEqual(self.coordination_polyhedron.edge_graph, edge_graph)
+        self.assertEqual(self.coordination_polyhedron.update_vertex_neighbours.call_count, 1)
+        self.assertEqual(self.coordination_polyhedron.construct_edge_graph.call_count, 1)
+
+    def test_abstract_geometry_if_cached(self):
+        abstract_geometry = Mock(spec=AbstractGeometry)
+        self.coordination_polyhedron._abstract_geometry = abstract_geometry
+        self.assertEqual(self.coordination_polyhedron.abstract_geometry, abstract_geometry)
+
+    def test_abstract_geometry_if_not_cached(self):
+        abstract_geometry = Mock(spec=AbstractGeometry)
+        self.coordination_polyhedron.construct_abstract_geometry = Mock(return_value=abstract_geometry)
+        self.assertEqual(self.coordination_polyhedron.abstract_geometry, abstract_geometry)
+        self.assertEqual(self.coordination_polyhedron.construct_abstract_geometry.call_count, 1)
+
+    def test_construct_abstract_geometry(self):
+        polyhedron = self.coordination_polyhedron
+        polyhedron.central_atom.coords = np.array([1.0, 2.0, 3.0])
+        polyhedron.minimum_image_vertex_coordinates = Mock(return_value='foo')
+        abstract_geometry = Mock(spec=AbstractGeometry)
+        with patch(f'polyhedral_analysis.coordination_polyhedron.AbstractGeometry') as mock_abstract_geometry:
+            mock_abstract_geometry.return_value = abstract_geometry
+            ag = polyhedron.construct_abstract_geometry()
+            self.assertEqual(ag, abstract_geometry)
+            mock_abstract_geometry.assert_called_with(central_site=polyhedron.central_atom.coords, 
+                                                      bare_coords='foo',
+                                                      include_central_site_in_centroid=False)
 
 
 if __name__ == '__main__':
