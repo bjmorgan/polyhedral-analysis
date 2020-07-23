@@ -202,7 +202,6 @@ class CoordinationPolyhedron:
                         this_simplex = rotated_component_simplices[0]
                         other_simplices = rotated_component_simplices[1:]
                         for roll in range(3):
-                            internal_edge = True
                             rotated_simplex = np.roll(this_simplex, roll)
                             edge = [rotated_simplex[0], rotated_simplex[1]]
                             if not np.all([i in np.unique(other_simplices) for i in edge]):

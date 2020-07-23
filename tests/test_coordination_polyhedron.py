@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch, PropertyMock
 import copy
 import numpy as np
 
+module_str = 'polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron'
 
 def mock_atom_lt(self, other):
     return self.index < other.index
@@ -27,18 +28,8 @@ class TestCoordinationPolyhedronInit(unittest.TestCase):
             v.__lt__ = mock_atom_lt
             v.index = i
             v.in_polyhedra = []
-        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.construct_edge_graph') as mock_construct_edge_graph:
-            mock_construct_edge_graph.return_value = {0: [1, 2, 3, 4],
-                                                      1: [0, 2, 3, 5],
-                                                      2: [0, 1, 3, 5],
-                                                      3: [0, 2, 4, 5],
-                                                      4: [0, 1, 3, 5],
-                                                      5: [1, 2, 3, 4]}
-            with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.construct_abstract_geometry') as mock_construct_abstract_geometry:
-                mock_construct_abstract_geometry.return_value = Mock(
-                    spec=AbstractGeometry)
-                CoordinationPolyhedron(central_atom=mock_central_atom,
-                                       vertices=mock_vertices)
+        CoordinationPolyhedron(central_atom=mock_central_atom,
+                               vertices=mock_vertices)
 
 class TestCoordinationPolyhedron(unittest.TestCase):
 
@@ -107,16 +98,25 @@ class TestCoordinationPolyhedron(unittest.TestCase):
 
     def test_update_vertex_neighbours(self):
         with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.edge_graph', new_callable=PropertyMock) as mock_edge_graph:
-            edge_graph = {0: [1, 2, 3, 4],
-                          1: [0, 2, 4, 5],
-                          2: [0, 1, 3, 5],
-                          3: [0, 2, 4, 5],
-                          4: [0, 1, 3, 5],
-                          5: [1, 2, 3, 4]}
-            mock_edge_graph.return_value = edge_graph                       
+            edge_graph = {1: [2, 3, 4, 5],
+                          2: [1, 3, 5, 6],
+                          3: [1, 2, 4, 6],
+                          4: [1, 3, 5, 6],
+                          5: [1, 2, 4, 6],
+                          6: [2, 3, 4, 5]}
+            mock_edge_graph.return_value = edge_graph
             self.coordination_polyhedron.update_vertex_neighbours()
             for v, n in zip(self.coordination_polyhedron.vertices, edge_graph.values()):
-                self.assertEqual(v._neighbours[self.coordination_polyhedron.index], n)
+                self.assertEqual(
+                    v._neighbours[self.coordination_polyhedron.index], n)
+
+    def test_vertices_by_indices(self):
+        vertices = self.coordination_polyhedron.vertices_by_indices([2, 4])
+        self.assertEqual(sorted([v.index for v in vertices]), [2, 4])
+
+    def test_vertex_indices(self):
+        self.assertEqual(self.coordination_polyhedron.vertex_indices, [
+                         1, 2, 3, 4, 5, 6])
 
 
 if __name__ == '__main__':
