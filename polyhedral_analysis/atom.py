@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from fnmatch import fnmatch
-from monty.io import zopen # type: ignore
+from monty.io import zopen  # type: ignore
 import json
 import os
 from pymatgen.core.sites import Site
 from pymatgen.core.lattice import Lattice
 from typing import List, Dict, Optional, Union, Any
-import numpy as np # type: ignore
+import numpy as np  # type: ignore
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
+
 
 class Atom:
     """Atom class"""
@@ -48,13 +49,13 @@ class Atom:
                 p.construct_edge_graph()
                 p.update_vertex_neighbours()
         return self._neighbours
-       
+
     def as_dict(self) -> Dict[str, Any]:
         """
         json-serializable :obj:`dict` representation of Atom.
         """
         d = {'index': self.index,
-             'site': self.site.as_dict(), # type: ignore
+             'site': self.site.as_dict(),  # type: ignore
              'label': self.label,
              'in_polyhedra': [p.index for p in self.in_polyhedra],
              'neighbours': self.neighbours,
@@ -70,7 +71,7 @@ class Atom:
            filename: Optional[str] = None) -> Union[None, str]:
         """
         Outputs the structure to a file or string.
-    
+
         Args:
             fmt (:obj:`str`, optional): Format to ouput to. Defaults to JSON unlees the filename
                 is provided. If fmt is specified this overrides the filename extension
@@ -78,7 +79,7 @@ class Atom:
             filename (:obj:`str`, optional): If provided, the output will be written to a file.
                 If `fmt` is not specified, the format will be determined from the filename
                 extension.
-    
+
         Returns:
             (str) if filename is `None`. `None` otherwise.
         """
@@ -99,7 +100,7 @@ class Atom:
                 return s
         else:
             raise ValueError(f'Output format "{fmt}" not recognised')
-        
+
     @property
     def frac_coords(self) -> np.ndarray:
         """Fractional coordinates"""
@@ -114,7 +115,7 @@ class Atom:
     def lattice(self) -> Lattice:
         l = self.site.lattice
         assert isinstance(l, Lattice)
-        return l 
+        return l
 
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, Atom):
@@ -128,8 +129,8 @@ class Atom:
 
     def __hash__(self) -> int:
         return self.index
-   
+
     def distance(self, other: Atom) -> float:
-        d = self.site.distance(other.site) # type: ignore
+        d = self.site.distance(other.site)  # type: ignore
         assert isinstance(d, float)
         return d
