@@ -335,6 +335,22 @@ class CoordinationPolyhedron:
         equal_vertex_atoms = self.vertices == other.vertices
         return equal_central_atom & equal_vertex_atoms
 
+    def shares_face(self, other: CoordinationPolyhedron) -> bool:
+        """Test whether this polyhdron shares a common face with another polyhedron.
+
+        Args:
+            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
+
+        Returns:
+            bool.
+
+        """
+        if not isinstance(other, CoordinationPolyhedron):
+            raise TypeError
+        faces = set(self.faces())
+        other_faces = set(other.faces())
+        return bool(faces.intersection(other_faces))
+
     def __eq__(self, other: object) -> bool:
         """
         Two :obj:`CoordinationPolyhedron` objects are considered equal if they
