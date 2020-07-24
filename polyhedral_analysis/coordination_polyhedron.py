@@ -37,7 +37,7 @@ class CoordinationPolyhedron:
         self.vertices = sorted(vertices)
         for v in self.vertices:
             v.in_polyhedra.append(self)
-        self._label = label if label else central_atom.label
+        self._label: str = label if label else central_atom.label
         self._edge_graph: Optional[Dict[int, List[int]]] = None
         self._abstract_geometry: Optional[AbstractGeometry] = None
 

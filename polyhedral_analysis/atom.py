@@ -27,7 +27,8 @@ class Atom:
         Args:
             index (int): Numerical index identifying this atom.
             site  (pymatgen.Site): The pymatgen Site (or PeriodicSite) object describing this atom.
-            label (:obj:`str`, optional): An optional string labelling this atom.
+            label (:obj:`str`, optional): An optional string labelling this atom. If no label
+                is given the site species string will be used.
 
         Attributes:
             in_polyhedra (list): List of polyhedra that this atom is part of.
@@ -38,7 +39,7 @@ class Atom:
         """
         self.index = index
         self.site = site
-        self.label = label
+        self.label: str = label if label else site.species_string
         self.in_polyhedra: List[CoordinationPolyhedron] = []
         self._neighbours: Dict[int, List[int]] = {}
 

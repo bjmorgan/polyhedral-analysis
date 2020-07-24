@@ -65,5 +65,21 @@ class Configuration:
         return [p.label for p in self.polyhedra]
 
     def polyhedra_by_label(self,
-                           label: str) -> List[CoordinationPolyhedron]:
-        return [p for p in self.polyhedra if p.label == label]
+                           label: Union[str, List[str]]) -> List[CoordinationPolyhedron]:
+        """Returns a list of polyhedra for this configuration with matching labels.
+
+        Args:
+            (:obj:`str` or :obj:`list(str)`): Either a single label string, or a list of
+                label strings.
+
+        Returns:
+            (list(CoordinationPolyhedron)
+
+        """
+        if isinstance(label, str):
+            return [p for p in self.polyhedra if p.label == label]
+        elif isinstance(label, list):
+            return [p for p in self.polyhedra if p.label in label]
+        else:
+            raise TypeError('Invalid type for label argument')
+

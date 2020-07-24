@@ -22,10 +22,11 @@ class TestAtomInit(unittest.TestCase):
     def test_atom_is_initialised_without_label(self):
         index = 123
         site = Mock(spec=Site)
+        site.species_string = 'bar'
         atom = Atom(index=index, site=site)
         self.assertEqual(atom.index, index)
         self.assertEqual(atom.site, site)
-        self.assertEqual(atom.label, None)
+        self.assertEqual(atom.label, 'bar')
         self.assertEqual(atom.in_polyhedra, [])
         self.assertEqual(atom.neighbours, {})
 
