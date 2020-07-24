@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch, mock_open
 from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
-from pymatgen import Site, Lattice
+from pymatgen.core.sites import Site
+from pymatgen.core.lattice import Lattice
 import numpy as np
 import json
 

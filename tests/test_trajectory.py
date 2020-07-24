@@ -5,7 +5,7 @@ from polyhedral_analysis.trajectory import Trajectory
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
 from polyhedral_analysis.configuration import Configuration
 from pymatgen.io.vasp.outputs import Xdatcar
-from pymatgen import Structure
+from pymatgen.core.structure import Structure
 
 class TestTrajectoryInit( unittest.TestCase ):
 
@@ -26,15 +26,15 @@ class TestTrajectoryInit( unittest.TestCase ):
         self.assertEqual(trajectory._structures, mock_structures)
         self.assertEqual(trajectory._configurations, mock_configurations)
 
-    def test_trajectory_init_raises_TypeError_if_not_given_Structures( self ):
+    def test_trajectory_init_raises_TypeError_if_not_given_Structures(self):
         mock_structures = [ Mock( spec=Structure ), 'foo' ]
         mock_configurations = [ Mock( spec=Configuration ), Mock( spec=Configuration ) ]
         with self.assertRaises( TypeError ):
             trajectory = Trajectory( structures=mock_structures,
                                      configurations=mock_configurations )
 
-    def test_trajectory_init_raises_TypeError_if_not_given_Structures( self ):
-        mock_structures = [ Mock( spec=Structure ), Mock( spec=Structure ) ]
+    def test_trajectory_init_raises_TypeError_if_not_given_Configurations(self):
+        mock_structures = [ Mock( spec=Structure ), Mock( spec=Structure)]
         mock_configurations = [ 'foo', Mock( spec=Configuration ) ]
         with self.assertRaises( TypeError ):
             trajectory = Trajectory( structures=mock_structures,

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
-from pymatgen import Structure, Site
+from pymatgen.core.structure import Structure
+from pymatgen.core.sites import Site
 from polyhedral_analysis.configuration import Configuration
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
