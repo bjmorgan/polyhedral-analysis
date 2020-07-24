@@ -1,2 +1,5 @@
 Sphinx>=1.6.3
+nbsphinx
+sphinx-rtd-theme
+recommonmark
 -r ../requirements.txt

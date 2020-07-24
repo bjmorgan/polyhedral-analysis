@@ -64,7 +64,7 @@ class CoordinationPolyhedron:
 
         Examples:
 
-            >>>> print(polyhedron)
+            >>> print(polyhedron)
             Coordination Polyhedron 4c
             255 [12.71362322 17.90999634 12.74490767] S
             ----------
@@ -94,7 +94,7 @@ class CoordinationPolyhedron:
             other_polyhedron (:obj:`CoordinationPolyhedron`): The other coordination polyhedron.
 
         Returns:
-            (list(int)): List of shared vertex indices.
+            list(int): List of shared vertex indices.
 
         """
         return list(set(self.vertex_indices) & set(other_polyhedron.vertex_indices))
@@ -179,11 +179,11 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            (tuple[tuple[int]])
+            tuple[tuple[int]]
 
         Examples: 
 
-            >>>> print(polyhedron)
+            >>> print(polyhedron)
             Coordination Polyhedron 4c
             255 [12.71362322 17.90999634 12.74490767] S
             ----------
@@ -193,8 +193,7 @@ class CoordinationPolyhedron:
             103 [12.17924193 15.66932958 13.34077502] Li
             159 [13.24242002 18.43469275 15.02193658] Li
             175 [15.02830461 17.60091516 12.52079631] Li
-
-            >>>> polyhedron.faces()
+            >>> polyhedron.faces()
             ((31, 159, 175), (31, 55, 71), (31, 55, 175), (31, 71, 159)
              (55, 71, 103), (55, 103, 175), (71, 103, 159), (103, 159, 175))
 
@@ -265,7 +264,7 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            tuple (float): A tuple of distances between each vertex and the central atom..
+            tuple(float): A tuple of distances between each vertex and the central atom..
 
         """
         distances = tuple(self.central_atom.distance(v) for v in self.vertices)
@@ -295,7 +294,7 @@ class CoordinationPolyhedron:
             other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
-            (bool): True / False.
+            bool: True / False.
 
         """
         if not isinstance(other, CoordinationPolyhedron):
@@ -311,7 +310,7 @@ class CoordinationPolyhedron:
             other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
-            (bool): True or False.
+            bool: True or False.
 
         """
         if not isinstance(other, CoordinationPolyhedron):
@@ -327,7 +326,7 @@ class CoordinationPolyhedron:
             other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
-            (bool): True or False.
+            bool: True or False.
 
         """
         if not isinstance(other, CoordinationPolyhedron):
@@ -345,7 +344,7 @@ class CoordinationPolyhedron:
             other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
 
         Returns:
-            (bool): True or False.
+            bool: True or False.
 
         """
         if not isinstance(other, CoordinationPolyhedron):
@@ -362,7 +361,7 @@ class CoordinationPolyhedron:
                                 a single length 3 array.
 
         Returns:
-            (np.array): A (N_vertex x N_vector) dimension numpy array.
+            np.array: A (N_vertex x N_vector) dimension numpy array.
 
         """
         if len(vectors.shape) == 1:
@@ -381,20 +380,20 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            (list): List of distances.
+            list: List of distances.
 
         """
         return [self.central_atom.distance(v) for v in self.vertices]
 
     def angles(self) -> List[float]:
         """
-        List of all vertex-centre-vertex angles.
+        List of all vertex--centre--vertex angles.
 
         Args:
             None
 
         Returns:
-             (list): List of angles.
+             list: List of angles.
 
         """
         return [vg.angle(p1, p2) for p1, p2 in combinations(self.vertex_vectors, 2)]
@@ -405,8 +404,8 @@ class CoordinationPolyhedron:
         """Returns the angular orientations of each centroid-to-vertex vector.
 
         The orientation is defined by two angles, theta and phi. 
-        Theta is the angle with respect to [ 0, 0, 1 ] and ranges from 0 to 180 degrees. 
-        Phi is the angle with respect to [ 1, 0, 0 ] and ranges from -180 to +180 degrees.
+        Theta is the angle with respect to [0, 0, 1] and ranges from 0 to 180 degrees. 
+        Phi is the angle with respect to [1, 0, 0] and ranges from -180 to +180 degrees.
 
         Args:
             units (:obj:`str`, optional): Optionally select the units for the calculated angles.
@@ -415,7 +414,7 @@ class CoordinationPolyhedron:
             return_distance (:obj:`bool`, optional): Optionally also return the distance. 
 
         Returns:
-            (list(tuple)): A list of `(theta,phi)` tuple pairs.
+            list(tuple): A list of `(theta,phi)` tuple pairs.
 
         """
         vg_units = {'degrees': 'deg',
@@ -439,7 +438,7 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            (float): The volume.
+            float: The volume.
 
         """
         v = self.convex_hull().volume
@@ -456,11 +455,12 @@ class CoordinationPolyhedron:
 
         Args:
             central_site (:obj:`pymatgen.PeriodicSite`): A `pymatgen` :obj:`PeriodicSite` object describing an atom at the nominal centre of the polyhedron.
-            vertex_sites (list[:obj:`pymatgen.PeriodicSite`): A list of `pymatgen` :obj`PeriodicSite` objects describing the atoms at the vertices.
+            vertex_sites (list[:obj:`pymatgen.PeriodicSite`): A list of `pymatgen` :obj:`PeriodicSite` objects describing the atoms at the vertices.
             label (:obj:`str`, optional): An optional string used to label this coordination polyhedron.
 
         Returns:
-            (:obj:`CoordinationPolyhedron`): The :obj:`CoordinationPolyhedron` object.
+            :obj:`CoordinationPolyhedron`: The :obj:`CoordinationPolyhedron` object.
+
         """
         vertices = [Atom(i, s) for i, s in enumerate(vertex_sites)]
         central_atom = Atom(-1, central_site)
@@ -472,10 +472,10 @@ class CoordinationPolyhedron:
         Select a subset of vertices from this polyhedron with a list of vertex indices.
 
         Args:
-            vertex_indices (list): List of vertex indices (int).
+            vertex_indices (list): List of vertex indices (`int`).
 
         Returns:
-            (list): A list of :obj:`Atom` objects containing the matching vertices.
+            list: A list of :obj:`Atom` objects containing the matching vertices.
 
         """
         return [v for v in self.vertices if v.index in vertex_indices]
