@@ -162,16 +162,41 @@ class CoordinationPolyhedron:
             self.central_atom.coords + v for v in pbc_vectors]
         return vertex_minimum_image_coords
 
-    def faces(self) -> List[List[int]]:
+    def faces(self) -> Tuple[Tuple[int, ...], ...]:
         """
+        Returns a nested set of tuples for each face of the polyhedron. Each 
+        per-face tuple returned contains the indices of the vertices that define
+        that face, in sorted numerical order.
+
         Args:
             None
 
         Returns:
-            (list[list[int]])
+            (tuple[tuple[int]])
+
+        Examples: 
+
+            >>>> print(polyhedron)
+            Coordination Polyhedron 4c
+            255 [12.71362322 17.90999634 12.74490767] S
+            ----------
+            31 [12.46919306 20.2317206  12.2641591 ] Li
+            55 [13.0016308  17.39863735 10.46318072] Li
+            71 [10.4034848  18.18407515 12.43873978] Li
+            103 [12.17924193 15.66932958 13.34077502] Li
+            159 [13.24242002 18.43469275 15.02193658] Li
+            175 [15.02830461 17.60091516 12.52079631] Li
+
+            >>>> polyhedron.faces()
+            ((31, 159, 175), (31, 55, 71), (31, 55, 175), (31, 71, 159)
+             (55, 71, 103), (55, 103, 175), (71, 103, 159), (103, 159, 175))
+
         """
-        return [[self.vertex_indices[v] for v in simplex]
-                for simplex in merge_coplanar_simplices(self.convex_hull())]
+        return tuple(
+                   tuple(
+                       sorted([self.vertex_indices[v] for v in simplex])
+                        ) for simplex in merge_coplanar_simplices(self.convex_hull())
+                    )
 
     def convex_hull(self) -> ConvexHull:
         return ConvexHull(self.minimum_image_vertex_coordinates())

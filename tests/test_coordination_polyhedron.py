@@ -5,6 +5,7 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_f
 from unittest.mock import Mock, patch, PropertyMock, call
 import copy
 import numpy as np
+from scipy.spatial import ConvexHull
 
 module_str = 'polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron'
 
@@ -191,6 +192,25 @@ class TestCoordinationPolyhedron(unittest.TestCase):
                                                       bare_coords='foo',
                                                       include_central_site_in_centroid=False)
 
+    def test_faces(self):
+        polyhedron = self.coordination_polyhedron
+        polyhedron.convex_hull = Mock(return_value=Mock(spec=ConvexHull))
+        returned_vertex_indices = [1, 2, 3, 4, 5, 6]
+        with patch(f'{module_str}.vertex_indices', new_callable=PropertyMock) as mock_vertex_indices:
+            mock_vertex_indices.return_value = returned_vertex_indices
+            simplices = [np.array([0, 3, 1]),
+                         np.array([0, 3, 4]),
+                         np.array([5, 3, 1]),
+                         np.array([5, 3, 4]),
+                         np.array([2, 0, 4]),
+                         np.array([2, 0, 1]),
+                         np.array([2, 5, 4]),
+                         np.array([2, 5, 1])]
+            with patch('polyhedral_analysis.coordination_polyhedron.merge_coplanar_simplices') as mock_merge_coplanar_simplices:
+                mock_merge_coplanar_simplices.return_value = simplices
+                faces = polyhedron.faces()
+                self.assertEqual(faces, ((1, 2, 4), (1, 4, 5), (2, 4, 6), (4, 5, 6), 
+                                         (1, 3, 5), (1, 2, 3), (3, 5, 6), (2, 3, 6)))
 
 if __name__ == '__main__':
     unittest.main()
