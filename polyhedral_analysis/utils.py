@@ -23,7 +23,28 @@ def flatten(this_list: Sequence[Sequence[T]]) -> List[T]:
 
 def lattice_mc_string(polyhedron: CoordinationPolyhedron,
                       neighbour_list: Dict[int, Tuple[int, ...]]) -> str:
-    """TODO"""
+    """Returns a string representation of a polyhedron as a `lattice_mc`_
+    site-input formatted site.
+
+    .. _lattice_mc: https://github.com/bjmorgan/lattice_mc
+
+    Args:
+        polyhedron (CoordinationPolyhedron): The coordination polyhedron.
+        neighbour_list (dict): Neighbour list dictionary.
+
+    Returns:
+        str
+
+    Example:
+
+        >>> nlist = {1: (3, 5, 8), ...}
+        >>> lattice_mc_string(polyhedron, neighbour_list=nlist
+        site: 1
+        centre: 2.94651000 1.70116834 1.20290767
+        neighbours: 3 5 8
+        label: oct
+
+    """
     string = f'site: {polyhedron.index}\n'
     string += f'centre: {" ".join(f"{c:.8f}" for c in polyhedron.central_atom.coords)}\n'
     string += f'neighbours: {" ".join(str(i) for i in neighbour_list[polyhedron.index])}\n'
