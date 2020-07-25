@@ -129,7 +129,8 @@ class TestCoordinationPolyhedron(unittest.TestCase):
                            [0.0, 0.0, -1.0]])
         for v, c in zip(self.coordination_polyhedron.vertices, coords):
             v.coords = c
-        np.testing.assert_array_equal(self.coordination_polyhedron.vertex_coords, coords)
+        np.testing.assert_array_equal(
+            self.coordination_polyhedron.vertex_coords, coords)
 
     def test_vertex_labels(self):
         labels = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -162,22 +163,29 @@ class TestCoordinationPolyhedron(unittest.TestCase):
                       4: [1, 3, 5, 6],
                       5: [1, 2, 4, 6],
                       6: [2, 3, 4, 5]}
-        self.coordination_polyhedron.construct_edge_graph = Mock(return_value=edge_graph)
+        self.coordination_polyhedron.construct_edge_graph = Mock(
+            return_value=edge_graph)
         self.coordination_polyhedron.update_vertex_neighbours = Mock()
         self.assertEqual(self.coordination_polyhedron.edge_graph, edge_graph)
-        self.assertEqual(self.coordination_polyhedron.update_vertex_neighbours.call_count, 1)
-        self.assertEqual(self.coordination_polyhedron.construct_edge_graph.call_count, 1)
+        self.assertEqual(
+            self.coordination_polyhedron.update_vertex_neighbours.call_count, 1)
+        self.assertEqual(
+            self.coordination_polyhedron.construct_edge_graph.call_count, 1)
 
     def test_abstract_geometry_if_cached(self):
         abstract_geometry = Mock(spec=AbstractGeometry)
         self.coordination_polyhedron._abstract_geometry = abstract_geometry
-        self.assertEqual(self.coordination_polyhedron.abstract_geometry, abstract_geometry)
+        self.assertEqual(
+            self.coordination_polyhedron.abstract_geometry, abstract_geometry)
 
     def test_abstract_geometry_if_not_cached(self):
         abstract_geometry = Mock(spec=AbstractGeometry)
-        self.coordination_polyhedron.construct_abstract_geometry = Mock(return_value=abstract_geometry)
-        self.assertEqual(self.coordination_polyhedron.abstract_geometry, abstract_geometry)
-        self.assertEqual(self.coordination_polyhedron.construct_abstract_geometry.call_count, 1)
+        self.coordination_polyhedron.construct_abstract_geometry = Mock(
+            return_value=abstract_geometry)
+        self.assertEqual(
+            self.coordination_polyhedron.abstract_geometry, abstract_geometry)
+        self.assertEqual(
+            self.coordination_polyhedron.construct_abstract_geometry.call_count, 1)
 
     def test_construct_abstract_geometry(self):
         polyhedron = self.coordination_polyhedron
@@ -188,7 +196,7 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             mock_abstract_geometry.return_value = abstract_geometry
             ag = polyhedron.construct_abstract_geometry()
             self.assertEqual(ag, abstract_geometry)
-            mock_abstract_geometry.assert_called_with(central_site=polyhedron.central_atom.coords, 
+            mock_abstract_geometry.assert_called_with(central_site=polyhedron.central_atom.coords,
                                                       bare_coords='foo',
                                                       include_central_site_in_centroid=False)
 
@@ -209,28 +217,83 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             with patch('polyhedral_analysis.coordination_polyhedron.merge_coplanar_simplices') as mock_merge_coplanar_simplices:
                 mock_merge_coplanar_simplices.return_value = simplices
                 faces = polyhedron.faces()
-                self.assertEqual(faces, ((1, 2, 4), (1, 4, 5), (2, 4, 6), (4, 5, 6), 
+                self.assertEqual(faces, ((1, 2, 4), (1, 4, 5), (2, 4, 6), (4, 5, 6),
                                          (1, 3, 5), (1, 2, 3), (3, 5, 6), (2, 3, 6)))
+
+    def test_neighbours(self):
+        mock_central_atom_i = Mock(spec=Atom)
+        mock_central_atom_i.in_polyhedra = []
+        mock_central_atom_i.index = 3
+        mock_central_atom_i.label = 'Li'
+        mock_central_atom_j = Mock(spec=Atom)
+        mock_central_atom_j.in_polyhedra = []
+        mock_central_atom_j.index = 7
+        mock_central_atom_j.label = 'Li'
+        mock_vertices = [Mock(spec=Atom) for i in range(10)]
+        for i, v in enumerate(mock_vertices, 1):
+            v.neighbours = None
+            v.__lt__ = mock_atom_lt
+            v.index = i
+            v.in_polyhedra = []
+        polyhedron_i = CoordinationPolyhedron(central_atom=mock_central_atom_i,
+                                              vertices=mock_vertices[:6])
+        polyhedron_j = CoordinationPolyhedron(central_atom=mock_central_atom_j,
+                                              vertices=mock_vertices[-6:])
+        polyhedron_i._edge_graph = Mock()
+        polyhedron_j._edge_graph = Mock()
+        self.assertEqual(polyhedron_i.neighbours(), (polyhedron_j,))
+        self.assertEqual(polyhedron_j.neighbours(), (polyhedron_i,))
+
+    def test_neighbours_and_shared_vertices(self):
+        mock_central_atom_i = Mock(spec=Atom)
+        mock_central_atom_i.in_polyhedra = []
+        mock_central_atom_i.index = 3
+        mock_central_atom_i.label = 'Li'
+        mock_central_atom_j = Mock(spec=Atom)
+        mock_central_atom_j.in_polyhedra = []
+        mock_central_atom_j.index = 7
+        mock_central_atom_j.label = 'Li'
+        mock_vertices = [Mock(spec=Atom) for i in range(10)]
+        for i, v in enumerate(mock_vertices, 1):
+            v.neighbours = None
+            v.__lt__ = mock_atom_lt
+            v.index = i
+            v.in_polyhedra = []
+        polyhedron_i = CoordinationPolyhedron(central_atom=mock_central_atom_i,
+                                              vertices=mock_vertices[:6])
+        polyhedron_j = CoordinationPolyhedron(central_atom=mock_central_atom_j,
+                                              vertices=mock_vertices[-6:])
+        polyhedron_i._edge_graph = Mock()
+        polyhedron_j._edge_graph = Mock()
+        self.assertEqual(polyhedron_i.neighbours_by_index_and_shared_vertices(), 
+                         {polyhedron_j.index: (5, 6)})
+        self.assertEqual(polyhedron_j.neighbours_by_index_and_shared_vertices(), 
+                         {polyhedron_i.index: (5, 6)})
 
     def test_shares_face_returns_True_when_faces_match(self):
         polyhedron = self.coordination_polyhedron
         other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
         # consider two face-sharing tetrahedra
-        polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
-        other_polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 5), (1, 3, 5), (1, 3, 5)))
+        polyhedron.faces = Mock(return_value=(
+            (1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
+        other_polyhedron.faces = Mock(return_value=(
+            (1, 2, 3), (2, 3, 5), (1, 3, 5), (1, 3, 5)))
         self.assertEqual(polyhedron.shares_face(other_polyhedron), True)
 
-    def test_shares_face_retrusn_False_when_no_faces_match(self):
+    def test_shares_face_returs_False_when_no_faces_match(self):
         polyhedron = self.coordination_polyhedron
         other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
         # consider two edge-sharing tetrahedra
-        polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
-        other_polyhedron.faces = Mock(return_value=((1, 2, 6), (2, 6, 5), (1, 6, 5), (1, 6, 5)))
+        polyhedron.faces = Mock(return_value=(
+            (1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
+        other_polyhedron.faces = Mock(return_value=(
+            (1, 2, 6), (2, 6, 5), (1, 6, 5), (1, 6, 5)))
         self.assertEqual(polyhedron.shares_face(other_polyhedron), False)
 
     def test_shares_face_raises_TypeError_for_incorrect_type(self):
         with self.assertRaises(TypeError):
             self.coordination_polyhedron.shares_face('foo')
+
 
 if __name__ == '__main__':
     unittest.main()

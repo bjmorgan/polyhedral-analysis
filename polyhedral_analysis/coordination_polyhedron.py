@@ -199,10 +199,10 @@ class CoordinationPolyhedron:
 
         """
         return tuple(
-                   tuple(
-                       sorted([self.vertex_indices[v] for v in simplex])
-                        ) for simplex in merge_coplanar_simplices(self.convex_hull())
-                    )
+            tuple(
+                sorted([self.vertex_indices[v] for v in simplex])
+            ) for simplex in merge_coplanar_simplices(self.convex_hull())
+        )
 
     def convex_hull(self) -> ConvexHull:
         return ConvexHull(self.minimum_image_vertex_coordinates())
@@ -315,7 +315,7 @@ class CoordinationPolyhedron:
         """
         if not isinstance(other, CoordinationPolyhedron):
             raise TypeError
-        return self.edge_graph == other.edge_graph
+        return self.edge_graph == other._edge_graph
 
     def equal_members(self, other: object) -> bool:
         """
@@ -350,6 +350,44 @@ class CoordinationPolyhedron:
         faces = set(self.faces())
         other_faces = set(other.faces())
         return bool(faces.intersection(other_faces))
+
+    def neighbours(self) -> Tuple[CoordinationPolyhedron, ...]:
+        """Returns a tuple of neighbouring polyhedra.
+        Two polyhedra are considered to be neighbours if they 
+        have one or more vertex atoms in common.
+
+        Args:
+            none
+
+        Returns:
+            tuple(CoordinationPolyhedron): Tuple of neighbouring polyhedra.
+
+        """
+        neighbours = []
+        for v in self.vertices:
+            for p in v.in_polyhedra:
+                if p.index != self.index and p not in neighbours:
+                    neighbours.append(p)
+        return tuple(sorted(neighbours, key=lambda p: p.index))
+
+    def neighbours_by_index_and_shared_vertices(self) -> Dict[int, Tuple[int, ...]]:
+        """Returns a dictionary of vertex atoms shared with neighbouring polyhedra.
+        Two polyhedra are considered to be neighbours if they have one of more
+        vertex atoms in common.
+
+        Args:
+            None
+
+        Returns:
+            dict(int, tuple(int, ...)): Dictionary where the keys are polyhedra
+                indices, and the values are the indices of common vertex atoms.
+
+        """
+        return {p.index: tuple(set(p.vertex_indices).intersection(self.vertex_indices))
+                for p in self.neighbours()}
+
+    def face_sharing_neighbour_list(self):
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() if len(v) >= 3)
 
     def __eq__(self, other: object) -> bool:
         """
@@ -495,6 +533,7 @@ class CoordinationPolyhedron:
 
         """
         return [v for v in self.vertices if v.index in vertex_indices]
+
 
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
