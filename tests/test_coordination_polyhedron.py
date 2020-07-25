@@ -244,7 +244,7 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         self.assertEqual(polyhedron_i.neighbours(), (polyhedron_j,))
         self.assertEqual(polyhedron_j.neighbours(), (polyhedron_i,))
 
-    def test_neighbours_and_shared_vertices(self):
+    def test_interection(self):
         mock_central_atom_i = Mock(spec=Atom)
         mock_central_atom_i.in_polyhedra = []
         mock_central_atom_i.index = 3
@@ -263,37 +263,20 @@ class TestCoordinationPolyhedron(unittest.TestCase):
                                               vertices=mock_vertices[:6])
         polyhedron_j = CoordinationPolyhedron(central_atom=mock_central_atom_j,
                                               vertices=mock_vertices[-6:])
-        polyhedron_i._edge_graph = Mock()
-        polyhedron_j._edge_graph = Mock()
+        self.assertEqual(polyhedron_i.intersection(polyhedron_j), (5, 6))
+        self.assertEqual(polyhedron_j.intersection(polyhedron_i), (5, 6))
+
+    def test_neighbours_by_index_and_shared_vertices(self):
+        polyhedron_i = self.coordination_polyhedron
+        polyhedron_j = copy.deepcopy(polyhedron_i)
+        polyhedron_i.neighbours = Mock(return_value=(polyhedron_j,))
+        polyhedron_j.neighbours = Mock(return_value=(polyhedron_i,))
+        polyhedron_i.intersection = Mock(return_value=(5, 6))
+        polyhedron_j.intersection = Mock(return_value=(5, 6))
         self.assertEqual(polyhedron_i.neighbours_by_index_and_shared_vertices(), 
                          {polyhedron_j.index: (5, 6)})
         self.assertEqual(polyhedron_j.neighbours_by_index_and_shared_vertices(), 
                          {polyhedron_i.index: (5, 6)})
-
-    def test_shares_face_returns_True_when_faces_match(self):
-        polyhedron = self.coordination_polyhedron
-        other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
-        # consider two face-sharing tetrahedra
-        polyhedron.faces = Mock(return_value=(
-            (1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
-        other_polyhedron.faces = Mock(return_value=(
-            (1, 2, 3), (2, 3, 5), (1, 3, 5), (1, 3, 5)))
-        self.assertEqual(polyhedron.shares_face(other_polyhedron), True)
-
-    def test_shares_face_returs_False_when_no_faces_match(self):
-        polyhedron = self.coordination_polyhedron
-        other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
-        # consider two edge-sharing tetrahedra
-        polyhedron.faces = Mock(return_value=(
-            (1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
-        other_polyhedron.faces = Mock(return_value=(
-            (1, 2, 6), (2, 6, 5), (1, 6, 5), (1, 6, 5)))
-        self.assertEqual(polyhedron.shares_face(other_polyhedron), False)
-
-    def test_shares_face_raises_TypeError_for_incorrect_type(self):
-        with self.assertRaises(TypeError):
-            self.coordination_polyhedron.shares_face('foo')
-
 
 if __name__ == '__main__':
     unittest.main()

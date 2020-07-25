@@ -87,17 +87,17 @@ class CoordinationPolyhedron:
         return to_return
 
     def intersection(self,
-                     other_polyhedron: CoordinationPolyhedron) -> List[int]:
-        """Returns a list of atom indices for vertex atoms shared with another polyhedron.
+                     other_polyhedron: CoordinationPolyhedron) -> Tuple[int, ...]:
+        """Returns a tuple of atom indices for vertex atoms shared with another polyhedron.
 
         Args:
             other_polyhedron (:obj:`CoordinationPolyhedron`): The other coordination polyhedron.
 
         Returns:
-            list(int): List of shared vertex indices.
+            tuple(int): Tuple of shared vertex indices.
 
         """
-        return list(set(self.vertex_indices) & set(other_polyhedron.vertex_indices))
+        return tuple(sorted(set(self.vertex_indices) & set(other_polyhedron.vertex_indices)))
 
     @property
     def vertex_indices(self) -> List[int]:
@@ -335,22 +335,6 @@ class CoordinationPolyhedron:
         equal_vertex_atoms = self.vertices == other.vertices
         return equal_central_atom & equal_vertex_atoms
 
-    def shares_face(self, other: CoordinationPolyhedron) -> bool:
-        """Test whether this polyhdron shares a common face with another polyhedron.
-
-        Args:
-            other (:obj:`CoordinationPolyhedron`): The other :obj:`CoordinationPolyhedron`.
-
-        Returns:
-            bool.
-
-        """
-        if not isinstance(other, CoordinationPolyhedron):
-            raise TypeError
-        faces = set(self.faces())
-        other_faces = set(other.faces())
-        return bool(faces.intersection(other_faces))
-
     def neighbours(self) -> Tuple[CoordinationPolyhedron, ...]:
         """Returns a tuple of neighbouring polyhedra.
         Two polyhedra are considered to be neighbours if they 
@@ -383,11 +367,19 @@ class CoordinationPolyhedron:
                 indices, and the values are the indices of common vertex atoms.
 
         """
-        return {p.index: tuple(set(p.vertex_indices).intersection(self.vertex_indices))
-                for p in self.neighbours()}
+        return {p.index: self.intersection(p) for p in self.neighbours()}
 
-    def face_sharing_neighbour_list(self):
-        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() if len(v) >= 3)
+    def corner_sharing_neighbour_list(self) -> Tuple[int, ...]:
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+                     if len(v) == 1)
+
+    def edge_sharing_neighbour_list(self) -> Tuple[int, ...]:
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+                     if len(v) == 2)
+
+    def face_sharing_neighbour_list(self) -> Tuple[int, ...]:
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+                     if len(v) >= 3)
 
     def __eq__(self, other: object) -> bool:
         """
