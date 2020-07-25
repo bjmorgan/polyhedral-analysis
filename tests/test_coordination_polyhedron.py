@@ -212,5 +212,25 @@ class TestCoordinationPolyhedron(unittest.TestCase):
                 self.assertEqual(faces, ((1, 2, 4), (1, 4, 5), (2, 4, 6), (4, 5, 6), 
                                          (1, 3, 5), (1, 2, 3), (3, 5, 6), (2, 3, 6)))
 
+    def test_shares_face_returns_True_when_faces_match(self):
+        polyhedron = self.coordination_polyhedron
+        other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
+        # consider two face-sharing tetrahedra
+        polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
+        other_polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 5), (1, 3, 5), (1, 3, 5)))
+        self.assertEqual(polyhedron.shares_face(other_polyhedron), True)
+
+    def test_shares_face_retrusn_False_when_no_faces_match(self):
+        polyhedron = self.coordination_polyhedron
+        other_polyhedron = copy.deepcopy(self.coordination_polyhedron)
+        # consider two edge-sharing tetrahedra
+        polyhedron.faces = Mock(return_value=((1, 2, 3), (2, 3, 4), (1, 3, 4), (1, 2, 4)))
+        other_polyhedron.faces = Mock(return_value=((1, 2, 6), (2, 6, 5), (1, 6, 5), (1, 6, 5)))
+        self.assertEqual(polyhedron.shares_face(other_polyhedron), False)
+
+    def test_shares_face_raises_TypeError_for_incorrect_type(self):
+        with self.assertRaises(TypeError):
+            self.coordination_polyhedron.shares_face('foo')
+
 if __name__ == '__main__':
     unittest.main()

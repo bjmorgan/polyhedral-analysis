@@ -3,7 +3,7 @@ from polyhedral_analysis.utils import flatten
 from pymatgen.core.structure import Structure
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 
 class Configuration:
 
@@ -83,3 +83,10 @@ class Configuration:
         else:
             raise TypeError('Invalid type for label argument')
 
+    def neighbour_list(self,
+                       label1: Optional[str] = None,
+                       label2: Optional[str] = None) -> Dict[int, List[int]]:
+        """
+        TODO
+        """
+        pass 

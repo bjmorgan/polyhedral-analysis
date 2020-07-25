@@ -496,7 +496,6 @@ class CoordinationPolyhedron:
         """
         return [v for v in self.vertices if v.index in vertex_indices]
 
-
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
     triangles_to_merge = []
