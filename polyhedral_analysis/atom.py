@@ -132,6 +132,15 @@ class Atom:
         return self.index
 
     def distance(self, other: Atom) -> float:
+        """Shortest distance using periodic boundary conditions to another `Atom`.
+
+        Args:
+            other (Atom): The other atom.
+
+        Returns:
+            float
+
+        """
         d = self.site.distance(other.site)  # type: ignore
         assert isinstance(d, float)
         return d
