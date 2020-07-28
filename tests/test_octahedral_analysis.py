@@ -26,15 +26,17 @@ class TestOctahedralAnalysis(unittest.TestCase):
         mock_polyhedron.index = 0
         mock_vertices = [Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom),
                          Mock(spec=Atom), Mock(spec=Atom), Mock(spec=Atom)]
-        neighbour_lists = [{0: [1, 2, 3, 4]},
-                           {0: [0, 2, 4, 5]},
-                           {0: [0, 1, 3, 5]},
-                           {0: [0, 3, 1, 5]},
-                           {0: [0, 4, 2, 5]},
-                           {0: [1, 2, 3, 4]}]
+        for i, mock_vertex in zip([10, 11, 12, 13, 14, 15], mock_vertices):
+            mock_vertex.index = i
+        neighbour_lists = [{0: [11, 12, 13, 14]},
+                           {0: [10, 12, 14, 15]},
+                           {0: [10, 11, 13, 15]},
+                           {0: [10, 13, 11, 15]},
+                           {0: [10, 14, 12, 15]},
+                           {0: [11, 12, 13, 14]}]
         mock_vertices_returns = []
         for n_list in neighbour_lists:
-            mock_vertices_returns.append([mock_vertices[i] for i in n_list[0]])
+            mock_vertices_returns.append([next(v for v in mock_vertices if v.index == i) for i in n_list[0]])
         mock_polyhedron.vertices_by_indices = Mock(side_effect=mock_vertices_returns)
         mock_polyhedron.edge_graph = {i: n_list[0] for i, n_list in enumerate(neighbour_lists)}
         for i, v in enumerate(mock_vertices):
