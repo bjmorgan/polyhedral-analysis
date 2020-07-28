@@ -20,7 +20,7 @@ class Configuration:
 
         Attributes:
             atoms (list(Atom)): A list of atoms that make up this configuration.
-            polyhedra (list(CoordinationPolyhedron): A list of polyhedra, generated using
+            polyhedra (list(CoordinationPolyhedron)): A list of polyhedra, generated using
                 the PolyhedraRecipe definitions passed in as the `recipes` list.
             central_atoms (list(Atom)): A list of atoms that define the centres of the 
                 coordination polyhedra.
@@ -43,14 +43,13 @@ class Configuration:
 
     def coordination_atom_by_index(self,
                                    index: int) -> Union[Atom, None]:
-        """
-        Return the coordination atom with a specific index.
+        """Return the coordination atom with a specific index.
 
         Args:
             index (int): The atom index to match.
 
         Returns:
-            (Atom|None): The matching coordination atom. If the desired index does not match
+            Union[Atom, None]: The matching coordination atom. If the desired index does not match
                          any of the coordination atoms for this configuration, None is returned.
         """
         coordination_atom_indices = [
@@ -69,11 +68,11 @@ class Configuration:
         """Returns a list of polyhedra for this configuration with matching labels.
 
         Args:
-            (:obj:`str` or :obj:`list(str)`): Either a single label string, or a list of
+            (Union[str, List[str]]): Either a single label string, or a list of
                 label strings.
 
         Returns:
-            (list(CoordinationPolyhedron)
+            list(CoordinationPolyhedron)
 
         """
         if isinstance(label, str):
