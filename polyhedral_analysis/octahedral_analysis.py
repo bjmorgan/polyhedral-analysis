@@ -47,9 +47,9 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
     vertex_pairs = []
     seen_indices: List[int] = []
     for v1 in polyhedron.vertices:
-        v1_neighbours = polyhedron.vertices_by_indices(v1.neighbours[polyhedron.index])
         if v1.index in seen_indices:
             continue
+        v1_neighbours = polyhedron.vertices_by_indices(v1.neighbours[polyhedron.index])
         v2 = next(v for v in polyhedron.vertices if v not in [v1, *v1_neighbours])
         vertex_pairs.append((v1, v2))
         seen_indices.extend([v1.index, v2.index])
