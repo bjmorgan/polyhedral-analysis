@@ -32,6 +32,7 @@ class TestPolyhedraRecipeInit(unittest.TestCase):
             self.assertEqual(recipe.vertex_graph_cutoff, None)
             self.assertEqual(recipe.n_neighbours, None)
             self.assertEqual(recipe.label, None)
+            self.assertEqual(recipe.recalculate, True)
 
 class TestPolyhedraRecipeFunctions(unittest.TestCase):
 

@@ -123,7 +123,8 @@ class PolyhedraRecipe:
                  coordination_cutoff: Optional[float] = None,
                  vertex_graph_cutoff: Optional[float] = None,
                  label: Optional[str] = None,
-                 n_neighbours: Optional[int] = None) -> None:
+                 n_neighbours: Optional[int] = None,
+                 recalculate: Optional[bool] = True) -> None:
         """
         Create a :obj:`PolyhedraRecipe` object.
 
@@ -141,6 +142,9 @@ class PolyhedraRecipe:
             vertex_graph_cutoff (:obj:`float`, optional): TODO.
             n_neighbours (:obj:`int`, optional): Optionally set the maximum number of neighbours to include.
             label (str): Label for this recipe.
+            recalculate (:obj:`bool`, optional): Reassign central atom and vertex atom indices for each new
+                configuration parsed. Default is `True`. If `recalulate` is set to `False` then the lists of
+                atom indices for central and vertex atoms will be fixed once initialised.
 
         Returns:
             None
@@ -176,6 +180,7 @@ class PolyhedraRecipe:
         self.vertex_graph_cutoff = vertex_graph_cutoff
         self.n_neighbours = n_neighbours
         self.label = label
+        self.recalculate = recalculate
 
     def central_atom_list(self, 
                           structure: Optional[Structure] = None,
