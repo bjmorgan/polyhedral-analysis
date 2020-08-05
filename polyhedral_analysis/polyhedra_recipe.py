@@ -285,10 +285,10 @@ c
         central_atoms (list(Atom)): List of Atom objects describing the set of possible centre atoms.
         vertex_atoms (list(Atom)): List of Atom objects describing the set of possible vertex atoms.
         central_indices (list(int)): List of integer indices specifying each central atom.
-        vertex_indices (list(list(in)): Nested list of integer indices for the vertex atoms in each polyhedron.
+        vertex_indices (list(list(int)): Nested list of integer indices for the vertex atoms in each polyhedron.
 
     Returns:
-        (list(CoordinationPolyhedron))
+        list(CoordinationPolyhedron)
 
     Raises:
         ValueError: If the lengths of the central_indices and vertex_indices lists are unequal.
