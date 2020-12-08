@@ -48,11 +48,15 @@ class TestTrajectory(unittest.TestCase):
         self.trajectory = Trajectory( structures=mock_structures,
                                       configurations=mock_configurations )
         
-    def test_extend( self ):
+    def test_extend(self):
         trajectory1 = self.trajectory
         trajectory2 = copy.deepcopy(trajectory1)
         trajectory1.extend(trajectory2)
         self.assertEqual(len(trajectory1.configurations), 4)
+
+    def test___len__(self):
+        trajectory = self.trajectory
+        self.assertEqual(len(trajectory), len(trajectory.structures))
 
 if __name__ == '__main__':
     unittest.main()
