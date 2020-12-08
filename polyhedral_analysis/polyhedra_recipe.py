@@ -123,7 +123,8 @@ class PolyhedraRecipe:
                  coordination_cutoff: Optional[float] = None,
                  vertex_graph_cutoff: Optional[float] = None,
                  label: Optional[str] = None,
-                 n_neighbours: Optional[int] = None) -> None:
+                 n_neighbours: Optional[int] = None,
+                 recalculate: Optional[bool] = True) -> None:
         """
         Create a :obj:`PolyhedraRecipe` object.
 
@@ -141,6 +142,9 @@ class PolyhedraRecipe:
             vertex_graph_cutoff (:obj:`float`, optional): TODO.
             n_neighbours (:obj:`int`, optional): Optionally set the maximum number of neighbours to include.
             label (str): Label for this recipe.
+            recalculate (:obj:`bool`, optional): Reassign central atom and vertex atom indices for each new
+                configuration parsed. Default is `True`. If `recalulate` is set to `False` then the lists of
+                atom indices for central and vertex atoms will be fixed once initialised.
 
         Returns:
             None
@@ -176,16 +180,16 @@ class PolyhedraRecipe:
         self.vertex_graph_cutoff = vertex_graph_cutoff
         self.n_neighbours = n_neighbours
         self.label = label
+        self.recalculate = recalculate
 
     def central_atom_list(self, 
-                          structure: Optional[Structure] = None,
-                          recalculate: bool = False) -> List[int]:
+                          structure: Optional[Structure] = None) -> List[int]:
         if not self._central_atom_list:
             if structure:
                 self._central_atom_list = list(self._central_atom_list_generator(structure))
             else:
                 raise ValueError('Needs structure argument')
-        elif recalculate:
+        elif self.recalculate:
             if structure:
                 self._central_atom_list = list(self._central_atom_list_generator(structure))
             else:
@@ -194,14 +198,13 @@ class PolyhedraRecipe:
         return self._central_atom_list
 
     def vertex_atom_list(self,
-                         structure: Optional[Structure] = None,
-                         recalculate: bool = False) -> List[int]:
+                         structure: Optional[Structure] = None) -> List[int]:
         if not self._vertex_atom_list:
             if structure:
                 self._vertex_atom_list = list(self._vertex_atom_list_generator(structure))
             else:
                 raise ValueError('Needs structure argument')
-        elif recalculate:
+        elif self.recalculate:
             if structure:
                 self._vertex_atom_list = list(self._vertex_atom_list_generator(structure))
             else:
@@ -273,7 +276,7 @@ def polyhedra_from_closest_centre(central_atoms: List[Atom],
 def polyhedra_from_atom_indices(central_atoms: List[Atom],
                                 vertex_atoms: List[Atom],
                                 central_indices: List[int],
-                                vertex_indices: List[int],
+                                vertex_indices: List[List[int]],
                                 label: Optional[str] = None) -> List[CoordinationPolyhedron]:
     """Construct a set of polyhedra from lists of atom indices for central and vertex atoms.
 c	
@@ -282,10 +285,10 @@ c
         central_atoms (list(Atom)): List of Atom objects describing the set of possible centre atoms.
         vertex_atoms (list(Atom)): List of Atom objects describing the set of possible vertex atoms.
         central_indices (list(int)): List of integer indices specifying each central atom.
-        vertex_indices (list(list(in)): Nested list of integer indices for the vertex atoms in each polyhedron.
+        vertex_indices (list(list(int)): Nested list of integer indices for the vertex atoms in each polyhedron.
 
     Returns:
-        (list(CoordinationPolyhedron))
+        list(CoordinationPolyhedron)
 
     Raises:
         ValueError: If the lengths of the central_indices and vertex_indices lists are unequal.
@@ -297,7 +300,7 @@ c
     polyhedra = []
     for ic, iv in zip(central_indices, vertex_indices):
         central_atom = next(atom for atom in central_atoms if atom.index == ic)
-        vertex_atoms = [atom for atom in vertex_atoms if atom.index == iv]
+        vertex_atoms = [atom for atom in vertex_atoms if atom.index in iv]
         polyhedra.append(CoordinationPolyhedron(central_atom=central_atom,
                                                 vertices=vertex_atoms,
                                                 label=label))

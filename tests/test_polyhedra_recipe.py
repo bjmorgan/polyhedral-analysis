@@ -1,18 +1,38 @@
 import unittest
 import numpy as np
-from polyhedral_analysis.polyhedra_recipe import ( PolyhedraRecipe,
-                                                   matching_sites,
-                                                   polyhedra_from_distance_cutoff )
+from polyhedral_analysis.polyhedra_recipe import (PolyhedraRecipe,
+                                                  matching_sites,
+                                                  polyhedra_from_distance_cutoff)
 from pymatgen import Structure, Lattice
 from polyhedral_analysis.atom import Atom
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
-class TestPolyhedraRecipeInit( unittest.TestCase ):
+class TestPolyhedraRecipeInit(unittest.TestCase):
 
-    def test_polyhedra_recipe_init_raises_ValueError_for_invalid_method( self ):
+    def test_polyhedra_recipe_init_raises_ValueError_for_invalid_method(self):
         invalid_method = 'foo'
-        with self.assertRaises( ValueError ):
-            PolyhedraRecipe( method=invalid_method, central_atoms='foo', vertex_atoms='bar' )
+        with self.assertRaises(ValueError):
+            PolyhedraRecipe(method=invalid_method, central_atoms='foo', vertex_atoms='bar')
+
+    def test_polyhdra_recipe_init(self):
+        recipe_args = {'method': 'distance cutoff',
+                       'central_atoms': 'S',
+                       'vertex_atoms': 'Li',
+                       'coordination_cutoff': 5.0}
+        with patch('polyhedral_analysis.polyhedra_recipe.generator_from_atom_argument') as mock_generator_from_atom_argument:
+            mock_generators = [Mock(), Mock()]
+            mock_generator_from_atom_argument.side_effect = mock_generators
+            recipe = PolyhedraRecipe(**recipe_args)
+            self.assertEqual(recipe.method, recipe_args['method'])
+            self.assertEqual(recipe._central_atom_list_generator, mock_generators[0])
+            self.assertEqual(recipe._vertex_atom_list_generator, mock_generators[1])
+            self.assertEqual(recipe._central_atom_list, None)
+            self.assertEqual(recipe._vertex_atom_list, None)
+            self.assertEqual(recipe.coordination_cutoff, recipe_args['coordination_cutoff'])
+            self.assertEqual(recipe.vertex_graph_cutoff, None)
+            self.assertEqual(recipe.n_neighbours, None)
+            self.assertEqual(recipe.label, None)
+            self.assertEqual(recipe.recalculate, True)
 
 class TestPolyhedraRecipeFunctions(unittest.TestCase):
 
