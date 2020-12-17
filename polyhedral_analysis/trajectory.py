@@ -163,7 +163,7 @@ class Trajectory:
                                    ncores=ncores,
                                    progress=progress) 
 
-    def __len__(self) -> Int:
+    def __len__(self) -> int:
         return len(self.structures)
 
 def _get_xdatcar(filename: str) -> Xdatcar:

@@ -157,7 +157,7 @@ class CoordinationPolyhedron:
     @property
     def best_fit_geometry(self) -> Dict[str, Union[str, float]]:
         psm = self.symmetry_measure
-        best_fit = min(psm, key=psm.get)
+        best_fit = min(psm, key=psm.get) # type: ignore
         return {'geometry': best_fit, 'symmetry_measure': psm[best_fit]}
 
     def minimum_image_vertex_coordinates(self) -> np.ndarray:
