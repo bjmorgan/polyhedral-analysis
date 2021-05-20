@@ -2,9 +2,16 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_f
 from itertools import permutations
 import math
 import numpy as np  # type: ignore
-from typing import Dict, Union
+from typing import Dict, Union, TypedDict
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
+
+class OrientationDict(TypedDict):
+    orientation_index: int
+    reference_geometry_index: int
+    rotational_distance: float
+    symmetry_measure: float
+    all_rotational_distances: float
 
 class RotationAnalyser(object):
     """Class for analysing rotational orientation of polyhedra.
@@ -47,7 +54,7 @@ class RotationAnalyser(object):
         self.reference_points = reference_points
 
     def discrete_orientation(self,
-                             points: np.ndarray) -> Dict[str, Union[int, float]]:
+                             points: np.ndarray) -> OrientationDict:
         """Find the discrete "closest orientation" for an input polyhedron of points.
 
         For example, a tetrahedon has 12 pure rotation symmetry operations. A distorted
@@ -100,16 +107,16 @@ class RotationAnalyser(object):
             [s['rotation_matrix'] for s in proper_rot_sm])
         trace = np.trace(proper_rot_matrices, axis1=1, axis2=2)
         rot_distance = np.arccos((trace - 1.0) / 2.0)
-        index = np.argmin(rot_distance)
+        index = int(np.argmin(rot_distance))
         reference_geometry_index = index // int(
             len(proper_rot_sm) / len(self.reference_points))
-        return {'orientation_index': index,
-                'reference_geometry_index': reference_geometry_index,
-                'rotational_distance': rot_distance[index],
-                'symmetry_measure': proper_rot_sm[index]['symmetry_measure'],
-                'all_rotational_distances': rot_distance}
+        return OrientationDict(orientation_index=index,
+                               reference_geometry_index=reference_geometry_index,
+                               rotational_distance=rot_distance[index],
+                               symmetry_measure=proper_rot_sm[index]['symmetry_measure'],
+                               all_rotational_distances=rot_distance)
 
     def polyhedron_orientation(self,
-                               polyhedron: CoordinationPolyhedron) -> Dict[str, Union[int, float]]:
+                               polyhedron: CoordinationPolyhedron) -> OrientationDict:
         points = polyhedron.abstract_geometry.points_wocs_csc()
         return self.discrete_orientation(points)

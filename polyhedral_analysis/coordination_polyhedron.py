@@ -104,7 +104,7 @@ class CoordinationPolyhedron:
         return [v.index for v in self.vertices]
 
     @property
-    def vertex_vectors(self) -> np.nadarry:
+    def vertex_vectors(self) -> np.ndarray:
         return self.abstract_geometry.points_wocs_ctwocc()
 
     @property
@@ -167,7 +167,7 @@ class CoordinationPolyhedron:
                                            vertex_frac_coords)[0]
         vertex_minimum_image_coords = [
             self.central_atom.coords + v for v in pbc_vectors]
-        return vertex_minimum_image_coords
+        return np.array(vertex_minimum_image_coords)
 
     def faces(self) -> Tuple[Tuple[int, ...], ...]:
         """

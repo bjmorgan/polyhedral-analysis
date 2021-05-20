@@ -3,7 +3,7 @@ import numpy as np
 from polyhedral_analysis.polyhedra_recipe import (PolyhedraRecipe,
                                                   matching_sites,
                                                   polyhedra_from_distance_cutoff)
-from pymatgen import Structure, Lattice
+from pymatgen.core import Structure, Lattice
 from polyhedral_analysis.atom import Atom
 from unittest.mock import Mock, patch
 

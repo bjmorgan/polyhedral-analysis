@@ -4,7 +4,7 @@ from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.utils import flatten
 from pymatgen.core.structure import Structure
 from pymatgen.core.sites import Site
-from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable
+from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any
 from polyhedral_analysis.atom import Atom
 from typing_extensions import Protocol
 
@@ -24,7 +24,7 @@ def matching_sites(structure: Structure,
         structure (Structure): The structure being analysed.
         reference_structure (Structure): A Structure object containing a set of reference sites.
         species (:obj:`list(str)`, optional): Optional list of strings specifying a subset of species
-            to return. Default is None, which specifies all species matching species are returned.
+            to return. Default is None, which specifies all species are returned.
         
     Returns:
         (list[tuple(Site,int)]): A list of length-2 tuples for each matching site. Each tuple
@@ -34,7 +34,7 @@ def matching_sites(structure: Structure,
     matched_sites = []
     for ref_site in reference_structure:
         dr = [site.distance(ref_site) for site in structure]
-        i = np.argmin(dr)
+        i = int(np.argmin(dr))
         matched_sites.append((structure[i], i))
     if species:
         matched_sites = [(s, i) for s, i in matched_sites if s.species_string in species]
