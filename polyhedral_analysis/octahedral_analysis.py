@@ -25,7 +25,7 @@ def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
             measure) is not an octahedron, a ValueError is raised.
 
     """
-    if not polyhedron.best_fit_geometry['geometry'] is 'Octahedron':
+    if polyhedron.best_fit_geometry['geometry'] != 'Octahedron':
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
 def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
