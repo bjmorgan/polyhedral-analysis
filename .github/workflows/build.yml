@@ -31,10 +31,10 @@ jobs:
         - name: Run tests
           run: |
             pytest --cov-config=.coveragerc --cov=polyhedral_analysis --cov-report xml
-        - name: Publish code coverage
-          env:
-            CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPO_TOKEN }}
-          uses: paambaati/codeclimate-action@v2.7.5
+#         - name: Publish code coverage
+#           env:
+#             CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPO_TOKEN }}
+#           uses: paambaati/codeclimate-action@v2.7.5
         - name: Static type checking
           run: |
             mypy polyhedral_analysis
