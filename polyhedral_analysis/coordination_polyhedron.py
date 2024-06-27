@@ -595,6 +595,49 @@ class CoordinationPolyhedron:
         """
         return self.central_atom.coords - self.centroid()
 
+    def radial_distortion_parameter(self, 
+                                    reference: str = 'centroid', 
+                                    normalize: bool = True,
+                                    method: Literal['MSD', 'MAD'] = 'MSD') -> float:
+        """
+        Calculate the radial distortion parameter for the coordination polyhedron.
+
+        The radial distortion parameter is defined as:
+        For MSD: Δ = mean(((d_i - d_mean) / (d_mean if normalize else 1))^2)
+        For MAD: Δ = mean(|d_i - d_mean| / (d_mean if normalize else 1))
+        where d_i are the N distances from the reference point to each vertex,
+        and d_mean is their mean value.
+
+        Args:
+            reference (str, optional): The reference point for calculating distances. 
+                Can be either 'centroid' (default) or 'central_atom'.
+            normalize (bool, optional): Whether to normalize the distortion parameter
+                with respect to the mean vertex distance. Default is True.
+            method (str, optional): The method to use for calculating distortion.
+                Can be either 'MSD' (Mean Squared Deviation, default) or 
+                'MAD' (Mean Absolute Deviation).
+
+        Returns:
+            float: The radial distortion parameter.
+
+        Raises:
+            ValueError: If an invalid reference point or method is provided.
+        """
+        if method not in ['MSD', 'MAD']:
+            raise ValueError("Invalid method. Use 'MSD' or 'MAD'.")
+        vectors = self.vertex_vectors(reference=reference)
+        distances = np.linalg.norm(vectors, axis=1)
+        d_mean = np.mean(distances)
+        if normalize:
+            relative_deviations = (distances - d_mean) / d_mean
+        else:
+            relative_deviations = distances - d_mean
+        if method == 'MAD':
+            distortion = np.mean(np.abs(relative_deviations))
+        else:  # MSD
+            distortion = np.mean(relative_deviations**2)
+        return distortion
+
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
     triangles_to_merge = []

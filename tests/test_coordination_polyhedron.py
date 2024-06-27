@@ -358,5 +358,75 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             # The centroid is at (0, 0, 0), so the displacement should be (0.1, 0.2, 0.3)
             np.testing.assert_array_almost_equal(displacement, np.array([0.1, 0.2, 0.3]))
 
+    def test_radial_distortion_parameter(self):
+        # Mock the vertex_vectors method
+        mock_vectors = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 2.0, 0.0],
+            [0.0, 0.0, 3.0],
+            [-1.0, 0.0, 0.0]
+        ])
+        self.coordination_polyhedron.vertex_vectors = Mock(return_value=mock_vectors)
+
+        # Calculate expected distortions
+        distances = np.array([1.0, 2.0, 3.0, 1.0])
+        d_mean = np.mean(distances)
+        relative_deviations = (distances - d_mean) / d_mean
+        
+        expected_mad_normalized = np.mean(np.abs(relative_deviations))
+        expected_msd_normalized = np.mean(relative_deviations**2)
+        expected_mad_non_normalized = np.mean(np.abs(distances - d_mean))
+        expected_msd_non_normalized = np.mean((distances - d_mean)**2)
+
+        # Test MSD (default)
+        self.assertAlmostEqual(
+            self.coordination_polyhedron.radial_distortion_parameter(),
+            expected_msd_normalized
+        )
+
+        # Test MAD
+        self.assertAlmostEqual(
+            self.coordination_polyhedron.radial_distortion_parameter(method='MAD'),
+            expected_mad_normalized
+        )
+
+        # Test non-normalized MSD
+        self.assertAlmostEqual(
+            self.coordination_polyhedron.radial_distortion_parameter(normalize=False),
+            expected_msd_non_normalized
+        )
+
+        # Test non-normalized MAD
+        self.assertAlmostEqual(
+            self.coordination_polyhedron.radial_distortion_parameter(normalize=False, method='MAD'),
+            expected_mad_non_normalized
+        )
+
+
+        # Verify that vertex_vectors was called
+        self.coordination_polyhedron.vertex_vectors.assert_called_with(reference='centroid')
+
+    def test_radial_distortion_parameter_perfect_polyhedron(self):
+        # Mock a perfect polyhedron where all vertices are equidistant from the reference
+        mock_vectors = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+            [-1.0, 0.0, 0.0]
+        ])
+        self.coordination_polyhedron.vertex_vectors = Mock(return_value=mock_vectors)
+
+        self.assertAlmostEqual(self.coordination_polyhedron.radial_distortion_parameter(method='MAD'), 0.0)
+        self.assertAlmostEqual(self.coordination_polyhedron.radial_distortion_parameter(method='MSD'), 0.0)
+        self.assertAlmostEqual(self.coordination_polyhedron.radial_distortion_parameter(normalize=False, method='MAD'), 0.0)
+        self.assertAlmostEqual(self.coordination_polyhedron.radial_distortion_parameter(normalize=False, method='MSD'), 0.0)
+
+    def test_radial_distortion_parameter_invalid_inputs(self):
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.radial_distortion_parameter(reference="invalid")
+        
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.radial_distortion_parameter(method="invalid")
+
 if __name__ == '__main__':
     unittest.main()
