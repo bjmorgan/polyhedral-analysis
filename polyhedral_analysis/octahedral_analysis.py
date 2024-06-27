@@ -91,11 +91,9 @@ def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
     if check:
         check_octahedra(polyhedron)
     vertex_pairs = opposite_vertex_pairs(polyhedron, check=False)
-    vectors = []
-    for v1, v2 in vertex_pairs:
-        vector = polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v2.index)] - \
-                 polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v1.index)]
-        vectors.append(vector)
+    vectors = [polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v2.index)] - 
+               polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v1.index)]
+               for v1, v2 in vertex_pairs]
     return vectors
 
 def isomer_is_trans(polyhedron: CoordinationPolyhedron,
@@ -209,7 +207,6 @@ def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
         v1_normalized = v1 / np.linalg.norm(v1)
         dot_product = np.dot(normal, v1_normalized)
         angle = np.arccos(np.clip(abs(dot_product), -1.0, 1.0))
-        angle_degrees = np.degrees(angle)
         angle_degrees = np.degrees(angle)
         
         angles.append(angle_degrees)

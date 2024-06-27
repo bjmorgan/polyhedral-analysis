@@ -291,13 +291,7 @@ class TestOctahedralAnalysis(unittest.TestCase):
             angles = trans_vector_orthogonality(mock_polyhedron)
             expected_angles = (2.8731459157778483, 5.724810452223508, 6.396811661684919)
 
-            # Sort both the calculated and expected angles
-            sorted_angles = sorted(angles)
-            sorted_expected = sorted(expected_angles)
-        
-            # Compare the sorted lists
-            for angle, expected_angle in zip(sorted_angles, sorted_expected):
-                self.assertAlmostEqual(angle, expected_angle, places=6)
+            np.testing.assert_allclose(sorted(angles), sorted(expected_angles), rtol=1e-6)
 
             mock_check_octahedra.assert_called_once()
             mock_trans_vertex_vectors.assert_called_once()
