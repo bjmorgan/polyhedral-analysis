@@ -61,20 +61,39 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             other_coordination_polyhedron))
 
     def test_vertex_vectors(self):
-        vectors = [np.array([1.0, 0.0, 0.0]),
-                   np.array([0.0, 1.0, 2.0])]
-        self.coordination_polyhedron._abstract_geometry = Mock(
-            spec=AbstractGeometry)
-        self.coordination_polyhedron.abstract_geometry.points_wocs_ctwocc.return_value = vectors
-        returned_vectors = self.coordination_polyhedron.vertex_vectors
-        for v1, v2 in zip(vectors, returned_vectors):
-            np.testing.assert_equal(v1, v2)
+        mock_min_image_coords = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 2.0]
+        ])
+        self.coordination_polyhedron.minimum_image_vertex_coordinates = Mock(return_value=mock_min_image_coords)
+
+        mock_centroid = np.array([-0.1, 0.1, 0.2])
+        self.coordination_polyhedron.centroid = Mock(return_value=mock_centroid)
+
+        mock_central_atom_coords = np.array([0.1, -0.1, -0.2])
+        self.coordination_polyhedron.central_atom.coords = mock_central_atom_coords
+
+        expected_vectors_centroid = mock_min_image_coords - mock_centroid
+        actual_vectors_centroid = self.coordination_polyhedron.vertex_vectors(reference='centroid')
+        np.testing.assert_array_almost_equal(actual_vectors_centroid, expected_vectors_centroid)
+
+        expected_vectors_central_atom = mock_min_image_coords - mock_central_atom_coords
+        actual_vectors_central_atom = self.coordination_polyhedron.vertex_vectors(reference='central_atom')
+        np.testing.assert_array_almost_equal(actual_vectors_central_atom, expected_vectors_central_atom)
+
+        self.coordination_polyhedron.centroid.assert_called_once()
+        self.assertEqual(self.coordination_polyhedron.minimum_image_vertex_coordinates.call_count, 2)
+
+    def test_vertex_vectors_invalid_reference(self):
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.vertex_vectors(reference="invalid")
+
 
     def test_angles(self):
         vertex_vectors = np.array([[1.0, 0.0, 0.0],
                                    [0.0, 1.0, 0.0],
                                    [0.0, -1.0, 0.0]])
-        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', new_callable=PropertyMock) as mock_vertex_vectors:
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors') as mock_vertex_vectors:
             mock_vertex_vectors.return_value = vertex_vectors
             angles = self.coordination_polyhedron.angles()
             np.testing.assert_equal(angles, [90.0, 90.0, 180.0])

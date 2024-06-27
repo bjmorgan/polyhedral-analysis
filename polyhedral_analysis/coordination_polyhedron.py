@@ -103,9 +103,30 @@ class CoordinationPolyhedron:
     def vertex_indices(self) -> List[int]:
         return [v.index for v in self.vertices]
 
-    @property
-    def vertex_vectors(self) -> np.ndarray:
-        return self.abstract_geometry.points_wocs_ctwocc()
+    def vertex_vectors(self,
+                       reference: str='centroid') -> np.ndarray:
+        """Returns an array of polyhedron centre -> vertex vectors.
+        The polyhedron centre can be set as either the centroid of the polyhedron (default)
+        or the position of the central atom.
+
+        Args:
+            reference (str, optional): The reference point used to compute the vertex vectors.
+                Can either be 'centroid' (default) or 'central_atom'.
+
+        Returns:
+            np.ndarray: Array of vectors from the reference point to each vertex.
+
+        Raises:
+            ValueError: If an invalid reference point setting is passed.
+
+        """
+        if reference == 'centroid':
+            reference_point = self.centroid()
+        elif reference == 'central_atom':
+            reference_point = self.central_atom.coords
+        else:
+            raise ValueError("Invalid reference point. Use 'centroid' or 'central_atom'.")
+        return self.minimum_image_vertex_coordinates() - reference_point
 
     @property
     def vertex_coords(self) -> np.ndarray:
@@ -440,7 +461,7 @@ class CoordinationPolyhedron:
 
     def angles(self) -> List[float]:
         """
-        List of all vertex--centre--vertex angles.
+        List of all vertex--centroid--vertex angles.
 
         Args:
             None
@@ -449,7 +470,7 @@ class CoordinationPolyhedron:
              list: List of angles.
 
         """
-        return [vg.angle(p1, p2) for p1, p2 in combinations(self.vertex_vectors, 2)]
+        return [vg.angle(p1, p2) for p1, p2 in combinations(self.vertex_vectors(reference='centroid'), 2)]
 
     def vertex_vector_orientations(self,
                                    units: str = 'degrees',
@@ -470,15 +491,16 @@ class CoordinationPolyhedron:
             list(tuple): A list of `(theta,phi)` tuple pairs.
 
         """
+        vertex_vectors = self.vertex_vectors(reference='centroid')
         vg_units = {'degrees': 'deg',
                     'radians': 'rad'}
         theta = [vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
-                 for point in self.vertex_vectors]
+                 for point in vertex_vectors]
         phi = [vg.signed_angle(np.array([1.0, 0.0, 0.0]), point,
                                look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
                for point in self.vertex_vectors]
         if return_distance:
-            distance = [vg.magnitude(point) for point in self.vertex_vectors]
+            distance = [vg.magnitude(point) for point in vertex_vectors]
             return list(zip(theta, phi, distance))
         return list(zip(theta, phi))
 
