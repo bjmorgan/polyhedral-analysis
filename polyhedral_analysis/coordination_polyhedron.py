@@ -554,6 +554,25 @@ class CoordinationPolyhedron:
         except ValueError:
             raise ValueError(f"This polyhedron does not have a vertex with global index {vertex_global_index}")
 
+    def centroid(self) -> np.ndarray:
+        """
+        Calculate the centroid of the vertices, accounting for periodic boundary conditions.
+
+        Returns:
+            np.ndarray: The 3D coordinates of the centroid.
+        """
+        return np.mean(self.minimum_image_vertex_coordinates(), axis=0)
+
+    def centroid_to_central_atom_vector(self) -> np.ndarray:
+        """
+        Calculate the vector displacement from the centroid of the vertices to the central atom,
+        accounting for periodic boundary conditions.
+
+        Returns:
+            np.ndarray: A 3D vector representing the displacement from the vertex centroid to the central atom.
+        """
+        return self.central_atom.coords - self.centroid()
+
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
     triangles_to_merge = []

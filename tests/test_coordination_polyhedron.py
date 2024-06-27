@@ -295,5 +295,49 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             # Verify that vertex_indices was called
             mock_vertex_indices.assert_called()
 
+    def test_centroid(self):
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.minimum_image_vertex_coordinates') as mock_min_image:
+            mock_min_image.return_value = np.array([
+                [1.0, 0.0, 0.0],
+                [-1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, -1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, -1.0]
+            ])
+            centroid = self.coordination_polyhedron.centroid()
+            # The centroid should be (0, 0, 0)
+            np.testing.assert_array_almost_equal(centroid, np.array([0.0, 0.0, 0.0]))
+
+    def test_centroid_with_offset(self):
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.minimum_image_vertex_coordinates') as mock_min_image:
+            mock_min_image.return_value = np.array([
+                [2.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0],
+                [1.0, 2.0, 1.0],
+                [1.0, 0.0, 1.0],
+                [1.0, 1.0, 2.0],
+                [1.0, 1.0, 0.0]
+            ])
+            centroid = self.coordination_polyhedron.centroid()
+            # The centroid should be (1, 1, 1)
+            np.testing.assert_array_almost_equal(centroid, np.array([1.0, 1.0, 1.0]))
+
+    def test_centroid_to_central_atom_vector(self):
+        self.coordination_polyhedron.central_atom.coords = np.array([0.0, 0.0, 0.0])
+        with patch.object(self.coordination_polyhedron, 'centroid') as mock_centroid:
+            mock_centroid.return_value = np.array([0.0, 0.0, 0.0])
+            displacement = self.coordination_polyhedron.centroid_to_central_atom_vector()
+            # The centroid is at (0, 0, 0), so the displacement should be (0, 0, 0)
+            np.testing.assert_array_almost_equal(displacement, np.array([0.0, 0.0, 0.0]))
+
+    def test_centroid_to_central_atom_vector_with_offset(self):
+        self.coordination_polyhedron.central_atom.coords = np.array([0.1, 0.2, 0.3])
+        with patch.object(self.coordination_polyhedron, 'centroid') as mock_centroid:
+            mock_centroid.return_value = np.array([0.0, 0.0, 0.0])
+            displacement = self.coordination_polyhedron.centroid_to_central_atom_vector()
+            # The centroid is at (0, 0, 0), so the displacement should be (0.1, 0.2, 0.3)
+            np.testing.assert_array_almost_equal(displacement, np.array([0.1, 0.2, 0.3]))
+
 if __name__ == '__main__':
     unittest.main()
