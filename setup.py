@@ -22,12 +22,10 @@ setup(
     license='MIT',
     python_requires='>=3.7',
     install_requires=['numpy',
-                      'pymatgen',
+                      'pymatgen>=2017.10.16',
                       'scipy', 
-                      'coverage==4.3.4',
-                      'codeclimate-test-reporter',
+                      'coverage>=6.3',
                       'vg',
                       'monty',
-                      'tqdm',
-                      'typing-extensions']
+                      'tqdm']
     )

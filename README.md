@@ -1,7 +1,7 @@
 # Polyhedral Analysis Tools
 
-[![Build Status](https://travis-ci.org/bjmorgan/polyhedral-analysis.svg?branch=master)](https://travis-ci.org/bjmorgan/polyhedral-analysis)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/801e93ffcc4749ac5392/test_coverage)](https://codeclimate.com/github/bjmorgan/polyhedral-analysis/test_coverage)
+![Build Status](https://github.com/bjmorgan/polyhedral-analysis/actions/workflows/build.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/bjmorgan/polyhedral-analysis/badge.svg?branch=main)](https://coveralls.io/github/bjmorgan/polyhedral-analysis?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/polyhedral-analysis/badge/?version=latest)](http://polyhedral-analysis.readthedocs.io/en/latest/?badge=latest)
 
 ## Documentation

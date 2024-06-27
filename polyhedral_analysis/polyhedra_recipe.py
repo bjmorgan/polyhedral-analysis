@@ -4,12 +4,11 @@ from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.utils import flatten
 from pymatgen.core.structure import Structure
 from pymatgen.core.sites import Site
-from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any
+from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any, Protocol
 from polyhedral_analysis.atom import Atom
-from typing_extensions import Protocol
 
 class IndexGenerator(Protocol):
-    def __call__(self, structures: List[Structure]) -> Sequence[int]: ...
+    def __call__(self, structure: Structure) -> Sequence[int]: ...
 
 AtomSpec = Union[str, List[str], List[int], IndexGenerator]
 
@@ -215,9 +214,10 @@ class PolyhedraRecipe:
     def find_polyhedra(self, 
                        atoms: List[Atom],
                        structure: Optional[Structure] = None) -> List[CoordinationPolyhedron]:
-        polyhedra_method: Dict[str, Callable[..., List[CoordinationPolyhedron]]] = {'distance cutoff': partial(polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff),
-                            'closest centre': polyhedra_from_closest_centre,
-                            'nearest neighbours': partial(polyhedra_from_nearest_neighbours, nn=self.n_neighbours)}
+        polyhedra_method: Dict[str, Callable[..., List[CoordinationPolyhedron]]] = {
+                'distance cutoff': partial(polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff),
+                'closest centre': polyhedra_from_closest_centre,
+                'nearest neighbours': partial(polyhedra_from_nearest_neighbours, nn=self.n_neighbours)}
         central_atom_list = self.central_atom_list(structure)
         vertex_atom_list = self.vertex_atom_list(structure)
         central_atoms = [atom for atom in atoms if atom.index in central_atom_list]
