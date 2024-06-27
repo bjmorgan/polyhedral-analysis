@@ -21,7 +21,7 @@ setup(
     packages=find_packages( exclude=['docs', 'tests*'] ),
     license='MIT',
     python_requires='>=3.7',
-    install_requires=['numpy',
+    install_requires=['numpy<2.0',
                       'pymatgen>=2017.10.16',
                       'scipy', 
                       'coverage>=6.3',
