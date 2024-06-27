@@ -23,7 +23,7 @@ jobs:
             pip install -r requirements.txt
             pip install -U numpy
             pip install mypy
-            mypy --install-ypes
+            mypy --install-types
             pip install types-PyYAML
             pip install pytest
             pip install pytest-cov
