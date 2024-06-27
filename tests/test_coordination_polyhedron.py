@@ -165,6 +165,18 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         self.assertEqual(self.coordination_polyhedron.index,
                          self.coordination_polyhedron.central_atom.index)
 
+    def test_edge_vertex_indices(self):
+        mock_edge_graph = {
+            1: [2, 3, 4],
+            2: [1, 3, 4],
+            3: [1, 2, 4],
+            4: [1, 2, 3]
+        }
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.edge_graph', new_callable=PropertyMock) as mock_edge_graph_property:
+            mock_edge_graph_property.return_value = mock_edge_graph
+            expected_edges = ((1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4))
+            self.assertEqual(self.coordination_polyhedron.edge_vertex_indices(), expected_edges)
+
     def test_edge_graph_if_cached(self):
         edge_graph = {1: [2, 3, 4, 5],
                       2: [1, 3, 5, 6],
@@ -427,6 +439,57 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         
         with self.assertRaises(ValueError):
             self.coordination_polyhedron.radial_distortion_parameter(method="invalid")
+
+    def test_sharing_neighbour_lists(self):
+        mock_neighbours = {
+            1: (1,),
+            2: (1, 2),
+            3: (1, 2, 3),
+            4: (1, 2, 3, 4)
+        }
+        self.coordination_polyhedron.neighbours_by_index_and_shared_vertices = Mock(return_value=mock_neighbours)
+    
+        self.assertEqual(self.coordination_polyhedron.corner_sharing_neighbour_list(), (1,))
+        self.assertEqual(self.coordination_polyhedron.edge_sharing_neighbour_list(), (2,))
+        self.assertEqual(self.coordination_polyhedron.face_sharing_neighbour_list(), (3, 4))
+
+    def test_vertex_vector_projections(self):
+        mock_vertex_vectors = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [-1, 0, 0]
+        ])
+    
+        input_vectors = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [1, 1, 1]
+        ])
+    
+        expected_projections = np.array([
+            [1, 0, 1/np.sqrt(3)],
+            [0, 1, 1/np.sqrt(3)],
+            [0, 0, 1/np.sqrt(3)],
+            [-1, 0, -1/np.sqrt(3)]
+        ])
+    
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vertex_vectors):
+            projections = self.coordination_polyhedron.vertex_vector_projections(input_vectors)
+            np.testing.assert_array_almost_equal(projections, expected_projections)
+
+        # Test with a single vector
+        single_vector = np.array([1, 1, 1])
+        expected_single_projection = np.array([[1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3), -1/np.sqrt(3)]]).T
+    
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vertex_vectors):
+            single_projection = self.coordination_polyhedron.vertex_vector_projections(single_vector)
+            np.testing.assert_array_almost_equal(single_projection, expected_single_projection)
+
+        # Test with different reference
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vertex_vectors):
+            projections_central = self.coordination_polyhedron.vertex_vector_projections(input_vectors, reference='central_atom')
+            np.testing.assert_array_almost_equal(projections_central, expected_projections)
 
 if __name__ == '__main__':
     unittest.main()

@@ -426,26 +426,26 @@ class CoordinationPolyhedron:
             return NotImplemented
         return self.equal_edge_graph(other)
 
-    def vertex_vector_projections(self, vectors: np.ndarray) -> np.ndarray:
+    def vertex_vector_projections(self, vectors: np.ndarray, reference: str = 'centroid') -> np.ndarray:
         """
-        Calculate the projection of each centroid-to-vertex vector on one or more input vectors..
+        Calculate the projection of each vertex vector on one or more input vectors.
 
         Args:
-            vectors (np.array): A Nx3 numpy array, where each row is a vector used
-                                to calculate the projection. `vectors` can also be 
-                                a single length 3 array.
+            vectors (np.ndarray): A Nx3 numpy array, where each row is a vector used
+                                  to calculate the projection. `vectors` can also be
+                                  a single length 3 array.
+            reference (str, optional): The reference point for vertex vectors. 
+                                       Can be either 'centroid' (default) or 'central_atom'.
 
         Returns:
-            np.array: A (N_vertex x N_vector) dimension numpy array.
+            np.ndarray: A (N_vertex x N_vector) dimension numpy array.
 
         """
-        if len(vectors.shape) == 1:
-            vectors = np.array([vectors])
-        to_return = []
-        for point in self.abstract_geometry.points_wocs_ctwocc():
-            for vec in vectors:
-                to_return.append(cos_theta(vec, point))
-        return np.array(to_return).reshape(-1, vectors.shape[0])
+        vectors = np.atleast_2d(vectors)
+        vertex_vecs = self.vertex_vectors(reference=reference)
+        vectors_normalized = vectors / np.linalg.norm(vectors, axis=1)[:, np.newaxis]
+        projections = np.dot(vertex_vecs, vectors_normalized.T)
+        return projections
 
     def coordination_distances(self) -> List[float]:
         """
