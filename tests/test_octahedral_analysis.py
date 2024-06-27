@@ -4,10 +4,12 @@ from polyhedral_analysis.octahedral_analysis import check_octahedra
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_pairs
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_distances
 from polyhedral_analysis.octahedral_analysis import trans_vertex_vectors
+from polyhedral_analysis.octahedral_analysis import trans_vector_orthogonality
 from polyhedral_analysis.octahedral_analysis import isomer_is_trans, isomer_is_cis, isomer_is_fac, isomer_is_mer
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
 from collections import Counter
+from itertools import permutations
 import numpy as np
 
 class TestOctahedralAnalysis(unittest.TestCase):
@@ -169,14 +171,14 @@ class TestOctahedralAnalysis(unittest.TestCase):
 
     def test_trans_vertex_vectors(self):
         mock_polyhedron = Mock(spec=CoordinationPolyhedron)
-        mock_polyhedron.vertex_vectors = np.array([
+        mock_polyhedron.vertex_vectors = Mock(return_value=np.array([
             [1, 0, 0],   # 0
             [0, 1, 0],   # 1
             [0, 0, 1],   # 2
             [-1, 0, 0],  # 3
             [0, -1, 0],  # 4
             [0, 0, -1]   # 5
-        ])
+        ]))
         
         # Test cases with different orderings of trans pairs
         test_cases = [
@@ -244,6 +246,105 @@ class TestOctahedralAnalysis(unittest.TestCase):
             
             with self.assertRaises(ValueError):
                 trans_vertex_vectors(mock_polyhedron)
+
+    def test_trans_vector_orthogonality(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        
+        # Mock trans vectors for a perfect octahedron
+        mock_trans_vectors = [
+            np.array([2, 0, 0]),
+            np.array([0, 2, 0]),
+            np.array([0, 0, 2])
+        ]
+        
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra, \
+             patch('polyhedral_analysis.octahedral_analysis.trans_vertex_vectors') as mock_trans_vertex_vectors:
+            
+            mock_check_octahedra.return_value = None
+            mock_trans_vertex_vectors.return_value = mock_trans_vectors
+            
+            angles = trans_vector_orthogonality(mock_polyhedron)
+            
+            self.assertEqual(len(angles), 3)
+            for angle in angles:
+                self.assertAlmostEqual(angle, 0.0, places=6)
+            
+            mock_check_octahedra.assert_called_once()
+            mock_trans_vertex_vectors.assert_called_once()
+
+    def test_trans_vector_orthogonality_distorted(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        
+        # Mock trans vectors for a slightly distorted octahedron
+        mock_trans_vectors = [
+            np.array([2, 0, 0]),
+            np.array([0, 2, 0.1]),
+            np.array([0.1, 0.1, 2])  # Slightly off from perfect
+        ]
+        
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra, \
+             patch('polyhedral_analysis.octahedral_analysis.trans_vertex_vectors') as mock_trans_vertex_vectors:
+            
+            mock_check_octahedra.return_value = None
+            mock_trans_vertex_vectors.return_value = mock_trans_vectors
+            
+            angles = trans_vector_orthogonality(mock_polyhedron)
+            expected_angles = (2.8731459157778483, 5.724810452223508, 6.396811661684919)
+
+            # Sort both the calculated and expected angles
+            sorted_angles = sorted(angles)
+            sorted_expected = sorted(expected_angles)
+        
+            # Compare the sorted lists
+            for angle, expected_angle in zip(sorted_angles, sorted_expected):
+                self.assertAlmostEqual(angle, expected_angle, places=6)
+
+            mock_check_octahedra.assert_called_once()
+            mock_trans_vertex_vectors.assert_called_once()
+
+    def test_trans_vector_orthogonality_not_octahedron(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra:
+            mock_check_octahedra.side_effect = ValueError("Not an octahedron")
+            
+            with self.assertRaises(ValueError):
+                trans_vector_orthogonality(mock_polyhedron)
+
+    def test_trans_vector_orthogonality_permutation_invariance(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        
+        # Define mock trans vectors
+        v1 = np.array([2, 0, 0])
+        v2 = np.array([0, 2, 0.1])
+        v3 = np.array([0.1, 0.1, 2])  # Slightly distorted
+        
+        base_vectors = [v1, v2, v3]
+        expected_angles = (2.8731459157778483, 5.724810452223508, 6.396811661684919)
+
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra, \
+             patch('polyhedral_analysis.octahedral_analysis.trans_vertex_vectors') as mock_trans_vertex_vectors:
+
+            mock_check_octahedra.return_value = None
+
+            # Test all permutations of the vectors
+            all_angles = []
+            for perm in permutations(base_vectors):
+                mock_trans_vertex_vectors.return_value = list(perm)
+                angles = trans_vector_orthogonality(mock_polyhedron)
+                all_angles.append(tuple(sorted(angles)))  # Store as a sorted tuple
+
+            # Check that all permutations give the same angles
+            self.assertEqual(len(set(all_angles)), 1)
+
+            # Check that the angles match the expected values
+            for angles in all_angles:
+                self.assertEqual(len(angles), 3)  # Should always have 3 angles
+                np.testing.assert_allclose(sorted(angles), expected_angles, rtol=1e-6)
+
+            # Check that mock methods were called the correct number of times
+            self.assertEqual(mock_check_octahedra.call_count, 6)  # Once for each permutation
+            self.assertEqual(mock_trans_vertex_vectors.call_count, 6)  # Once for each permutation
 
 if __name__ == '__main__':
     unittest.main()

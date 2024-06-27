@@ -93,8 +93,8 @@ def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
     vertex_pairs = opposite_vertex_pairs(polyhedron, check=False)
     vectors = []
     for v1, v2 in vertex_pairs:
-        vector = polyhedron.vertex_vectors[polyhedron.vertex_internal_index_from_global_index(v2.index)] - \
-                 polyhedron.vertex_vectors[polyhedron.vertex_internal_index_from_global_index(v1.index)]
+        vector = polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v2.index)] - \
+                 polyhedron.vertex_vectors()[polyhedron.vertex_internal_index_from_global_index(v1.index)]
         vectors.append(vector)
     return vectors
 
@@ -172,3 +172,46 @@ def isomer_is_mer(polyhedron: CoordinationPolyhedron,
     """
     return not isomer_is_fac(polyhedron, check=check)
 
+def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
+                               check: bool = True) -> Tuple[float, float, float]:
+    """
+    For each trans pair vector, calculate the smallest angle between the vector and 
+    the plane defined by the other two vectors.
+
+    Args:
+        polyhedron (CoordinationPolyhedron): The polyhedron to be analysed.
+        check (bool, optional): Optional flag to set whether to check that this polyhedron
+            is an octahedron. Default is True.
+
+    Returns:
+        Tuple[float, float, float]: A tuple containing the three smallest angles (in degrees) 
+        between each vector and the plane defined by the other two vectors.
+
+    Raises:
+        ValueError: If the polyhedron is not recognized as an octahedron.
+
+    """
+    if check:
+        check_octahedra(polyhedron)
+    
+    trans_vectors = trans_vertex_vectors(polyhedron, check=False)
+    
+    angles = []
+    for i in range(3):
+        v1 = trans_vectors[i]
+        v2 = trans_vectors[(i+1)%3]
+        v3 = trans_vectors[(i+2)%3]
+        
+        # Calculate the normal vector to the plane containing v2 and v3
+        normal = np.cross(v2, v3)
+        normal = normal / np.linalg.norm(normal)  # Normalize the normal vector
+        # Calculate the angle between v1 and the normal
+        v1_normalized = v1 / np.linalg.norm(v1)
+        dot_product = np.dot(normal, v1_normalized)
+        angle = np.arccos(np.clip(abs(dot_product), -1.0, 1.0))
+        angle_degrees = np.degrees(angle)
+        angle_degrees = np.degrees(angle)
+        
+        angles.append(angle_degrees)
+    
+    return tuple(angles)
