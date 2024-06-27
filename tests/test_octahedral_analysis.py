@@ -3,10 +3,12 @@ from unittest.mock import Mock, patch
 from polyhedral_analysis.octahedral_analysis import check_octahedra
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_pairs
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_distances
+from polyhedral_analysis.octahedral_analysis import trans_vertex_vectors
 from polyhedral_analysis.octahedral_analysis import isomer_is_trans, isomer_is_cis, isomer_is_fac, isomer_is_mer
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
 from collections import Counter
+import numpy as np
 
 class TestOctahedralAnalysis(unittest.TestCase):
 
@@ -164,6 +166,84 @@ class TestOctahedralAnalysis(unittest.TestCase):
             self.assertEqual(isomer_is_mer(mock_polyhedron), False)
             mock_isomer_is_fac.return_value = False
             self.assertEqual(isomer_is_mer(mock_polyhedron), True)
+
+    def test_trans_vertex_vectors(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        mock_polyhedron.vertex_vectors = np.array([
+            [1, 0, 0],   # 0
+            [0, 1, 0],   # 1
+            [0, 0, 1],   # 2
+            [-1, 0, 0],  # 3
+            [0, -1, 0],  # 4
+            [0, 0, -1]   # 5
+        ])
+        
+        # Test cases with different orderings of trans pairs
+        test_cases = [
+            # Case 1: Sequential order
+            {
+                'vertex_pairs': [(Mock(index=0), Mock(index=3)),
+                                 (Mock(index=1), Mock(index=4)),
+                                 (Mock(index=2), Mock(index=5))],
+                'expected_vectors': [np.array([-2, 0, 0]),
+                                     np.array([0, -2, 0]),
+                                     np.array([0, 0, -2])]
+            },
+            # Case 2: Non-sequential order
+            {
+                'vertex_pairs': [(Mock(index=2), Mock(index=5)),
+                                 (Mock(index=0), Mock(index=3)),
+                                 (Mock(index=1), Mock(index=4))],
+                'expected_vectors': [np.array([0, 0, -2]),
+                                     np.array([-2, 0, 0]),
+                                     np.array([0, -2, 0])]
+            },
+            # Case 3: Reversed pairs
+            {
+                'vertex_pairs': [(Mock(index=3), Mock(index=0)),
+                                 (Mock(index=4), Mock(index=1)),
+                                 (Mock(index=5), Mock(index=2))],
+                'expected_vectors': [np.array([2, 0, 0]),
+                                     np.array([0, 2, 0]),
+                                     np.array([0, 0, 2])]
+            },
+            # Case 4: Mixed order and direction
+            {
+                'vertex_pairs': [(Mock(index=1), Mock(index=4)),
+                                 (Mock(index=5), Mock(index=2)),
+                                 (Mock(index=3), Mock(index=0))],
+                'expected_vectors': [np.array([0, -2, 0]),
+                                     np.array([0, 0, 2]),
+                                     np.array([2, 0, 0])]
+            }
+        ]
+        
+        for case in test_cases:
+            with self.subTest(vertex_pairs=case['vertex_pairs']):
+                with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra, \
+                     patch('polyhedral_analysis.octahedral_analysis.opposite_vertex_pairs') as mock_opposite_vertex_pairs:
+                    
+                    mock_check_octahedra.return_value = None
+                    mock_opposite_vertex_pairs.return_value = case['vertex_pairs']
+                    
+                    mock_polyhedron.vertex_internal_index_from_global_index = lambda x: x
+                    
+                    vectors = trans_vertex_vectors(mock_polyhedron)
+                    
+                    for v, e in zip(vectors, case['expected_vectors']):
+                        np.testing.assert_array_almost_equal(v, e)
+                    
+                    mock_check_octahedra.assert_called_once()
+                    mock_opposite_vertex_pairs.assert_called_once()
+
+    def test_trans_vertex_vectors_not_octahedron(self):
+        mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra:
+            mock_check_octahedra.side_effect = ValueError("Not an octahedron")
+            
+            with self.assertRaises(ValueError):
+                trans_vertex_vectors(mock_polyhedron)
 
 if __name__ == '__main__':
     unittest.main()

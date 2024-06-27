@@ -72,6 +72,32 @@ def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
                       for vp in opposite_vertex_pairs(polyhedron, check=check))
     return (distances[0], distances[1], distances[2])
 
+def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
+                         check: bool = True) -> List[np.ndarray]:
+    """For an octahedral polyhedron, return the vectors between pairs of trans vertices.
+
+    Args:
+        polyhedron (:obj: `CoordinationPolyhedron`): The polyhedron to be analysed.
+        check (Optional, :obj: `bool`): Optional flag to set whether to check that this polyhedron
+            is an octahedron. Default is `True`.
+
+    Returns:
+        List[np.ndarray]: A list of three numpy arrays, each representing a vector
+                          between a pair of trans vertices.
+
+    Raises:
+        ValueError: If the polyhedron is not recognized as an octahedron.
+    """
+    if check:
+        check_octahedra(polyhedron)
+    vertex_pairs = opposite_vertex_pairs(polyhedron, check=False)
+    vectors = []
+    for v1, v2 in vertex_pairs:
+        vector = polyhedron.vertex_vectors[polyhedron.vertex_internal_index_from_global_index(v2.index)] - \
+                 polyhedron.vertex_vectors[polyhedron.vertex_internal_index_from_global_index(v1.index)]
+        vectors.append(vector)
+    return vectors
+
 def isomer_is_trans(polyhedron: CoordinationPolyhedron,
              check: bool = True) -> bool:
     """For an octahedral polyhedron with 2+4 coordination, return True for trans coordination,
