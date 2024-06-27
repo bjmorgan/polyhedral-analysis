@@ -278,5 +278,22 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         self.assertEqual(polyhedron_j.neighbours_by_index_and_shared_vertices(), 
                          {polyhedron_i.index: (5, 6)})
 
+    def test_vertex_internal_index_from_global_index(self):
+        # Set up mock vertex indices
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_indices', new_callable=PropertyMock) as mock_vertex_indices:
+            mock_vertex_indices.return_value = [10, 20, 30, 40, 50, 60]
+        
+            # Test successful cases
+            self.assertEqual(self.coordination_polyhedron.vertex_internal_index_from_global_index(10), 0)
+            self.assertEqual(self.coordination_polyhedron.vertex_internal_index_from_global_index(30), 2)
+            self.assertEqual(self.coordination_polyhedron.vertex_internal_index_from_global_index(60), 5)
+        
+            # Test case where global index doesn't exist
+            with self.assertRaises(ValueError):
+                self.coordination_polyhedron.vertex_internal_index_from_global_index(70)
+        
+            # Verify that vertex_indices was called
+            mock_vertex_indices.assert_called()
+
 if __name__ == '__main__':
     unittest.main()

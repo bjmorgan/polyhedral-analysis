@@ -130,6 +130,13 @@ class CoordinationPolyhedron:
             self.update_vertex_neighbours()
         return self._edge_graph
 
+    def edge_vertex_indices(self) -> Tuple[Tuple[int, int], ...]:
+        edge_pairs = set()
+        for v1, v2_list in self.edge_graph.items():
+            for v2 in v2_list:
+                edge_pairs.add(tuple(sorted([v1, v2])))
+        return sorted(tuple(edge_pairs))
+
     @property
     def abstract_geometry(self) -> AbstractGeometry:
         if not self._abstract_geometry:
@@ -526,6 +533,26 @@ class CoordinationPolyhedron:
         """
         return [v for v in self.vertices if v.index in vertex_indices]
 
+    def vertex_internal_index_from_global_index(self,
+                                                vertex_global_index: int) -> int:
+        """
+        Returns the internal index for the vertex with a given global index.
+
+        Args:
+            vertex_global_index (int): The global index for a given vertex.
+
+        Returns:
+            int: the internal index for the corresponding vertex.
+
+        Raises:
+            ValueError: If this polyhedron does not have a vertex with a global
+                index equal to `vertex_global_index`.
+
+        """
+        try:
+            return self.vertex_indices.index(vertex_global_index)
+        except ValueError:
+            raise ValueError(f"This polyhedron does not have a vertex with global index {vertex_global_index}")
 
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
