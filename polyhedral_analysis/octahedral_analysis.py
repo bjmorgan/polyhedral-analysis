@@ -192,7 +192,7 @@ def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
     if check:
         check_octahedra(polyhedron)
     
-    trans_vectors = trans_vertex_vectors(polyhedron, check=False)
+    trans_vectors: List[np.ndarray] = trans_vertex_vectors(polyhedron, check=False)
     
     angles = []
     for i in range(3):
@@ -208,7 +208,6 @@ def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
         dot_product = np.dot(normal, v1_normalized)
         angle = np.arccos(np.clip(abs(dot_product), -1.0, 1.0))
         angle_degrees = np.degrees(angle)
-        
         angles.append(angle_degrees)
     
     return tuple(angles)

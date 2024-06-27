@@ -4,8 +4,8 @@ from fnmatch import fnmatch
 from monty.io import zopen  # type: ignore
 import json
 import os
-from pymatgen.core.sites import Site
-from pymatgen.core.lattice import Lattice
+from pymatgen.core.sites import Site  # type: ignore[import]
+from pymatgen.core.lattice import Lattice  # type: ignore[import]
 from typing import List, Dict, Optional, Union, Any
 import numpy as np  # type: ignore
 

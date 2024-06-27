@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pymatgen.io.vasp import Xdatcar # type: ignore
-from pymatgen.core.structure import Structure
+from pymatgen.core.structure import Structure # type: ignore
 from polyhedral_analysis.configuration import Configuration
 from polyhedral_analysis.utils import flatten
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
@@ -11,9 +11,21 @@ import copy
 from monty.io import zopen # type: ignore
 import pickle
 import multiprocessing
-from tqdm import tqdm, tqdm_notebook # type: ignore
+from tqdm import tqdm
+from tqdm.notebook import tqdm as tqdm_notebook
 from functools import partial
-from typing import List, Optional, Union, Any, Dict
+from typing import List, Optional, Union, Callable, Iterator, Any, TypeVar, Dict
+
+T = TypeVar('T')
+ProgressBarType = Callable[[Iterator[T]], Iterator[T]]
+
+def get_progress_bar(progress: Union[bool, str]) -> ProgressBarType:
+    if progress == 'notebook':
+        return lambda x: tqdm_notebook(x)  # type: ignore
+    elif progress:
+        return lambda x: tqdm(x)  # type: ignore
+    else:
+        return iter
 
 class Trajectory:
 
@@ -65,23 +77,20 @@ class Trajectory:
         """
         args = [{'structure': structure, 
                  'recipes': recipes} for structure in structures]
+        progress_bar = get_progress_bar(progress)
+        progress_kwargs: dict[str, Any] = {}
         if progress:
             progress_kwargs = {'total': len(args),
                                'unit': ' configurations'}
-            if progress == 'notebook':
-                pbar = tqdm_notebook
-            else:
-                pbar = tqdm
-        else:
-            pbar = iter
+
         # generate polyhedra configurations
         if ncores:
             with multiprocessing.Pool(ncores) as p:
-                configurations = list(pbar(p.imap(cls._get_configuration, args), 
-                                                  **progress_kwargs))
+                configurations = list(progress_bar(p.imap(cls._get_configuration, args), 
+                                                   **progress_kwargs))
         else:
-            configurations = list(pbar(map(cls._get_configuration, args),
-                                           **progress_kwargs))
+            configurations = list(progress_bar(map(cls._get_configuration, args),
+                                               **progress_kwargs))
         return cls(structures=structures, 
                    configurations=configurations)
 

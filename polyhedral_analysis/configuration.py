@@ -1,6 +1,6 @@
 from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.utils import flatten, prune_neighbour_list, lattice_mc_string
-from pymatgen.core.structure import Structure
+from pymatgen.core.structure import Structure # type: ignore[import]
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from typing import List, Union, Dict, Tuple

@@ -3,16 +3,16 @@ from __future__ import annotations
 from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.symmetry_measure import symmetry_measures_from_coordination
 from polyhedral_analysis.orientation_parameters import cos_theta
+from pymatgen.core.sites import Site  # type: ignore[import]
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry  # type: ignore
 from pymatgen.util.coord import pbc_shortest_vectors  # type: ignore
-import numpy as np  # type: ignore
-from scipy.spatial import ConvexHull  # type: ignore
+import numpy as np 
+from scipy.spatial import ConvexHull  # type: ignore[import-untyped]
 from itertools import combinations
 import vg  # type: ignore
 from collections import Counter
-from typing import List, Optional, Dict, Union, Set, Tuple
+from typing import List, Optional, Dict, Union, Set, Tuple, Literal
 import typing
-from pymatgen.core.sites import Site
 
 class CoordinationPolyhedron:
 
@@ -152,11 +152,12 @@ class CoordinationPolyhedron:
         return self._edge_graph
 
     def edge_vertex_indices(self) -> Tuple[Tuple[int, int], ...]:
-        edge_pairs = set()
+        edge_pairs: Set[Tuple[int, int]] = set()
         for v1, v2_list in self.edge_graph.items():
             for v2 in v2_list:
-                edge_pairs.add(tuple(sorted([v1, v2])))
-        return sorted(tuple(edge_pairs))
+                edge = (min(v1, v2), max(v1, v2))
+                edge_pairs.add(edge)
+        return tuple(sorted(edge_pairs))
 
     @property
     def abstract_geometry(self) -> AbstractGeometry:
@@ -498,7 +499,7 @@ class CoordinationPolyhedron:
                  for point in vertex_vectors]
         phi = [vg.signed_angle(np.array([1.0, 0.0, 0.0]), point,
                                look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
-               for point in self.vertex_vectors]
+               for point in vertex_vectors]
         if return_distance:
             distance = [vg.magnitude(point) for point in vertex_vectors]
             return list(zip(theta, phi, distance))

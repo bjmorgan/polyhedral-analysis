@@ -1,11 +1,10 @@
 from functools import partial
 import numpy as np # type: ignore
+from pymatgen.core import Site, Structure  # type: ignore[import]
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.utils import flatten
-from pymatgen.core.structure import Structure
-from pymatgen.core.sites import Site
-from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any, Protocol
 from polyhedral_analysis.atom import Atom
+from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any, Protocol
 
 class IndexGenerator(Protocol):
     def __call__(self, structure: Structure) -> Sequence[int]: ...
