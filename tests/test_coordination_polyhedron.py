@@ -2,6 +2,7 @@ import unittest
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
+from pymatgen.core import Site
 from unittest.mock import Mock, patch, PropertyMock, call
 import copy
 import numpy as np
@@ -497,6 +498,37 @@ class TestCoordinationPolyhedron(unittest.TestCase):
     
         distances = self.coordination_polyhedron.coordination_distances()
         self.assertEqual(distances, mock_distances)
+
+    def test_from_sites(self):
+        mock_central_site = Mock()
+        mock_vertex_sites = [Mock() for _ in range(3)]
+    
+        with patch('polyhedral_analysis.coordination_polyhedron.Atom') as mock_atom:
+            def create_mock_atom(index, site, label=None):
+                mock = Mock(spec=Atom)
+                mock.index = index
+                mock.site = site
+                mock.label = label if label else site.species_string
+                mock.in_polyhedra = []
+                mock._neighbours = {}
+                mock.__lt__ = lambda self, other: self.index < other.index
+                return mock
+        
+            mock_atom.side_effect = create_mock_atom
+        
+            polyhedron = CoordinationPolyhedron.from_sites(mock_central_site, mock_vertex_sites)
+        
+            self.assertEqual(polyhedron.central_atom.index, -1)
+            self.assertEqual(polyhedron.central_atom.site, mock_central_site)
+            self.assertEqual(len(polyhedron.vertices), 3)
+            for i, vertex in enumerate(polyhedron.vertices):
+                self.assertEqual(vertex.index, i)
+                self.assertEqual(vertex.site, mock_vertex_sites[i])
+                self.assertEqual(vertex.in_polyhedra, [polyhedron])
+                self.assertEqual(vertex._neighbours, {})
+
+            # Check that vertices are sorted
+            self.assertEqual([v.index for v in polyhedron.vertices], [0, 1, 2])
 
 if __name__ == '__main__':
     unittest.main()
