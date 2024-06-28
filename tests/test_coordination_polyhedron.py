@@ -491,5 +491,12 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             projections_central = self.coordination_polyhedron.vertex_vector_projections(input_vectors, reference='central_atom')
             np.testing.assert_array_almost_equal(projections_central, expected_projections)
 
+    def test_coordination_distances(self):
+        mock_distances = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        self.coordination_polyhedron.central_atom.distance = Mock(side_effect=mock_distances)
+    
+        distances = self.coordination_polyhedron.coordination_distances()
+        self.assertEqual(distances, mock_distances)
+
 if __name__ == '__main__':
     unittest.main()
