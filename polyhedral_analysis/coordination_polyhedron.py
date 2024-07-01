@@ -285,16 +285,18 @@ class CoordinationPolyhedron:
     def vertex_count(self) -> typing.Counter[Union[str, None]]:
         return Counter([v.label for v in self.vertices])
 
-    def vertex_distances(self, reference: Literal['central_atom', 'centroid'] = 'central_atom') -> Tuple[float, ...]:
+    def vertex_distances(self,
+                         reference: Literal['central_atom', 'centroid'] = 'central_atom'
+                        ) -> np.ndarray:
         """
-        Returns a tuple of distances from either the central atom or the centroid to the vertex atoms.
+        Returns an array of distances from either the central atom or the centroid to the vertex atoms.
  
         Args:
             reference (str, optional): The reference point for distance calculations. 
                 Can be either 'central_atom' (default) or 'centroid'.
 
         Returns:
-            Tuple[float, ...]: A tuple of distances between each vertex and the reference point.
+            np.ndarray[float, ...]: An array of distances between each vertex and the reference point.
 
         Raises:
             ValueError: If an invalid reference point is provided.
@@ -304,7 +306,7 @@ class CoordinationPolyhedron:
             raise ValueError("Invalid reference point. Use 'central_atom' or 'centroid'.")
         vectors = self.vertex_vectors(reference=reference)
         distances = np.linalg.norm(vectors, axis=1)
-        return tuple(distances)
+        return distances
 
     def vertex_distances_and_labels(self,
                                     reference: Literal['central_atom', 'centroid'] = 'central_atom'
@@ -615,7 +617,7 @@ class CoordinationPolyhedron:
         return self.central_atom.coords - self.centroid()
 
     def radial_distortion_parameter(self, 
-                                    reference: str = 'centroid', 
+                                    reference: Literal['central_atom', 'centroid'] = 'centroid', 
                                     normalize: bool = True,
                                     method: Literal['MSD', 'MAD'] = 'MSD') -> float:
         """
@@ -628,11 +630,11 @@ class CoordinationPolyhedron:
         and d_mean is their mean value.
 
         Args:
-            reference (str, optional): The reference point for calculating distances. 
+            reference (Literal['central_atom', 'centroid'], optional): The reference point for calculating distances. 
                 Can be either 'centroid' (default) or 'central_atom'.
             normalize (bool, optional): Whether to normalize the distortion parameter
                 with respect to the mean vertex distance. Default is True.
-            method (str, optional): The method to use for calculating distortion.
+            method (Literal['MSD', 'MAD'], optional): The method to use for calculating distortion.
                 Can be either 'MSD' (Mean Squared Deviation, default) or 
                 'MAD' (Mean Absolute Deviation).
 

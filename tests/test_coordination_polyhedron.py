@@ -101,17 +101,15 @@ class TestCoordinationPolyhedron(unittest.TestCase):
 
     def test_vertex_distances(self):
         mock_vectors = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3], [3, 4, 0]])
-        expected_distances = (1.0, 2.0, 3.0, 5.0)
+        expected_distances = np.array([1.0, 2.0, 3.0, 5.0])
         with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vectors):
             # Test with default reference (central_atom)
             distances = self.coordination_polyhedron.vertex_distances()
             print(distances)
-            np.testing.assert_almost_equal(distances, expected_distances)
-            self.assertIsInstance(distances, tuple)
+            np.testing.assert_equal(distances, expected_distances)
             # Test with centroid reference
             distances_centroid = self.coordination_polyhedron.vertex_distances(reference='centroid')
-            np.testing.assert_almost_equal(distances_centroid, expected_distances)
-            self.assertIsInstance(distances_centroid, tuple)
+            np.testing.assert_equal(distances_centroid, expected_distances)
         # Test with invalid reference
         with self.assertRaises(ValueError):
             self.coordination_polyhedron.vertex_distances(reference='invalid')
