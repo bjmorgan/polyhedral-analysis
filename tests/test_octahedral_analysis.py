@@ -5,6 +5,7 @@ from polyhedral_analysis.octahedral_analysis import opposite_vertex_pairs
 from polyhedral_analysis.octahedral_analysis import opposite_vertex_distances
 from polyhedral_analysis.octahedral_analysis import trans_vertex_vectors
 from polyhedral_analysis.octahedral_analysis import trans_vector_orthogonality
+from polyhedral_analysis.octahedral_analysis import adjacent_vertex_pairs
 from polyhedral_analysis.octahedral_analysis import isomer_is_trans, isomer_is_cis, isomer_is_fac, isomer_is_mer
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
@@ -339,6 +340,58 @@ class TestOctahedralAnalysis(unittest.TestCase):
             # Check that mock methods were called the correct number of times
             self.assertEqual(mock_check_octahedra.call_count, 6)  # Once for each permutation
             self.assertEqual(mock_trans_vertex_vectors.call_count, 6)  # Once for each permutation
+
+class TestAdjacentVertexPairs(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_polyhedron = Mock(spec=CoordinationPolyhedron)
+        mock_vertices = [Mock(spec=Atom) for i in range(6)]
+        for i in range(6):
+            mock_vertices[i].index = i
+        self.mock_polyhedron.vertices = mock_vertices
+        self.mock_polyhedron.edge_vertex_indices.return_value = (
+            (0, 1), (0, 2), (0, 3), (0, 4),
+            (1, 2), (1, 4), (1, 5),
+            (2, 3), (2, 5),
+            (3, 4), (3, 5),
+            (4, 5)
+        )
+
+
+    def test_adjacent_vertex_pairs_valid_octahedron(self):
+        expected_pairs = [
+            (self.mock_polyhedron.vertices[0], self.mock_polyhedron.vertices[1]),
+            (self.mock_polyhedron.vertices[0], self.mock_polyhedron.vertices[2]),
+            (self.mock_polyhedron.vertices[0], self.mock_polyhedron.vertices[3]),
+            (self.mock_polyhedron.vertices[0], self.mock_polyhedron.vertices[4]),
+            (self.mock_polyhedron.vertices[1], self.mock_polyhedron.vertices[2]),
+            (self.mock_polyhedron.vertices[1], self.mock_polyhedron.vertices[4]),
+            (self.mock_polyhedron.vertices[1], self.mock_polyhedron.vertices[5]),
+            (self.mock_polyhedron.vertices[2], self.mock_polyhedron.vertices[3]),
+            (self.mock_polyhedron.vertices[2], self.mock_polyhedron.vertices[5]),
+            (self.mock_polyhedron.vertices[3], self.mock_polyhedron.vertices[4]),
+            (self.mock_polyhedron.vertices[3], self.mock_polyhedron.vertices[5]),
+            (self.mock_polyhedron.vertices[4], self.mock_polyhedron.vertices[5])
+        ]
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check:
+            result = adjacent_vertex_pairs(self.mock_polyhedron)
+        self.assertEqual(result, expected_pairs)
+        mock_check.assert_called_once_with(self.mock_polyhedron)
+
+    def test_adjacent_vertex_pairs_no_check(self):
+        self.mock_polyhedron.edge_vertex_indices.return_value = ((0, 1), (1, 2))
+
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check:
+            adjacent_vertex_pairs(self.mock_polyhedron, check=False)
+
+        mock_check.assert_not_called()
+
+    def test_adjacent_vertex_pairs_invalid_vertex_index(self):
+        self.mock_polyhedron.edge_vertex_indices.return_value = ((0, 6),)  # Invalid index 6
+
+        with patch('polyhedral_analysis.octahedral_analysis.check_octahedra'):
+            with self.assertRaises(StopIteration):
+                adjacent_vertex_pairs(self.mock_polyhedron)
 
 if __name__ == '__main__':
     unittest.main()
