@@ -100,23 +100,45 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             np.testing.assert_equal(angles, [90.0, 90.0, 180.0])
 
     def test_vertex_distances(self):
-        mock_vertex_distances = [2.0, 1.0, 1.0, 1.0, 1.0, 1.5]
-        self.coordination_polyhedron.central_atom.distance = \
-            Mock(side_effect=mock_vertex_distances)
-        vertex_distances = self.coordination_polyhedron.vertex_distances()
-        np.testing.assert_equal(vertex_distances, mock_vertex_distances)
+        mock_vectors = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3], [3, 4, 0]])
+        expected_distances = (1.0, 2.0, 3.0, 5.0)
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vectors):
+            # Test with default reference (central_atom)
+            distances = self.coordination_polyhedron.vertex_distances()
+            print(distances)
+            np.testing.assert_almost_equal(distances, expected_distances)
+            self.assertIsInstance(distances, tuple)
+            # Test with centroid reference
+            distances_centroid = self.coordination_polyhedron.vertex_distances(reference='centroid')
+            np.testing.assert_almost_equal(distances_centroid, expected_distances)
+            self.assertIsInstance(distances_centroid, tuple)
+        # Test with invalid reference
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.vertex_distances(reference='invalid')
 
     def test_vertex_distances_and_labels(self):
-        mock_vertex_distances = (2.0, 1.0, 1.0, 1.0, 1.0, 1.5)
-        mock_labels = ['O', 'O', 'F', 'F', 'F', 'F']
-        self.coordination_polyhedron.central_atom = Mock(spec=Atom)
-        self.coordination_polyhedron.vertex_distances = \
-            Mock(return_value=mock_vertex_distances)
+        # Mock the vertex_distances method and vertex_labels property
+        mock_distances = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        mock_labels = ['A', 'B', 'C', 'D', 'E', 'F']
+        
+        self.coordination_polyhedron.vertex_distances = Mock(return_value=mock_distances)
         with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_labels', new_callable=PropertyMock) as mock_vertex_labels:
-            mock_vertex_labels.__get__ = Mock(return_value=mock_labels)
-            output = self.coordination_polyhedron.vertex_distances_and_labels()
-        np.testing.assert_equal(output,
-                                list(zip(mock_vertex_distances, mock_labels)))
+            mock_vertex_labels.return_value = mock_labels
+
+            # Test with default reference (central_atom)
+            result = self.coordination_polyhedron.vertex_distances_and_labels()
+            expected = ((1.0, 'A'), (2.0, 'B'), (3.0, 'C'), (4.0, 'D'), (5.0, 'E'), (6.0, 'F'))
+            self.assertEqual(result, expected)
+            self.coordination_polyhedron.vertex_distances.assert_called_with(reference='central_atom')
+
+            # Test with centroid reference
+            result_centroid = self.coordination_polyhedron.vertex_distances_and_labels(reference='centroid')
+            self.assertEqual(result_centroid, expected)
+            self.coordination_polyhedron.vertex_distances.assert_called_with(reference='centroid')
+
+            # Test with invalid reference
+            with self.assertRaises(ValueError):
+                self.coordination_polyhedron.vertex_distances_and_labels(reference='invalid')
 
     def test_update_vertex_neighbours(self):
         with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.edge_graph', new_callable=PropertyMock) as mock_edge_graph:
@@ -373,51 +395,27 @@ class TestCoordinationPolyhedron(unittest.TestCase):
 
     def test_radial_distortion_parameter(self):
         # Mock the vertex_vectors method
-        mock_vectors = np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 2.0, 0.0],
-            [0.0, 0.0, 3.0],
-            [-1.0, 0.0, 0.0]
-        ])
-        self.coordination_polyhedron.vertex_vectors = Mock(return_value=mock_vectors)
-
-        # Calculate expected distortions
-        distances = np.array([1.0, 2.0, 3.0, 1.0])
-        d_mean = np.mean(distances)
-        relative_deviations = (distances - d_mean) / d_mean
-        
-        expected_mad_normalized = np.mean(np.abs(relative_deviations))
-        expected_msd_normalized = np.mean(relative_deviations**2)
-        expected_mad_non_normalized = np.mean(np.abs(distances - d_mean))
-        expected_msd_non_normalized = np.mean((distances - d_mean)**2)
+        mock_distances = np.array([1.0, 2.0, 3.0, 4.0])
+        self.coordination_polyhedron.vertex_distances = Mock(return_value=mock_distances)
 
         # Test MSD (default)
-        self.assertAlmostEqual(
-            self.coordination_polyhedron.radial_distortion_parameter(),
-            expected_msd_normalized
-        )
+        msd_normalized = self.coordination_polyhedron.radial_distortion_parameter()
+        self.assertAlmostEqual(msd_normalized, 0.2, places=6)
 
         # Test MAD
-        self.assertAlmostEqual(
-            self.coordination_polyhedron.radial_distortion_parameter(method='MAD'),
-            expected_mad_normalized
-        )
+        mad_normalized = self.coordination_polyhedron.radial_distortion_parameter(method='MAD')
+        self.assertAlmostEqual(mad_normalized, 0.4, places=6)
 
         # Test non-normalized MSD
-        self.assertAlmostEqual(
-            self.coordination_polyhedron.radial_distortion_parameter(normalize=False),
-            expected_msd_non_normalized
-        )
+        msd_non_normalized = self.coordination_polyhedron.radial_distortion_parameter(normalize=False)
+        self.assertAlmostEqual(msd_non_normalized, 1.25, places=6)
 
         # Test non-normalized MAD
-        self.assertAlmostEqual(
-            self.coordination_polyhedron.radial_distortion_parameter(normalize=False, method='MAD'),
-            expected_mad_non_normalized
-        )
+        mad_non_normalized = self.coordination_polyhedron.radial_distortion_parameter(normalize=False, method='MAD')
+        self.assertAlmostEqual(mad_non_normalized, 1.0, places=6)
 
-
-        # Verify that vertex_vectors was called
-        self.coordination_polyhedron.vertex_vectors.assert_called_with(reference='centroid')
+        # Verify that vertex_distances was called with the correct reference
+        self.coordination_polyhedron.vertex_distances.assert_called_with(reference='centroid')
 
     def test_radial_distortion_parameter_perfect_polyhedron(self):
         # Mock a perfect polyhedron where all vertices are equidistant from the reference
@@ -493,11 +491,14 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             np.testing.assert_array_almost_equal(projections_central, expected_projections)
 
     def test_coordination_distances(self):
-        mock_distances = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-        self.coordination_polyhedron.central_atom.distance = Mock(side_effect=mock_distances)
+        mock_distances = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
     
-        distances = self.coordination_polyhedron.coordination_distances()
-        self.assertEqual(distances, mock_distances)
+        with patch.object(self.coordination_polyhedron, 'vertex_distances', return_value=mock_distances) as mock_vertex_distances:
+            distances = self.coordination_polyhedron.coordination_distances()
+        
+            self.assertEqual(distances, list(mock_distances))
+            self.assertIsInstance(distances, list)
+            mock_vertex_distances.assert_called_once_with(reference='central_atom')
 
     def test_from_sites(self):
         mock_central_site = Mock()

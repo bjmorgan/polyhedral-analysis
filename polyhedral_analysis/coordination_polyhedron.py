@@ -285,33 +285,49 @@ class CoordinationPolyhedron:
     def vertex_count(self) -> typing.Counter[Union[str, None]]:
         return Counter([v.label for v in self.vertices])
 
-    def vertex_distances(self) -> Tuple[float, ...]:
+    def vertex_distances(self, reference: Literal['central_atom', 'centroid'] = 'central_atom') -> Tuple[float, ...]:
         """
-        Returns a tuple of distances from the central atom to the vertex atoms.
-
+        Returns a tuple of distances from either the central atom or the centroid to the vertex atoms.
+ 
         Args:
-            None
+            reference (str, optional): The reference point for distance calculations. 
+                Can be either 'central_atom' (default) or 'centroid'.
 
         Returns:
-            tuple(float): A tuple of distances between each vertex and the central atom..
+            Tuple[float, ...]: A tuple of distances between each vertex and the reference point.
+
+        Raises:
+            ValueError: If an invalid reference point is provided.
 
         """
-        distances = tuple(self.central_atom.distance(v) for v in self.vertices)
-        return distances
+        if reference not in ['central_atom', 'centroid']:
+            raise ValueError("Invalid reference point. Use 'central_atom' or 'centroid'.")
+        vectors = self.vertex_vectors(reference=reference)
+        distances = np.linalg.norm(vectors, axis=1)
+        return tuple(distances)
 
-    def vertex_distances_and_labels(self) -> Tuple[Tuple[float, Optional[str]], ...]:
+    def vertex_distances_and_labels(self,
+                                    reference: Literal['central_atom', 'centroid'] = 'central_atom'
+                                    ) -> Tuple[Tuple[float, Optional[str]], ...]:
         """
-        Returns a tuple of distances and species labels from the central atom to the vertex atoms.
+        Returns a tuple of distances and species labels from the reference point to the vertex atoms.
 
         Args:
-            None
+            reference (str, optional): The reference point for distance calculations. 
+                Can be either 'central_atom' (default) or 'centroid'.
 
         Returns:
-            tuple(tuple(float, str)): A tuple of length-2 tuples, containing for each vertex the
-                distance from the central atom and the species label of the vertex atom.
+            Tuple[Tuple[float, Optional[str]], ...]: A tuple of length-2 tuples, containing for each vertex the
+                distance from the reference point and the species label of the vertex atom.
+
+        Raises:
+            ValueError: If an invalid reference point is provided.
 
         """
-        return tuple(zip(self.vertex_distances(),
+        if reference not in ['central_atom', 'centroid']:
+            raise ValueError("Invalid reference point. Use 'central_atom' or 'centroid'.")
+    
+        return tuple(zip(self.vertex_distances(reference=reference),
                          self.vertex_labels))
 
     def equal_vertices(self, other: object) -> bool:
@@ -449,16 +465,18 @@ class CoordinationPolyhedron:
 
     def coordination_distances(self) -> List[float]:
         """
-        List of distances from the central atom to the vertex atoms.
+        Returns a list of distances from the central atom to the vertex atoms.
+
+        This method is a wrapper around vertex_distances() that maintains backward compatibility
+        and returns a list instead of a tuple.
 
         Args:
             None
 
         Returns:
-            list: List of distances.
-
+            List[float]: A list of distances between each vertex and the central atom.
         """
-        return [self.central_atom.distance(v) for v in self.vertices]
+        return list(self.vertex_distances(reference='central_atom'))
 
     def angles(self) -> List[float]:
         """
@@ -626,8 +644,7 @@ class CoordinationPolyhedron:
         """
         if method not in ['MSD', 'MAD']:
             raise ValueError("Invalid method. Use 'MSD' or 'MAD'.")
-        vectors = self.vertex_vectors(reference=reference)
-        distances = np.linalg.norm(vectors, axis=1)
+        distances = self.vertex_distances(reference=reference)
         d_mean = np.mean(distances)
         if normalize:
             relative_deviations = (distances - d_mean) / d_mean
