@@ -1,13 +1,9 @@
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import numpy as np # type: ignore
 
 # Functions for analysing octahedra
-
-VertexPairs = Tuple[Tuple[Atom, Atom],
-                    Tuple[Atom, Atom],
-                    Tuple[Atom, Atom]]
 
 def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
     """
@@ -28,8 +24,36 @@ def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
     if polyhedron.best_fit_geometry['geometry'] != 'Octahedron':
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
+def adjacent_vertex_pairs(polyhedron: CoordinationPolyhedron,
+                          check: bool = True) -> List[Tuple[Atom, Atom]]:
+    """
+    Find pairs of adjacent vertices in an octahedral polyhedron.
+
+    Args:
+        polyhedron (CoordinationPolyhedron): The polyhedron to be analysed.
+        check (bool, optional): Whether to check if the polyhedron is octahedral. Default is True.
+
+    Returns:
+        List[Tuple[Atom, Atom]]: A list of tuples, each containing a pair of adjacent Atom objects.
+
+    Raises:
+        ValueError: If the polyhedron is not recognized as an octahedron.
+    """
+    if check:
+        check_octahedra(polyhedron)
+
+    edge_indices = polyhedron.edge_vertex_indices()
+    adjacent_pairs = []
+
+    for i, j in edge_indices:
+        atom_i = next(v for v in polyhedron.vertices if v.index == i)
+        atom_j = next(v for v in polyhedron.vertices if v.index == j)
+        adjacent_pairs.append((atom_i, atom_j))
+
+    return adjacent_pairs
+
 def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
-                          check: bool = True) -> VertexPairs:
+                          check: bool = True) -> List[Tuple[Atom, Atom]]:
     """For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
     Args:
@@ -53,7 +77,7 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
         v2 = next(v for v in polyhedron.vertices if v not in [v1, *v1_neighbours])
         vertex_pairs.append((v1, v2))
         seen_indices.extend([v1.index, v2.index])
-    return (vertex_pairs[0], vertex_pairs[1], vertex_pairs[2])
+    return [vertex_pairs[0], vertex_pairs[1], vertex_pairs[2]]
 
 def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
                               check: bool = True) -> Tuple[float, float, float]:

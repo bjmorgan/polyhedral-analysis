@@ -658,6 +658,43 @@ class CoordinationPolyhedron:
             distortion = np.mean(relative_deviations**2)
         return distortion
 
+    def vertex_angles(self, 
+                      vertex_pairs: Tuple[Tuple[int, int], ...],
+                      reference: Literal['central_atom', 'centroid'] = 'central_atom') -> np.ndarray:
+        """
+        Calculate angles between specified pairs of vertices.
+
+        Args:
+            vertex_pairs (Tuple[Tuple[int, int], ...]): Pairs of vertex global indices to calculate angles for.
+            reference (Literal['central_atom', 'centroid'], optional): The reference point for vertex vectors. 
+                Defaults to 'central_atom'.
+
+        Returns:
+            np.ndarray: Array of calculated angles in degrees.
+
+        Raises:
+            ValueError: If an invalid vertex index is provided.
+
+        """
+        vertex_vectors = self.vertex_vectors(reference=reference)
+        angles = []
+
+        for i1, i2 in vertex_pairs:
+            try:
+                v1 = vertex_vectors[self.vertex_internal_index_from_global_index(i1)]
+                v2 = vertex_vectors[self.vertex_internal_index_from_global_index(i2)]
+            except ValueError as e:
+                raise ValueError(f"Invalid vertex index in pair ({i1}, {i2}): {str(e)}")
+
+            # Calculate the angle between v1 and v2
+            dot_product = np.dot(v1, v2)
+            magnitudes = np.linalg.norm(v1) * np.linalg.norm(v2)
+            cos_angle = dot_product / magnitudes
+            angle = np.arccos(np.clip(cos_angle, -1.0, 1.0))  # clip to handle floating point errors
+            angles.append(np.degrees(angle))
+
+        return np.array(angles)
+
 def merge_coplanar_simplices(convex_hull: ConvexHull,
                              tolerance: float = 0.1) -> List[List[int]]:
     triangles_to_merge = []

@@ -50,9 +50,9 @@ class TestOctahedralAnalysis(unittest.TestCase):
         with patch('polyhedral_analysis.octahedral_analysis.check_octahedra') as mock_check_octahedra:
             mock_check_octahedra.return_value = True
             output = opposite_vertex_pairs(mock_polyhedron)
-            expected_output = ((mock_vertices[0], mock_vertices[5]),
+            expected_output = [(mock_vertices[0], mock_vertices[5]),
                                (mock_vertices[1], mock_vertices[3]),
-                               (mock_vertices[2], mock_vertices[4]))
+                               (mock_vertices[2], mock_vertices[4])]
             self.assertEqual(output, expected_output)
    
     def test_opposite_vertex_pairs_raises_AssertionError_if_not_octahedral(self):

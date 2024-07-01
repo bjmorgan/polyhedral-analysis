@@ -529,5 +529,55 @@ class TestCoordinationPolyhedron(unittest.TestCase):
             # Check that vertices are sorted
             self.assertEqual([v.index for v in polyhedron.vertices], [0, 1, 2])
 
+
+    def test_vertex_angles_central_atom(self):
+        mock_vectors = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [0, 0, -1]
+        ])
+        self.coordination_polyhedron.vertex_vectors = Mock(return_value = mock_vectors)
+        self.coordination_polyhedron.vertex_internal_index_from_global_index = Mock(side_effect = (0, 1, 1, 2, 2, 3))
+        
+        vertex_pairs = ((0, 1), (1, 2), (2, 3))
+        expected_angles = np.array([90, 90, 180])
+        
+        angles = self.coordination_polyhedron.vertex_angles(vertex_pairs)
+        
+        np.testing.assert_array_almost_equal(angles, expected_angles, decimal=5)
+        self.coordination_polyhedron.vertex_vectors.assert_called_once_with(reference='central_atom')
+
+    def test_vertex_angles_centroid(self):
+        mock_vectors = np.array([
+            [1, 1, 0],
+            [-1, 1, 0],
+            [0, -1, 1],
+            [0, -1, -1]
+        ])
+        self.coordination_polyhedron.vertex_vectors = Mock(return_value = mock_vectors)
+        self.coordination_polyhedron.vertex_internal_index_from_global_index = Mock(side_effect = (0, 1, 1, 2, 2, 3))
+        
+        vertex_pairs = ((0, 1), (1, 2), (2, 3))
+        expected_angles = np.array([90, 120, 90])
+        
+        angles = self.coordination_polyhedron.vertex_angles(vertex_pairs, reference='centroid')
+        
+        np.testing.assert_array_almost_equal(angles, expected_angles, decimal=5)
+        self.coordination_polyhedron.vertex_vectors.assert_called_once_with(reference='centroid')
+
+    def test_vertex_angles_invalid_index(self):
+        mock_vectors = np.array([
+            [1, 0, 0], 
+            [0, 1, 0]]
+        )
+        self.coordination_polyhedron.vertex_vectors = Mock(return_value = mock_vectors)
+        self.coordination_polyhedron.vertex_internal_index_from_global_index = Mock(side_effect=[0, ValueError])
+        
+        vertex_pairs = ((0, 2),)
+        
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.vertex_angles(vertex_pairs)
+
 if __name__ == '__main__':
     unittest.main()
