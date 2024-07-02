@@ -613,8 +613,21 @@ class CoordinationPolyhedron:
 
         Returns:
             np.ndarray: A 3D vector representing the displacement from the vertex centroid to the central atom.
+
         """
         return self.central_atom.coords - self.centroid()
+
+    @property
+    def off_centre_displacement(self) -> float:
+        """
+        Returns the displacment from the centroid of the polyhedron vertices to the central atom,
+        accounting for periodic boundary conditions.
+
+        Returns:
+            float
+
+        """
+        return float(np.linalg.norm(self.centroid_to_central_atom_vector()))
 
     def radial_distortion_parameter(self, 
                                     reference: Literal['central_atom', 'centroid'] = 'centroid', 

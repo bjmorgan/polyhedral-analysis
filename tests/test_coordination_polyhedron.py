@@ -579,5 +579,11 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.coordination_polyhedron.vertex_angles(vertex_pairs)
 
+    def test_off_centre_displacement(self):
+        mock_displacement_vector = np.array([0.1, 0.2, 0.3])
+        self.coordination_polyhedron.centroid_to_central_atom_vector = Mock(return_value = mock_displacement_vector)
+        expected_displacement = np.linalg.norm(mock_displacement_vector)
+        self.assertEqual(self.coordination_polyhedron.off_centre_displacement, expected_displacement)
+
 if __name__ == '__main__':
     unittest.main()
