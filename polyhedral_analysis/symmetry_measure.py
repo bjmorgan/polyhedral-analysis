@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure # type: ignore
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries # type: ignore
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 from itertools import permutations
 import numpy as np # type: ignore

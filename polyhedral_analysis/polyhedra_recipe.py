@@ -1,6 +1,6 @@
 from functools import partial
 import numpy as np # type: ignore
-from pymatgen.core import Site, Structure  # type: ignore[import]
+from pymatgen.core import Site, Structure
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.utils import flatten
 from polyhedral_analysis.atom import Atom
@@ -29,7 +29,7 @@ def matching_sites(structure: Structure,
             contains the corresponding pymatgen Site, and the site index.
 
     """
-    matched_sites = []
+    matched_sites: List[Tuple[Site, int]] = []
     for ref_site in reference_structure:
         dr = [site.distance(ref_site) for site in structure]
         i = int(np.argmin(dr))

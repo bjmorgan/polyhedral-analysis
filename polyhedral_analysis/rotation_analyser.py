@@ -1,7 +1,7 @@
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure  # type: ignore
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
 from itertools import permutations
 import math
-import numpy as np  # type: ignore
+import numpy as np
 from typing import Dict, Union, TypedDict
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.symmetry_measure import symmetry_measures_from_coordination
 from polyhedral_analysis.orientation_parameters import cos_theta
-from pymatgen.core.sites import Site  # type: ignore[import]
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry  # type: ignore
-from pymatgen.util.coord import pbc_shortest_vectors  # type: ignore
+from pymatgen.core.sites import Site
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
+from pymatgen.util.coord import pbc_shortest_vectors
 import numpy as np 
 from scipy.spatial import ConvexHull  # type: ignore[import-untyped]
 from itertools import combinations
@@ -528,7 +528,7 @@ class CoordinationPolyhedron:
         
         result: List[Tuple[float, ...]] = []
         for point in vertex_vectors:
-            theta: float = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
+            theta = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
             
             # Handle the edge case where theta is 0 or 180 degrees (or equivalent in radians)
             if np.isclose(theta, 0) or np.isclose(theta, np.pi if units == 'radians' else 180):
@@ -538,7 +538,7 @@ class CoordinationPolyhedron:
                                       look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
             
             if return_distance:
-                distance: float = vg.magnitude(point)
+                distance = vg.magnitude(point)
                 result.append((theta, phi, distance))
             else:
                 result.append((theta, phi))

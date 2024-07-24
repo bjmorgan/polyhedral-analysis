@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pymatgen.io.vasp import Xdatcar # type: ignore
-from pymatgen.core.structure import Structure # type: ignore
+from pymatgen.io.vasp import Xdatcar
+from pymatgen.core.structure import Structure
 from polyhedral_analysis.configuration import Configuration
 from polyhedral_analysis.utils import flatten
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe

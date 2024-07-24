@@ -1,4 +1,4 @@
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry # type: ignore
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 import numpy as np # type: ignore
 
 def cos_theta(a: np.ndarray, 
