@@ -1,5 +1,5 @@
-numpy < 2.0
-pymatgen >= 2017.10.16
+numpy
+pymatgen >= 2024.7.18
 scipy
 coverage >= 6.3
 vg
