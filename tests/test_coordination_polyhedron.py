@@ -585,5 +585,63 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         expected_displacement = np.linalg.norm(mock_displacement_vector)
         self.assertEqual(self.coordination_polyhedron.off_centre_displacement, expected_displacement)
 
+    def test_vertex_vector_orientations(self):
+        # Mock vertex vectors
+        mock_vectors = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [-1, -1, -1]
+        ])
+        
+        # Calculate the actual angle for [-1, -1, -1] vector
+        actual_theta = 180 - np.degrees(np.arccos(1/np.sqrt(3)))
+        
+        # Expected results for degrees
+        expected_centroid_deg = [
+            (90.0, 0.0),
+            (90.0, 90.0),
+            (0.0, 0.0),
+            (actual_theta, -135.0)
+        ]
+        
+        # Expected results for radians
+        expected_centroid_rad = [
+            (np.pi/2, 0.0),
+            (np.pi/2, np.pi/2),
+            (0.0, 0.0),
+            (np.pi - np.arccos(1/np.sqrt(3)), -3*np.pi/4)
+        ]
+        
+        # Test with centroid reference (default)
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vectors):
+            orientations_deg = self.coordination_polyhedron.vertex_vector_orientations()
+            orientations_rad = self.coordination_polyhedron.vertex_vector_orientations(units='radians')
+            
+            np.testing.assert_array_almost_equal(orientations_deg, expected_centroid_deg)
+            np.testing.assert_array_almost_equal(orientations_rad, expected_centroid_rad)
+        
+        # Test with central_atom reference
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vectors):
+            orientations_central = self.coordination_polyhedron.vertex_vector_orientations(reference='central_atom')
+            
+            np.testing.assert_array_almost_equal(orientations_central, expected_centroid_deg)
+        
+        # Test with return_distance=True
+        with patch('polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron.vertex_vectors', return_value=mock_vectors):
+            orientations_with_dist = self.coordination_polyhedron.vertex_vector_orientations(return_distance=True)
+            
+            expected_with_dist = [
+                (90.0, 0.0, 1.0),
+                (90.0, 90.0, 1.0),
+                (0.0, 0.0, 1.0),
+                (actual_theta, -135.0, np.sqrt(3))
+            ]
+            np.testing.assert_array_almost_equal(orientations_with_dist, expected_with_dist)
+        
+        # Test with invalid reference
+        with self.assertRaises(ValueError):
+            self.coordination_polyhedron.vertex_vector_orientations(reference='invalid')
+
 if __name__ == '__main__':
     unittest.main()

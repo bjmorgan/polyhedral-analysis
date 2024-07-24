@@ -495,35 +495,55 @@ class CoordinationPolyhedron:
 
     def vertex_vector_orientations(self,
                                    units: str = 'degrees',
-                                   return_distance: bool = False) -> List[Tuple[float, ...]]:
-        """Returns the angular orientations of each centroid-to-vertex vector.
-
+                                   return_distance: bool = False,
+                                   reference: str = 'centroid') -> List[Tuple[float, ...]]:
+        """Returns the angular orientations of each vertex vector.
+    
         The orientation is defined by two angles, theta and phi. 
         Theta is the angle with respect to [0, 0, 1] and ranges from 0 to 180 degrees. 
         Phi is the angle with respect to [1, 0, 0] and ranges from -180 to +180 degrees.
-
+    
         Args:
             units (:obj:`str`, optional): Optionally select the units for the calculated angles.
                                           Options are `degrees` or `radians`. 
                                           Default is `degrees`.
             return_distance (:obj:`bool`, optional): Optionally also return the distance. 
-
+            reference (:obj:`str`, optional): The reference point for vertex vectors. 
+                                              Options are `centroid` or `central_atom`.
+                                              Default is `centroid`.
+    
         Returns:
-            list(tuple): A list of `(theta,phi)` tuple pairs.
-
+            list(tuple): A list of `(theta,phi)` tuple pairs, or `(theta,phi,distance)` if
+                         `return_distance` is True.
+    
+        Raises:
+            ValueError: If an invalid reference point is provided.
         """
-        vertex_vectors = self.vertex_vectors(reference='centroid')
+        if reference not in ['centroid', 'central_atom']:
+            raise ValueError("Invalid reference point. Use 'centroid' or 'central_atom'.")
+        
+        vertex_vectors = self.vertex_vectors(reference=reference)
         vg_units = {'degrees': 'deg',
                     'radians': 'rad'}
-        theta = [vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
-                 for point in vertex_vectors]
-        phi = [vg.signed_angle(np.array([1.0, 0.0, 0.0]), point,
-                               look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
-               for point in vertex_vectors]
-        if return_distance:
-            distance = [vg.magnitude(point) for point in vertex_vectors]
-            return list(zip(theta, phi, distance))
-        return list(zip(theta, phi))
+        
+        result = []
+        for point in vertex_vectors:
+            theta = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
+            
+            # Handle the edge case where theta is 0 or 180 degrees (or equivalent in radians)
+            if np.isclose(theta, 0) or np.isclose(theta, np.pi if units == 'radians' else 180):
+                phi = 0.0  # phi is undefined in this case, so we set it to 0
+            else:
+                phi = vg.signed_angle(np.array([1.0, 0.0, 0.0]), point,
+                                      look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
+            
+            if return_distance:
+                distance = vg.magnitude(point)
+                result.append((theta, phi, distance))
+            else:
+                result.append((theta, phi))
+        
+        return result
 
     @property
     def volume(self) -> float:
