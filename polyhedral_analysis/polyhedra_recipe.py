@@ -84,17 +84,17 @@ def generator_from_atom_argument(arg: AtomSpec) -> IndexGenerator:
     """
     if callable(arg):
         return arg
-    if type(arg) is str:
+    if isinstance(arg, str):
         return partial(_get_indices_from_str, arg=arg)
-    elif type(arg) in [list, tuple]:
-        if type(arg[0]) is str:
+    elif isinstance(arg, (list, tuple)):
+        if all(isinstance(item, str) for item in arg):
             return partial(_get_indices_from_list_str, arg=arg)
-        elif type(arg[0]) is int:
+        elif all(isinstance(item, int) for item in arg):
             return partial(_get_indices_from_list_int, arg=arg)
         else:
-            raise TypeError
+            raise TypeError("List items must be all strings or all integers")
     else:
-        raise TypeError
+        raise TypeError("Argument must be callable, string, or list of strings or integers")
 
 def _get_indices_from_str(structure: Structure,
                           arg: str) -> Sequence[int]:
@@ -209,7 +209,7 @@ class PolyhedraRecipe:
                 raise ValueError('Needs structure argument')
         assert isinstance(self._vertex_atom_list, list)
         return self._vertex_atom_list
-
+                                             
     def find_polyhedra(self, 
                        atoms: List[Atom],
                        structure: Optional[Structure] = None) -> List[CoordinationPolyhedron]:
@@ -222,9 +222,24 @@ class PolyhedraRecipe:
         central_atoms = [atom for atom in atoms if atom.index in central_atom_list]
         vertex_atoms = [atom for atom in atoms if atom.index in vertex_atom_list]
         
-        return polyhedra_method[self.method](central_atoms=central_atoms, 
-                                             vertex_atoms=vertex_atoms, 
-                                             label=self.label)
+        if self.method == 'distance cutoff':
+            if self.coordination_cutoff is None:
+                raise ValueError("coordination_cutoff must be set for 'distance cutoff' method")
+            return polyhedra_from_distance_cutoff(central_atoms=central_atoms, 
+                                                  vertex_atoms=vertex_atoms, 
+                                                  cutoff=self.coordination_cutoff,
+                                                  label=self.label)
+        elif self.method == 'nearest neighbours':
+            if self.n_neighbours is None:
+                raise ValueError("n_neighbours must be set for 'nearest neighbours' method")
+            return polyhedra_from_nearest_neighbours(central_atoms=central_atoms, 
+                                                     vertex_atoms=vertex_atoms, 
+                                                     nn=self.n_neighbours,
+                                                     label=self.label)
+        else:
+            return polyhedra_method[self.method](central_atoms=central_atoms, 
+                                                 vertex_atoms=vertex_atoms, 
+                                                 label=self.label)
 
 def polyhedra_from_distance_cutoff(central_atoms: List[Atom],
                                    vertex_atoms: List[Atom],
