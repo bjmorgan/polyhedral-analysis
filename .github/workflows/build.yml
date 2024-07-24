@@ -21,7 +21,7 @@ jobs:
           run: |
             pip install --upgrade pip
             pip install -r requirements.txt
-            pip install -U numpy
+            pip install -U --no-binary numpy
             pip install mypy
             pip install types-tqdm
             pip install types-PyYAML
