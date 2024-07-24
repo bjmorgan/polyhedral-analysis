@@ -494,9 +494,9 @@ class CoordinationPolyhedron:
         return [vg.angle(p1, p2) for p1, p2 in combinations(self.vertex_vectors(reference='centroid'), 2)]
 
     def vertex_vector_orientations(self,
-                                   units: str = 'degrees',
+                                   units: Literal['degrees', 'radians'] = 'degrees',
                                    return_distance: bool = False,
-                                   reference: str = 'centroid') -> List[Tuple[float, ...]]:
+                                   reference: Literal['centroid', 'central_atom'] = 'centroid') -> List[Tuple[float, ...]]:
         """Returns the angular orientations of each vertex vector.
     
         The orientation is defined by two angles, theta and phi. 
@@ -526,9 +526,9 @@ class CoordinationPolyhedron:
         vg_units = {'degrees': 'deg',
                     'radians': 'rad'}
         
-        result = []
+        result: List[Tuple[float, ...]] = []
         for point in vertex_vectors:
-            theta = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
+            theta: float = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
             
             # Handle the edge case where theta is 0 or 180 degrees (or equivalent in radians)
             if np.isclose(theta, 0) or np.isclose(theta, np.pi if units == 'radians' else 180):
@@ -538,7 +538,7 @@ class CoordinationPolyhedron:
                                       look=np.array([0.0, 0.0, 1.0]), units=vg_units[units])
             
             if return_distance:
-                distance = vg.magnitude(point)
+                distance: float = vg.magnitude(point)
                 result.append((theta, phi, distance))
             else:
                 result.append((theta, phi))
