@@ -129,7 +129,6 @@ class PolyhedraRecipe:
         Args:
             method (str): Method used for constructing coordination polyhedra. 
                 Implemented options are:
-
                     - `distance cutoff`: include all coordinating ions within a cutoff distance.
                     - `closest centre`: include all coordinating ions that share a common closest centre atom.
                     - `nearest neighbours`: include n nearest neighbours to each centre atom.
@@ -144,13 +143,11 @@ class PolyhedraRecipe:
                 configuration parsed. Default is `True`. If `recalulate` is set to `False` then the lists of
                 atom indices for central and vertex atoms will be fixed once initialised.
 
-        Returns:
-            None
+        Returns: None
 
         Notes:
             `central_atoms` and `vertex_atoms` define how to select 
-            a subset of
-            atoms from a single :obj:`Structure`. How this is implemented depends on
+            a subset of atoms from a single :obj:`Structure`. How this is implemented depends on
             the argument type provided when initialising a :obj:`PolyhedraRecipe` instance.
 
                     - (:obj:`str`): Select all atoms with matching species strings, e.g. ``'Ti'``.
@@ -167,8 +164,8 @@ class PolyhedraRecipe:
         if method not in PolyhedraRecipe.allowed_methods:
             methods_string = '\n'.join( [ "    - '{}'".format( m ) 
                 for m in PolyhedraRecipe.allowed_methods ] )
-            raise ValueError( "\n'{}' is not a recognised string for selecting the recipe method.\n Valid methods are:\n{}".format( 
-                              method, methods_string ) )
+            raise ValueError(f"\n'{method}' is not a recognised string for selecting the recipe method.\n Valid methods are:\n{methods_string}")
+            
         self.method = method
         self._central_atom_list_generator = generator_from_atom_argument(central_atoms)
         self._vertex_atom_list_generator = generator_from_atom_argument(vertex_atoms)
