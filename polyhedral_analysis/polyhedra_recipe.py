@@ -88,9 +88,9 @@ def generator_from_atom_argument(arg: AtomSpec) -> IndexGenerator:
         return partial(_get_indices_from_str, arg=arg)
     elif isinstance(arg, (list, tuple)):
         if all(isinstance(item, str) for item in arg):
-            return partial(_get_indices_from_list_str, arg=arg)
+            return partial(_get_indices_from_list_str, arg=cast(Sequence[str], arg))
         elif all(isinstance(item, int) for item in arg):
-            return partial(_get_indices_from_list_int, arg=arg)
+            return partial(_get_indices_from_list_int, arg=cast(Sequence[int], arg))
         else:
             raise TypeError("List items must be all strings or all integers")
     else:
@@ -213,10 +213,6 @@ class PolyhedraRecipe:
     def find_polyhedra(self, 
                        atoms: List[Atom],
                        structure: Optional[Structure] = None) -> List[CoordinationPolyhedron]:
-        polyhedra_method: Dict[str, Callable[..., List[CoordinationPolyhedron]]] = {
-                'distance cutoff': partial(polyhedra_from_distance_cutoff, cutoff=self.coordination_cutoff),
-                'closest centre': polyhedra_from_closest_centre,
-                'nearest neighbours': partial(polyhedra_from_nearest_neighbours, nn=self.n_neighbours)}
         central_atom_list = self.central_atom_list(structure)
         vertex_atom_list = self.vertex_atom_list(structure)
         central_atoms = [atom for atom in atoms if atom.index in central_atom_list]
@@ -236,10 +232,12 @@ class PolyhedraRecipe:
                                                      vertex_atoms=vertex_atoms, 
                                                      nn=self.n_neighbours,
                                                      label=self.label)
-        else:
-            return polyhedra_method[self.method](central_atoms=central_atoms, 
-                                                 vertex_atoms=vertex_atoms, 
+        elif self.method == 'closest centre':
+            return polyhedra_from_closest_centre(central_atoms=central_atoms,
+                                                 vertex_atoms=vertex_atoms,
                                                  label=self.label)
+        else:
+            raise ValueError(f"Unsupported method: {self.method}")
 
 def polyhedra_from_distance_cutoff(central_atoms: List[Atom],
                                    vertex_atoms: List[Atom],
