@@ -4,7 +4,7 @@ from pymatgen.core import Site, Structure
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.utils import flatten
 from polyhedral_analysis.atom import Atom
-from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any, Protocol
+from typing import Optional, List, Tuple, Callable, Union, Dict, Sequence, Iterable, Any, Protocol, cast, Sequence
 
 class IndexGenerator(Protocol):
     def __call__(self, structure: Structure) -> Sequence[int]: ...
