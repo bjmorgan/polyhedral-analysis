@@ -5,3 +5,4 @@ coverage >= 6.3
 vg
 monty
 tqdm
+cmcrameri

@@ -27,5 +27,6 @@ setup(
                       'coverage>=6.3',
                       'vg',
                       'monty',
-                      'tqdm']
+                      'tqdm',
+                      'cmcrameri']
     )
