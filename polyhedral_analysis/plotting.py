@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde # type: ignore
+from cmcrameri import cm # type: ignore
 import matplotlib.pyplot as plt
-from cmcrameri import cm
 from typing import List, Tuple, Optional, Dict, Any
 
 def _process_orientation_data(orientations: List[Tuple[float, float]]) -> Dict[str, Any]:
@@ -25,7 +25,10 @@ def _process_orientation_data(orientations: List[Tuple[float, float]]) -> Dict[s
     if orientations_array.shape[1] != 2:
         raise ValueError("Each orientation should be a tuple of (theta, phi).")
 
-    phi_grid, theta_grid = np.mgrid[-180:180:100j, 0:180:100j]
+    phi = np.linspace(-180, 180, 100)
+    theta = np.linspace(0, 180, 100)
+    phi_grid, theta_grid = np.meshgrid(phi, theta)
+
     positions = np.vstack([phi_grid.ravel(), theta_grid.ravel()])
 
     values = orientations_array.T[::-1]  # Swap and transpose
@@ -84,7 +87,7 @@ def plot_orientation_distribution(orientations: List[Tuple[float, float]],
         cbar.ax.tick_params(labelsize=fontsize)
         cbar.ax.yaxis.get_offset_text().set_fontsize(fontsize)
 
-    cbar.formatter.set_powerlimits((0, 0))
+    cbar.formatter.set_powerlimits((0, 0)) # type: ignore
     cbar.update_ticks()
 
     ax.set_xlim(-180, 180)
