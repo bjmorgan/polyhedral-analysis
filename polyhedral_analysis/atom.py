@@ -95,7 +95,7 @@ class Atom:
             s = json.dumps(self.as_dict())
             if filename:
                 with zopen(filename, 'wt') as f:
-                    f.write('{}'.format(s))
+                    f.write(s)  # type: ignore[arg-type]
                 return None
             else:
                 return s

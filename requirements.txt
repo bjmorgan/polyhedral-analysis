@@ -1,8 +1,8 @@
-numpy < 2.0
+numpy
 pymatgen >= 2024.7.18
 scipy
-coverage >= 6.3
 vg
 monty
 tqdm
 cmcrameri
+bsym

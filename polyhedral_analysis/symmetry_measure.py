@@ -3,25 +3,76 @@ from __future__ import annotations
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
-from itertools import permutations
-import numpy as np # type: ignore
-from typing import Dict, List
+import numpy as np
+
+
+def _compute_reduced_permutations(reference_points: np.ndarray) -> np.ndarray:
+    """Compute symmetry-inequivalent permutation representatives for reference points.
+
+    Uses bsym to find the point group of the reference geometry and enumerate
+    one representative permutation per orbit under the symmetry group action.
+
+    Args:
+        reference_points: An Nx3 array of reference coordinates.
+
+    Returns:
+        An MxN integer array where each row is a permutation of [0, ..., N-1]
+        and M = N! / |G|, where |G| is the size of the symmetry group.
+
+    Note:
+        The point group detection relies on pymatgen's PointGroupAnalyzer
+        (via bsym). A known bug (materialsproject/pymatgen#4596) causes
+        under-detection of symmetry for the Square-face capped trigonal prism,
+        resulting in more representatives than strictly necessary. This does
+        not affect correctness.
+    """
+    from pymatgen.core import Molecule
+    from bsym.interface.pymatgen import point_group_from_molecule  # type: ignore[import]
+    from bsym import ConfigurationSpace  # type: ignore[import]
+
+    n = len(reference_points)
+    mol = Molecule(['H'] * n, reference_points)
+    point_group = point_group_from_molecule(mol)
+    config_space = ConfigurationSpace(
+        objects=list(range(n)),
+        symmetry_group=point_group,
+    )
+    site_distribution = {i: 1 for i in range(n)}
+    unique_configs = config_space.unique_configurations(
+        site_distribution=site_distribution,
+    )
+    return np.array(
+        [c.tolist() for c in unique_configs],
+        dtype=np.intp,
+    )
+
 
 class SymmetryMeasure:
 
-    def __init__(self, 
+    def __init__(self,
                  reference_points: np.ndarray,
                  string: str) -> None:
         self.string = string
         self.reference_points = reference_points
+        self._permutations: np.ndarray | None = None
+
+    @property
+    def permutations(self) -> np.ndarray:
+        """Symmetry-inequivalent index permutations for this geometry.
+
+        Computed lazily on first access from the reference points using bsym.
+        """
+        if self._permutations is None:
+            self._permutations = _compute_reduced_permutations(self.reference_points)
+        return self._permutations
 
     def minimum_symmetry_measure(self,
                                  ag: AbstractGeometry) -> float:
         distorted_points = ag.points_wocs_csc()
-        to_return =  min(symmetry_measure(np.array(p), self.reference_points )['symmetry_measure'] 
-                         for p in permutations(distorted_points))
-        assert isinstance(to_return, float)
-        return to_return
+        return min(
+            symmetry_measure(distorted_points[perm], self.reference_points)['symmetry_measure']
+            for perm in self.permutations
+        )
 
     @classmethod
     def from_name(cls, name: str) -> SymmetryMeasure:
@@ -41,13 +92,12 @@ symmetry_measures_to_construct = {4: ['Tetrahedron'],
                                       'Square-face bicapped trigonal prism',
                                       'Triangular-face bicapped trigonal prism',
                                       'Dodecahedron with triangular faces',
-                                      'Dodecahedron with triangular faces',
                                       'Hexagonal bipyramid',
-                                      'Bicapped octahedron (opposed cap faces)', 
-                                      'Bicapped octahedron (cap faces with one atom in common)', 
+                                      'Bicapped octahedron (opposed cap faces)',
+                                      'Bicapped octahedron (cap faces with one atom in common)',
                                       'Bicapped octahedron (cap faces with one edge in common)']}
 
-symmetry_measures_from_coordination: Dict[int, Dict[str, SymmetryMeasure]] = {}
+symmetry_measures_from_coordination: dict[int, dict[str, SymmetryMeasure]] = {}
 for coordination_number, strings in symmetry_measures_to_construct.items():
     symmetry_measures_from_coordination[coordination_number] = {}
     for string in strings:
