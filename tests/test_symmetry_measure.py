@@ -1,8 +1,12 @@
+import math
 import unittest
 import numpy as np
-from polyhedral_analysis.symmetry_measure import SymmetryMeasure
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 from itertools import permutations
+from polyhedral_analysis.symmetry_measure import SymmetryMeasure, _compute_reduced_permutations
+from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import (
+    AbstractGeometry,
+    symmetry_measure,
+)
 
 class TestSymmetryMeasureInit( unittest.TestCase ):
 
@@ -60,7 +64,52 @@ class TestSymmetryMeasure( unittest.TestCase ):
         for key, value in expected_reference_points.items():
             np.testing.assert_array_almost_equal( symmetry_measures_from_coordination[ len( value ) ][ key ].reference_points, value )
 
-    
+
+
+class TestReducedPermutations(unittest.TestCase):
+
+    def test_tetrahedron_has_one_representative(self):
+        sm = SymmetryMeasure.from_name('Tetrahedron')
+        self.assertEqual(len(sm.permutations), 1)
+
+    def test_octahedron_has_15_representatives(self):
+        sm = SymmetryMeasure.from_name('Octahedron')
+        self.assertEqual(len(sm.permutations), 15)
+
+    def test_reduced_permutations_cover_all_orbits(self):
+        """For the trigonal bipyramid, verify that the number of
+        representatives times the symmetry group order equals N!."""
+        sm = SymmetryMeasure.from_name('Trigonal bipyramid')
+        # Trigonal bipyramid has |G|=12, so 120/12 = 10 representatives.
+        self.assertEqual(len(sm.permutations), 10)
+        self.assertEqual(len(sm.permutations) * 12, math.factorial(5))
+
+    def test_reduced_gives_same_csm_as_brute_force(self):
+        """Verify that the reduced-permutation CSM matches brute-force
+        for a distorted octahedron."""
+        sm = SymmetryMeasure.from_name('Octahedron')
+        # A distorted octahedron (vertices shifted from ideal positions).
+        distorted = np.array([
+            [0.0, 0.0, 1.1],
+            [0.0, 0.1, -1.0],
+            [1.0, 0.0, 0.1],
+            [-1.0, 0.1, 0.0],
+            [0.0, 1.0, -0.1],
+            [0.1, -1.0, 0.0],
+        ])
+        ag = AbstractGeometry(
+            central_site=np.array([0.0, 0.0, 0.0]),
+            bare_coords=distorted,
+        )
+        reduced_csm = sm.minimum_symmetry_measure(ag)
+        # Brute-force over all 6! permutations.
+        points = ag.points_wocs_csc()
+        brute_force_csm = min(
+            symmetry_measure(np.array(p), sm.reference_points)['symmetry_measure']
+            for p in permutations(points)
+        )
+        self.assertAlmostEqual(reduced_csm, brute_force_csm, places=10)
+
 
 if __name__ == '__main__':
     unittest.main()
