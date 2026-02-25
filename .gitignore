@@ -8,3 +8,6 @@
 docs/examples/.nbgrader.log
 docs/examples/.ipynb_checkpoints
 .mypy_cache
+*.md
+!README.md
+!CHANGELOG.md
