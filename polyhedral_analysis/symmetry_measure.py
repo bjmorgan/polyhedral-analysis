@@ -27,8 +27,8 @@ def _compute_reduced_permutations(reference_points: np.ndarray) -> np.ndarray:
         not affect correctness.
     """
     from pymatgen.core import Molecule
-    from bsym.interface.pymatgen import point_group_from_molecule
-    from bsym import ConfigurationSpace
+    from bsym.interface.pymatgen import point_group_from_molecule  # type: ignore[import-untyped]
+    from bsym import ConfigurationSpace  # type: ignore[import-untyped]
 
     n = len(reference_points)
     mol = Molecule(['H'] * n, reference_points)
