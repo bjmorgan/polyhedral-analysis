@@ -20,17 +20,12 @@ jobs:
         - name: Install Python dependencies
           run: |
             pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install mypy
-            pip install types-tqdm
-            pip install types-PyYAML
-            pip install pytest
-            pip install pytest-cov
             pip install .
+            pip install mypy types-tqdm types-PyYAML pytest pytest-cov
             pip list
         - name: Run tests
           run: |
-            pytest --cov-config=.coveragerc --cov=polyhedral_analysis --cov-report lcov
+            pytest --cov=polyhedral_analysis --cov-report lcov
         - name: Coveralls GitHub Action
           continue-on-error: true
           uses: coverallsapp/github-action@v2

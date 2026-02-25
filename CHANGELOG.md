@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+### Other changes
+
+- Migrated from setup.py to pyproject.toml.
+- Removed requirements.txt, .coveragerc, and .mypy.ini (consolidated into pyproject.toml).
+- Version now read at runtime via importlib.metadata.
+
 ## 0.2.0
 
 ### Performance
