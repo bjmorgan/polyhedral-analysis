@@ -3,7 +3,7 @@ from __future__ import annotations
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
-import numpy as np  # type: ignore
+import numpy as np
 
 
 def _compute_reduced_permutations(reference_points: np.ndarray) -> np.ndarray:
@@ -93,8 +93,8 @@ symmetry_measures_to_construct = {4: ['Tetrahedron'],
                                       'Triangular-face bicapped trigonal prism',
                                       'Dodecahedron with triangular faces',
                                       'Hexagonal bipyramid',
-                                      'Bicapped octahedron (opposed cap faces)', 
-                                      'Bicapped octahedron (cap faces with one atom in common)', 
+                                      'Bicapped octahedron (opposed cap faces)',
+                                      'Bicapped octahedron (cap faces with one atom in common)',
                                       'Bicapped octahedron (cap faces with one edge in common)']}
 
 symmetry_measures_from_coordination: dict[int, dict[str, SymmetryMeasure]] = {}

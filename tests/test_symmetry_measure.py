@@ -2,7 +2,7 @@ import math
 import unittest
 import numpy as np
 from itertools import permutations
-from polyhedral_analysis.symmetry_measure import SymmetryMeasure, _compute_reduced_permutations
+from polyhedral_analysis.symmetry_measure import SymmetryMeasure
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import (
     AbstractGeometry,
     symmetry_measure,
