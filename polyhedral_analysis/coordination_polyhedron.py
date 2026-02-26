@@ -146,7 +146,7 @@ class CoordinationPolyhedron:
 
     @property
     def edge_graph(self) -> dict[int, list[int]]:
-        if not self._edge_graph:
+        if self._edge_graph is None:
             self._edge_graph = self.construct_edge_graph()
             self.update_vertex_neighbours()
         return self._edge_graph

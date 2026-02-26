@@ -123,7 +123,7 @@ class PolyhedraRecipe:
                  vertex_graph_cutoff: float | None = None,
                  label: str | None = None,
                  n_neighbours: int | None = None,
-                 recalculate: bool | None = True) -> None:
+                 recalculate: bool = True) -> None:
         """
         Create a :obj:`PolyhedraRecipe` object.
 

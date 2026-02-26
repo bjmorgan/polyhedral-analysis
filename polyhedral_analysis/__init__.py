@@ -1,2 +1,6 @@
-from importlib.metadata import version
-__version__ = version("polyhedral-analysis")
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("polyhedral-analysis")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
