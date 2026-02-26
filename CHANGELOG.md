@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.0
+
+### Breaking changes
+
+- Removed dependency on `pymatgen.analysis.chemenv`. CSM (continuous symmetry measure) calculation and reference geometry data are now implemented internally.
+- `minimum_symmetry_measure()` now takes `distorted_points: np.ndarray` instead of `AbstractGeometry`.
+- `oct_rotational_order_parameter()` now takes `points: np.ndarray` instead of `AbstractGeometry`.
+- Removed `abstract_geometry` property and `construct_abstract_geometry()` method from `CoordinationPolyhedron`.
+
+### New features
+
+- Added `polyhedral_analysis.csm` module with internal `continuous_symmetry_measure()` function using SVD-based Procrustes analysis.
+- Added `polyhedral_analysis.reference_geometries` module with hardcoded ideal vertex coordinates for 17 reference geometries (CN 4-8).
+
+### Other changes
+
+- Split mypy type checking into a separate CI job.
+
 ## 0.3.0
 
 ### Other changes
