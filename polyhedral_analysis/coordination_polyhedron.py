@@ -4,7 +4,6 @@ from polyhedral_analysis.atom import Atom
 from polyhedral_analysis.symmetry_measure import symmetry_measures_from_coordination
 from polyhedral_analysis.orientation_parameters import cos_theta
 from pymatgen.core.sites import Site
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 from pymatgen.util.coord import pbc_shortest_vectors
 import numpy as np 
 from scipy.spatial import ConvexHull  # type: ignore[import-untyped]
@@ -39,7 +38,6 @@ class CoordinationPolyhedron:
             v.in_polyhedra.append(self)
         self._label: str = label if label else central_atom.label
         self._edge_graph: dict[int, list[int]] | None = None
-        self._abstract_geometry: AbstractGeometry | None = None
 
     @property
     def label(self) -> str:
@@ -160,27 +158,13 @@ class CoordinationPolyhedron:
         return tuple(sorted(edge_pairs))
 
     @property
-    def abstract_geometry(self) -> AbstractGeometry:
-        if self._abstract_geometry is None:
-            self._abstract_geometry = self.construct_abstract_geometry()
-        return self._abstract_geometry
-
-    def construct_abstract_geometry(self) -> AbstractGeometry:
-        """
-        Returns the polyhedron as a ``pymatgen`` :obj:`AbstractGeometry` object.
-        """
-        return AbstractGeometry(central_site=self.central_atom.coords,
-                                bare_coords=self.minimum_image_vertex_coordinates(),
-                                include_central_site_in_centroid=False)
-
-    @property
     def symmetry_measure(self) -> dict[str, float]:
         if self.coordination_number not in symmetry_measures_from_coordination:
             raise ValueError('No symmetry measure objects for coordination number of {}'.format(
                 self.coordination_number))
         msm = {}
         for string, sm in symmetry_measures_from_coordination[self.coordination_number].items():
-            msm[string] = sm.minimum_symmetry_measure(self.abstract_geometry)
+            msm[string] = sm.minimum_symmetry_measure(self.vertex_vectors(reference='central_atom'))
         return msm
 
     @property

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometries import AllCoordinationGeometries
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 import numpy as np
+
+from polyhedral_analysis.csm import continuous_symmetry_measure
+from polyhedral_analysis.reference_geometries import get_reference_geometry
 
 
 def _compute_reduced_permutations(reference_points: np.ndarray) -> np.ndarray:
@@ -67,16 +67,15 @@ class SymmetryMeasure:
         return self._permutations
 
     def minimum_symmetry_measure(self,
-                                 ag: AbstractGeometry) -> float:
-        distorted_points = ag.points_wocs_csc()
+                                 distorted_points: np.ndarray) -> float:
         return min(
-            symmetry_measure(distorted_points[perm], self.reference_points)['symmetry_measure']
+            continuous_symmetry_measure(distorted_points[perm], self.reference_points).symmetry_measure
             for perm in self.permutations
         )
 
     @classmethod
     def from_name(cls, name: str) -> SymmetryMeasure:
-        reference_points = AllCoordinationGeometries().get_geometry_from_name(name).points
+        reference_points = get_reference_geometry(name)
         return cls(reference_points, name)
 
 symmetry_measures_to_construct = {4: ['Tetrahedron'],
