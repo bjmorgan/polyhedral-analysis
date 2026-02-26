@@ -1,12 +1,14 @@
 # Changelog
 
-## 0.2.1
+## 0.3.0
 
 ### Other changes
 
 - Migrated from setup.py to pyproject.toml.
 - Removed requirements.txt, .coveragerc, and .mypy.ini (consolidated into pyproject.toml).
 - Version now read at runtime via importlib.metadata.
+- Updated type hints to modern Python 3.11+ syntax.
+- Updated README with description, features, installation, and quick start example.
 
 ## 0.2.0
 
