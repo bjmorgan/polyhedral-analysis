@@ -2,7 +2,7 @@ from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_f
 from itertools import permutations
 import math
 import numpy as np
-from typing import Dict, Union, TypedDict
+from typing import TypedDict
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
 

@@ -3,13 +3,12 @@ from polyhedral_analysis.utils import flatten, prune_neighbour_list, lattice_mc_
 from pymatgen.core.structure import Structure
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
-from typing import List, Union, Dict, Tuple
 
 class Configuration:
 
     def __init__(self,
                  structure: Structure,
-                 recipes: List[PolyhedraRecipe]) -> None:
+                 recipes: list[PolyhedraRecipe]) -> None:
         """
         A Configuration object describes a single atomic geometry.
 
@@ -31,7 +30,7 @@ class Configuration:
                            site=site,
                            label=site.species_string)
                       for i, site in enumerate(structure.sites)]
-        self.polyhedra: List[CoordinationPolyhedron] = []
+        self.polyhedra: list[CoordinationPolyhedron] = []
         for recipe in recipes:
             self.polyhedra.extend(recipe.find_polyhedra(self.atoms, structure))
         self.central_atoms = sorted(list(set(
@@ -42,14 +41,14 @@ class Configuration:
             key=lambda x: x.index)
 
     def coordination_atom_by_index(self,
-                                   index: int) -> Union[Atom, None]:
+                                   index: int) -> Atom | None:
         """Return the coordination atom with a specific index.
 
         Args:
             index (int): The atom index to match.
 
         Returns:
-            Union[Atom, None]: The matching coordination atom. If the desired index does not match
+            Atom | None: The matching coordination atom. If the desired index does not match
                          any of the coordination atoms for this configuration, None is returned.
         """
         coordination_atom_indices = [
@@ -60,15 +59,15 @@ class Configuration:
             return self.coordination_atoms[coordination_atom_indices.index(index)]
 
     @property
-    def polyhedra_labels(self) -> List[Union[str, None]]:
+    def polyhedra_labels(self) -> list[str | None]:
         return [p.label for p in self.polyhedra]
 
     def polyhedra_by_label(self,
-                           label: Union[str, List[str]]) -> List[CoordinationPolyhedron]:
+                           label: str | list[str]) -> list[CoordinationPolyhedron]:
         """Returns a list of polyhedra for this configuration with matching labels.
 
         Args:
-            (Union[str, List[str]]): Either a single label string, or a list of
+            label (str | list[str]): Either a single label string, or a list of
                 label strings.
 
         Returns:
@@ -84,8 +83,8 @@ class Configuration:
 
     def to_lattice_mc(self, 
                       filename: str, 
-                      labels: List[str],
-                      neighbour_list: Dict[int, Tuple[int, ...]]) -> None:
+                      labels: list[str],
+                      neighbour_list: dict[int, tuple[int, ...]]) -> None:
         site_indices = [p.index for p in self.polyhedra_by_label(labels)]
         neighbour_list = prune_neighbour_list(neighbour_list, site_indices)
         with open(filename, 'w') as f:
@@ -96,6 +95,6 @@ class Configuration:
                     f.write(f'{lattice_mc_string(p, neighbour_list)}\n')
 
     def face_sharing_neighbour_list(self, 
-                                    labels: List[str]) -> Dict[int, Tuple[int, ...]]:
+                                    labels: list[str]) -> dict[int, tuple[int, ...]]:
         return {p.index: p.face_sharing_neighbour_list()
                 for p in self.polyhedra_by_label(labels)}

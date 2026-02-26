@@ -11,15 +11,15 @@ from scipy.spatial import ConvexHull  # type: ignore[import-untyped]
 from itertools import combinations
 import vg  # type: ignore
 from collections import Counter
-from typing import List, Optional, Dict, Union, Set, Tuple, Literal
+from typing import Literal
 import typing
 
 class CoordinationPolyhedron:
 
     def __init__(self,
                  central_atom: Atom,
-                 vertices: List[Atom],
-                 label: Optional[str] = None) -> None:
+                 vertices: list[Atom],
+                 label: str | None = None) -> None:
         """
         Initialise a CoordinationPolyhedron object.
 
@@ -38,8 +38,8 @@ class CoordinationPolyhedron:
         for v in self.vertices:
             v.in_polyhedra.append(self)
         self._label: str = label if label else central_atom.label
-        self._edge_graph: Optional[Dict[int, List[int]]] = None
-        self._abstract_geometry: Optional[AbstractGeometry] = None
+        self._edge_graph: dict[int, list[int]] | None = None
+        self._abstract_geometry: AbstractGeometry | None = None
 
     @property
     def label(self) -> str:
@@ -87,7 +87,7 @@ class CoordinationPolyhedron:
         return to_return
 
     def intersection(self,
-                     other_polyhedron: CoordinationPolyhedron) -> Tuple[int, ...]:
+                     other_polyhedron: CoordinationPolyhedron) -> tuple[int, ...]:
         """Returns a tuple of atom indices for vertex atoms shared with another polyhedron.
 
         Args:
@@ -100,7 +100,7 @@ class CoordinationPolyhedron:
         return tuple(sorted(set(self.vertex_indices) & set(other_polyhedron.vertex_indices)))
 
     @property
-    def vertex_indices(self) -> List[int]:
+    def vertex_indices(self) -> list[int]:
         return [v.index for v in self.vertices]
 
     def vertex_vectors(self,
@@ -133,7 +133,7 @@ class CoordinationPolyhedron:
         return np.array([v.coords for v in self.vertices])
 
     @property
-    def vertex_labels(self) -> List[Optional[str]]:
+    def vertex_labels(self) -> list[str | None]:
         return [v.label for v in self.vertices]
 
     @property
@@ -145,14 +145,14 @@ class CoordinationPolyhedron:
         return self.central_atom.index
 
     @property
-    def edge_graph(self) -> Dict[int, List[int]]:
-        if not self._edge_graph:
+    def edge_graph(self) -> dict[int, list[int]]:
+        if self._edge_graph is None:
             self._edge_graph = self.construct_edge_graph()
             self.update_vertex_neighbours()
         return self._edge_graph
 
-    def edge_vertex_indices(self) -> Tuple[Tuple[int, int], ...]:
-        edge_pairs: Set[Tuple[int, int]] = set()
+    def edge_vertex_indices(self) -> tuple[tuple[int, int], ...]:
+        edge_pairs: set[tuple[int, int]] = set()
         for v1, v2_list in self.edge_graph.items():
             for v2 in v2_list:
                 edge = (min(v1, v2), max(v1, v2))
@@ -161,7 +161,7 @@ class CoordinationPolyhedron:
 
     @property
     def abstract_geometry(self) -> AbstractGeometry:
-        if not self._abstract_geometry:
+        if self._abstract_geometry is None:
             self._abstract_geometry = self.construct_abstract_geometry()
         return self._abstract_geometry
 
@@ -174,7 +174,7 @@ class CoordinationPolyhedron:
                                 include_central_site_in_centroid=False)
 
     @property
-    def symmetry_measure(self) -> Dict[str, float]:
+    def symmetry_measure(self) -> dict[str, float]:
         if self.coordination_number not in symmetry_measures_from_coordination:
             raise ValueError('No symmetry measure objects for coordination number of {}'.format(
                 self.coordination_number))
@@ -184,7 +184,7 @@ class CoordinationPolyhedron:
         return msm
 
     @property
-    def best_fit_geometry(self) -> Dict[str, Union[str, float]]:
+    def best_fit_geometry(self) -> dict[str, str | float]:
         psm = self.symmetry_measure
         best_fit = min(psm, key=psm.get) # type: ignore
         return {'geometry': best_fit, 'symmetry_measure': psm[best_fit]}
@@ -198,7 +198,7 @@ class CoordinationPolyhedron:
             self.central_atom.coords + v for v in pbc_vectors]
         return np.array(vertex_minimum_image_coords)
 
-    def faces(self) -> Tuple[Tuple[int, ...], ...]:
+    def faces(self) -> tuple[tuple[int, ...], ...]:
         """
         Returns a nested set of tuples for each face of the polyhedron. Each 
         per-face tuple returned contains the indices of the vertices that define
@@ -236,8 +236,8 @@ class CoordinationPolyhedron:
     def convex_hull(self) -> ConvexHull:
         return ConvexHull(self.minimum_image_vertex_coordinates())
 
-    def construct_edge_graph(self) -> Dict[int, List[int]]:
-        connected_vertices: Dict[int, Set[int]] = {
+    def construct_edge_graph(self) -> dict[int, list[int]]:
+        connected_vertices: dict[int, set[int]] = {
             i: set() for i in range(self.coordination_number)}
         if self.coordination_number > 3:
             convex_hull = self.convex_hull()
@@ -282,7 +282,7 @@ class CoordinationPolyhedron:
         return edge_list
 
     @property
-    def vertex_count(self) -> typing.Counter[Union[str, None]]:
+    def vertex_count(self) -> typing.Counter[str | None]:
         return Counter([v.label for v in self.vertices])
 
     def vertex_distances(self,
@@ -310,7 +310,7 @@ class CoordinationPolyhedron:
 
     def vertex_distances_and_labels(self,
                                     reference: Literal['central_atom', 'centroid'] = 'central_atom'
-                                    ) -> Tuple[Tuple[float, Optional[str]], ...]:
+                                    ) -> tuple[tuple[float, str | None], ...]:
         """
         Returns a tuple of distances and species labels from the reference point to the vertex atoms.
 
@@ -319,7 +319,7 @@ class CoordinationPolyhedron:
                 Can be either 'central_atom' (default) or 'centroid'.
 
         Returns:
-            Tuple[Tuple[float, Optional[str]], ...]: A tuple of length-2 tuples, containing for each vertex the
+            tuple[tuple[float, str | None], ...]: A tuple of length-2 tuples, containing for each vertex the
                 distance from the reference point and the species label of the vertex atom.
 
         Raises:
@@ -382,7 +382,7 @@ class CoordinationPolyhedron:
         equal_vertex_atoms = self.vertices == other.vertices
         return equal_central_atom & equal_vertex_atoms
 
-    def neighbours(self) -> Tuple[CoordinationPolyhedron, ...]:
+    def neighbours(self) -> tuple[CoordinationPolyhedron, ...]:
         """Returns a tuple of neighbouring polyhedra.
         Two polyhedra are considered to be neighbours if they 
         have one or more vertex atoms in common.
@@ -401,7 +401,7 @@ class CoordinationPolyhedron:
                     neighbours.append(p)
         return tuple(sorted(neighbours, key=lambda p: p.index))
 
-    def neighbours_by_index_and_shared_vertices(self) -> Dict[int, Tuple[int, ...]]:
+    def neighbours_by_index_and_shared_vertices(self) -> dict[int, tuple[int, ...]]:
         """Returns a dictionary of vertex atoms shared with neighbouring polyhedra.
         Two polyhedra are considered to be neighbours if they have one of more
         vertex atoms in common.
@@ -416,15 +416,15 @@ class CoordinationPolyhedron:
         """
         return {p.index: self.intersection(p) for p in self.neighbours()}
 
-    def corner_sharing_neighbour_list(self) -> Tuple[int, ...]:
+    def corner_sharing_neighbour_list(self) -> tuple[int, ...]:
         return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
                      if len(v) == 1)
 
-    def edge_sharing_neighbour_list(self) -> Tuple[int, ...]:
+    def edge_sharing_neighbour_list(self) -> tuple[int, ...]:
         return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
                      if len(v) == 2)
 
-    def face_sharing_neighbour_list(self) -> Tuple[int, ...]:
+    def face_sharing_neighbour_list(self) -> tuple[int, ...]:
         return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
                      if len(v) >= 3)
 
@@ -465,7 +465,7 @@ class CoordinationPolyhedron:
         projections = np.dot(vertex_vecs, vectors_normalized.T)
         return projections
 
-    def coordination_distances(self) -> List[float]:
+    def coordination_distances(self) -> list[float]:
         """
         Returns a list of distances from the central atom to the vertex atoms.
 
@@ -476,11 +476,11 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            List[float]: A list of distances between each vertex and the central atom.
+            list[float]: A list of distances between each vertex and the central atom.
         """
         return list(self.vertex_distances(reference='central_atom'))
 
-    def angles(self) -> List[float]:
+    def angles(self) -> list[float]:
         """
         List of all vertex--centroid--vertex angles.
 
@@ -496,7 +496,7 @@ class CoordinationPolyhedron:
     def vertex_vector_orientations(self,
                                    units: Literal['degrees', 'radians'] = 'degrees',
                                    return_distance: bool = False,
-                                   reference: Literal['centroid', 'central_atom'] = 'centroid') -> List[Tuple[float, ...]]:
+                                   reference: Literal['centroid', 'central_atom'] = 'centroid') -> list[tuple[float, ...]]:
         """Returns the angular orientations of each vertex vector.
     
         The orientation is defined by two angles, theta and phi. 
@@ -526,7 +526,7 @@ class CoordinationPolyhedron:
         vg_units = {'degrees': 'deg',
                     'radians': 'rad'}
         
-        result: List[Tuple[float, ...]] = []
+        result: list[tuple[float, ...]] = []
         for point in vertex_vectors:
             theta = vg.angle(np.array([0.0, 0.0, 1.0]), point, units=vg_units[units])
             
@@ -564,8 +564,8 @@ class CoordinationPolyhedron:
     @classmethod
     def from_sites(cls,
                    central_site: Site,
-                   vertex_sites: List[Site],
-                   label: Optional[str] = None) -> CoordinationPolyhedron:
+                   vertex_sites: list[Site],
+                   label: str | None = None) -> CoordinationPolyhedron:
         """
         Create a :obj:`CoordinationPolyhedron` from a set of `pymatgen` :obj:`PeriodicSite` objects.
 
@@ -583,7 +583,7 @@ class CoordinationPolyhedron:
         return cls(central_atom=central_atom, vertices=vertices, label=label)
 
     def vertices_by_indices(self,
-                            vertex_indices: List[int]) -> List[Atom]:
+                            vertex_indices: list[int]) -> list[Atom]:
         """
         Select a subset of vertices from this polyhedron with a list of vertex indices.
 
@@ -692,13 +692,13 @@ class CoordinationPolyhedron:
         return distortion
 
     def vertex_angles(self, 
-                      vertex_pairs: Tuple[Tuple[int, int], ...],
+                      vertex_pairs: tuple[tuple[int, int], ...],
                       reference: Literal['central_atom', 'centroid'] = 'central_atom') -> np.ndarray:
         """
         Calculate angles between specified pairs of vertices.
 
         Args:
-            vertex_pairs (Tuple[Tuple[int, int], ...]): Pairs of vertex global indices to calculate angles for.
+            vertex_pairs (tuple[tuple[int, int], ...]): Pairs of vertex global indices to calculate angles for.
             reference (Literal['central_atom', 'centroid'], optional): The reference point for vertex vectors. 
                 Defaults to 'central_atom'.
 
@@ -729,7 +729,7 @@ class CoordinationPolyhedron:
         return np.array(angles)
 
 def merge_coplanar_simplices(convex_hull: ConvexHull,
-                             tolerance: float = 0.1) -> List[List[int]]:
+                             tolerance: float = 0.1) -> list[list[int]]:
     triangles_to_merge = []
     # TODO: there has to be a better way of doing this pairwise loop, e.g. using itertools.permutations
     for i, e1 in enumerate(convex_hull.equations):

@@ -6,10 +6,8 @@ import json
 import os
 from pymatgen.core.sites import Site
 from pymatgen.core.lattice import Lattice
-from typing import List, Dict, Optional, Union, Any
+from typing import Any, TYPE_CHECKING
 import numpy as np  # type: ignore
-
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
@@ -20,7 +18,7 @@ class Atom:
     def __init__(self,
                  index: int,
                  site: Site,
-                 label: Optional[str] = None) -> None:
+                 label: str | None = None) -> None:
         """
         Initialise an Atom object.
 
@@ -40,18 +38,18 @@ class Atom:
         self.index = index
         self.site = site
         self.label: str = label if label else site.species_string
-        self.in_polyhedra: List[CoordinationPolyhedron] = []
-        self._neighbours: Dict[int, List[int]] = {}
+        self.in_polyhedra: list[CoordinationPolyhedron] = []
+        self._neighbours: dict[int, list[int]] = {}
 
     @property
-    def neighbours(self) -> Dict[int, List[int]]:
+    def neighbours(self) -> dict[int, list[int]]:
         if len(self._neighbours) != len(self.in_polyhedra):
             for p in self.in_polyhedra:
                 p.construct_edge_graph()
                 p.update_vertex_neighbours()
         return self._neighbours
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         """
         json-serializable :obj:`dict` representation of Atom.
         """
@@ -68,8 +66,8 @@ class Atom:
         return "{} {}".format(self.index, self.site)
 
     def to(self,
-           fmt: Optional[str] = None,
-           filename: Optional[str] = None) -> Union[None, str]:
+           fmt: str | None = None,
+           filename: str | None = None) -> None | str:
         """
         Outputs the structure to a file or string.
 

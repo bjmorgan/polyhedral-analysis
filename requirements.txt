@@ -1,8 +1,0 @@
-numpy
-pymatgen >= 2024.7.18
-scipy
-vg
-monty
-tqdm
-cmcrameri
-bsym

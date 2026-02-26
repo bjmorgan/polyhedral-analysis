@@ -1,4 +1,5 @@
-from typing import List, TypeVar, Sequence, Dict, Tuple
+from collections.abc import Sequence
+from typing import TypeVar
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 
 T = TypeVar('T')
@@ -8,7 +9,7 @@ Utility functions
 """
 
 
-def flatten(this_list: Sequence[Sequence[T]]) -> List[T]:
+def flatten(this_list: Sequence[Sequence[T]]) -> list[T]:
     """Flattens a nested list.
 
     Args:
@@ -22,7 +23,7 @@ def flatten(this_list: Sequence[Sequence[T]]) -> List[T]:
 
 
 def lattice_mc_string(polyhedron: CoordinationPolyhedron,
-                      neighbour_list: Dict[int, Tuple[int, ...]]) -> str:
+                      neighbour_list: dict[int, tuple[int, ...]]) -> str:
     """Returns a string representation of a polyhedron as a `lattice_mc`_
     site-input formatted site.
 
@@ -52,8 +53,8 @@ def lattice_mc_string(polyhedron: CoordinationPolyhedron,
     return string
 
 
-def prune_neighbour_list(neighbours: Dict[int, Tuple[int, ...]], 
-                         indices: List[int]) -> Dict[int, Tuple[int, ...]]:
+def prune_neighbour_list(neighbours: dict[int, tuple[int, ...]],
+                         indices: list[int]) -> dict[int, tuple[int, ...]]:
     """TODO"""
     pruned_neighbours = {}
     for k, v in neighbours.items():

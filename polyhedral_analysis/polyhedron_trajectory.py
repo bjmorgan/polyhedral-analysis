@@ -1,5 +1,4 @@
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
-from typing import Optional, List
 
 class PolyhedronTrajectory:
     """
@@ -7,8 +6,8 @@ class PolyhedronTrajectory:
     """
 
     def __init__(self, 
-                 polyhedra: List[CoordinationPolyhedron],
-                 config_numbers: Optional[List[int]] = None) -> None:
+                 polyhedra: list[CoordinationPolyhedron],
+                 config_numbers: list[int] | None = None) -> None:
         """
         Initialise a PolyhedronTrajectory object.
 
