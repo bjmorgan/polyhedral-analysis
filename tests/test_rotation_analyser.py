@@ -3,7 +3,6 @@ import numpy as np
 from polyhedral_analysis.rotation_analyser import RotationAnalyser
 from unittest.mock import Mock
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 
 class TestRotationAnalyserInit(unittest.TestCase):
 
@@ -46,11 +45,10 @@ class TestRotationAnalyser(unittest.TestCase):
 
     def test_polyhedron_orientation(self):
         mock_polyhedron = Mock(spec=CoordinationPolyhedron)
-        mock_polyhedron.abstract_geometry = Mock(spec=AbstractGeometry)
-        mock_polyhedron.abstract_geometry.points_wocs_csc = Mock(
-            return_value='foo')
+        mock_polyhedron.vertex_vectors = Mock(return_value='foo')
         self.ra.discrete_orientation = Mock(return_value='bar')
         orientation = self.ra.polyhedron_orientation(mock_polyhedron)
+        mock_polyhedron.vertex_vectors.assert_called_once_with(reference='central_atom')
         self.ra.discrete_orientation.assert_called_once_with('foo')
         self.assertEqual(orientation, 'bar')
 

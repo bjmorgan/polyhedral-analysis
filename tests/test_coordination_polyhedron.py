@@ -1,7 +1,6 @@
 import unittest
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
 from pymatgen.core import Site
 from unittest.mock import Mock, patch, PropertyMock, call
 import copy
@@ -224,33 +223,20 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         self.assertEqual(
             self.coordination_polyhedron.construct_edge_graph.call_count, 1)
 
-    def test_abstract_geometry_if_cached(self):
-        abstract_geometry = Mock(spec=AbstractGeometry)
-        self.coordination_polyhedron._abstract_geometry = abstract_geometry
-        self.assertEqual(
-            self.coordination_polyhedron.abstract_geometry, abstract_geometry)
-
-    def test_abstract_geometry_if_not_cached(self):
-        abstract_geometry = Mock(spec=AbstractGeometry)
-        self.coordination_polyhedron.construct_abstract_geometry = Mock(
-            return_value=abstract_geometry)
-        self.assertEqual(
-            self.coordination_polyhedron.abstract_geometry, abstract_geometry)
-        self.assertEqual(
-            self.coordination_polyhedron.construct_abstract_geometry.call_count, 1)
-
-    def test_construct_abstract_geometry(self):
+    def test_symmetry_measure_delegates_to_vertex_vectors(self):
         polyhedron = self.coordination_polyhedron
-        polyhedron.central_atom.coords = np.array([1.0, 2.0, 3.0])
-        polyhedron.minimum_image_vertex_coordinates = Mock(return_value='foo')
-        abstract_geometry = Mock(spec=AbstractGeometry)
-        with patch(f'polyhedral_analysis.coordination_polyhedron.AbstractGeometry') as mock_abstract_geometry:
-            mock_abstract_geometry.return_value = abstract_geometry
-            ag = polyhedron.construct_abstract_geometry()
-            self.assertEqual(ag, abstract_geometry)
-            mock_abstract_geometry.assert_called_with(central_site=polyhedron.central_atom.coords,
-                                                      bare_coords='foo',
-                                                      include_central_site_in_centroid=False)
+        mock_vectors = np.array([
+            [0.0, 0.0, 2.0],
+            [0.0, 0.0, -2.0],
+            [2.0, 0.0, 0.0],
+            [-2.0, 0.0, 0.0],
+            [0.0, 2.0, 0.0],
+            [0.0, -2.0, 0.0],
+        ])
+        polyhedron.vertex_vectors = Mock(return_value=mock_vectors)
+        sm = polyhedron.symmetry_measure
+        polyhedron.vertex_vectors.assert_called_with(reference='central_atom')
+        self.assertAlmostEqual(sm['Octahedron'], 0.0)
 
     def test_faces(self):
         polyhedron = self.coordination_polyhedron

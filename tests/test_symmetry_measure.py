@@ -3,10 +3,7 @@ import unittest
 import numpy as np
 from itertools import permutations
 from polyhedral_analysis.symmetry_measure import SymmetryMeasure
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import (
-    AbstractGeometry,
-    symmetry_measure,
-)
+from polyhedral_analysis.csm import continuous_symmetry_measure
 
 class TestSymmetryMeasureInit( unittest.TestCase ):
 
@@ -36,15 +33,13 @@ class TestSymmetryMeasure( unittest.TestCase ):
   
     def test_minimum_symmetry_measure( self ):
         # The symmetry measure for a perfect octahedron is 0.0.
-        vertex_coordinates = np.array([[0.0, 0.0, 2.0], 
-                                       [0.0, 0.0, -2.0], 
-                                       [2.0, 0.0, 0.0], 
-                                       [0.0, 2.0, 0.0], 
-                                       [-2.0, 0.0, 0.0], 
-                                       [0.0, -2.0, 0.0]])
-        ag = AbstractGeometry( central_site=np.array([0.0, 0.0, 0.0]), 
-                               bare_coords=vertex_coordinates)
-        self.assertEqual( self.sm.minimum_symmetry_measure( ag=ag ), 0.0 )
+        vertex_vectors = np.array([[0.0, 0.0, 2.0],
+                                   [0.0, 0.0, -2.0],
+                                   [2.0, 0.0, 0.0],
+                                   [0.0, 2.0, 0.0],
+                                   [-2.0, 0.0, 0.0],
+                                   [0.0, -2.0, 0.0]])
+        self.assertEqual( self.sm.minimum_symmetry_measure( vertex_vectors ), 0.0 )
 
     def test_symmetry_measures_from_coordination( self ):
         from polyhedral_analysis.symmetry_measure import symmetry_measures_from_coordination
@@ -97,16 +92,11 @@ class TestReducedPermutations(unittest.TestCase):
             [0.0, 1.0, -0.1],
             [0.1, -1.0, 0.0],
         ])
-        ag = AbstractGeometry(
-            central_site=np.array([0.0, 0.0, 0.0]),
-            bare_coords=distorted,
-        )
-        reduced_csm = sm.minimum_symmetry_measure(ag)
+        reduced_csm = sm.minimum_symmetry_measure(distorted)
         # Brute-force over all 6! permutations.
-        points = ag.points_wocs_csc()
         brute_force_csm = min(
-            symmetry_measure(np.array(p), sm.reference_points)['symmetry_measure']
-            for p in permutations(points)
+            continuous_symmetry_measure(np.array(p), sm.reference_points).symmetry_measure
+            for p in permutations(distorted)
         )
         self.assertAlmostEqual(reduced_csm, brute_force_csm, places=10)
 

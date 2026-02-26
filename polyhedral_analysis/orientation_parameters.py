@@ -1,5 +1,4 @@
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import AbstractGeometry
-import numpy as np # type: ignore
+import numpy as np
 
 def cos_theta(a: np.ndarray, 
               b: np.ndarray) -> float:
@@ -25,11 +24,14 @@ def projection_xyz(vec_in: np.ndarray) -> float:
         scores.append(2.0 * cos_theta(vec_in, vec)**2 - 1.0)
     return max(scores)
 
-def oct_rotational_order_parameter(ag: AbstractGeometry) -> float:
-    """Order parameter for rotational oriention of an octahedron with respect to <100> vectors.
+def oct_rotational_order_parameter(points: np.ndarray) -> float:
+    """Order parameter for rotational orientation of an octahedron with respect to <100> vectors.
 
-    Gives 1.0 for a perfectly aligned octahedron.
-    Gives 0.33 for a 45° rotated octahedron around one axis.
+    Args:
+        points: A 6x3 array of centroid-centred vertex vectors.
 
+    Returns:
+        1.0 for a perfectly aligned octahedron.
+        0.33 for a 45 degree rotated octahedron around one axis.
     """
-    return sum(projection_xyz(point) for point in ag.points_wocs_ctwocc()) / 6.0
+    return sum(projection_xyz(point) for point in points) / 6.0

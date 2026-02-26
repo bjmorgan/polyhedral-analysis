@@ -6,32 +6,47 @@ on: [pull_request]
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   tests:
-      runs-on: ubuntu-latest
-      timeout-minutes: 30
-      strategy:
-        matrix:
-          python-version: ['3.11', '3.12', '3.13', '3.14']
-      steps:
-        - uses: actions/checkout@v4
-        - name: Set up Python ${{matrix.python-version}}
-          uses: actions/setup-python@v5
-          with:
-            python-version: ${{matrix.python-version}}
-        - name: Install Python dependencies
-          run: |
-            pip install --upgrade pip
-            pip install .
-            pip install mypy types-tqdm types-PyYAML pytest pytest-cov
-            pip list
-        - name: Run tests
-          run: |
-            pytest --cov=polyhedral_analysis --cov-report lcov
-        - name: Coveralls GitHub Action
-          continue-on-error: true
-          uses: coverallsapp/github-action@v2
-          with:
-            path-to-lcov: ./coverage.lcov
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-        - name: Static type checking
-          run: |
-            mypy polyhedral_analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .
+          pip install pytest pytest-cov
+          pip list
+      - name: Run tests
+        run: |
+          pytest --cov=polyhedral_analysis --cov-report lcov
+      - name: Coveralls GitHub Action
+        continue-on-error: true
+        uses: coverallsapp/github-action@v2
+        with:
+          path-to-lcov: ./coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  mypy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .
+          pip install mypy types-tqdm types-PyYAML
+      - name: Static type checking
+        run: |
+          mypy polyhedral_analysis

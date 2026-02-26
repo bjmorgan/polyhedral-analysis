@@ -1,4 +1,4 @@
-from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import symmetry_measure
+from polyhedral_analysis.csm import continuous_symmetry_measure
 from itertools import permutations
 import math
 import numpy as np
@@ -97,26 +97,26 @@ class RotationAnalyser(object):
         points -= np.mean(points, axis=0, dtype=float)
         sm = []
         for rp in self.reference_points:
-            sm.extend([symmetry_measure(points, p) for p in permutations(rp)])
-        min_sm = min([s['symmetry_measure'] for s in sm])
+            sm.extend([continuous_symmetry_measure(points, np.array(p)) for p in permutations(rp)])
+        min_sm = min(s.symmetry_measure for s in sm)
         pure_rot_sm = [s for s in sm if math.isclose(
-            s['symmetry_measure'], min_sm)]
+            s.symmetry_measure, min_sm)]
         proper_rot_sm = [s for s in pure_rot_sm if np.linalg.det(
-            s['rotation_matrix']) > 0]
+            s.rotation_matrix) > 0]
         proper_rot_matrices = np.array(
-            [s['rotation_matrix'] for s in proper_rot_sm])
+            [s.rotation_matrix for s in proper_rot_sm])
         trace = np.trace(proper_rot_matrices, axis1=1, axis2=2)
-        rot_distance = np.arccos((trace - 1.0) / 2.0)
+        rot_distance = np.arccos(np.clip((trace - 1.0) / 2.0, -1.0, 1.0))
         index = int(np.argmin(rot_distance))
         reference_geometry_index = index // int(
             len(proper_rot_sm) / len(self.reference_points))
         return OrientationDict(orientation_index=index,
                                reference_geometry_index=reference_geometry_index,
                                rotational_distance=rot_distance[index],
-                               symmetry_measure=proper_rot_sm[index]['symmetry_measure'],
+                               symmetry_measure=proper_rot_sm[index].symmetry_measure,
                                all_rotational_distances=rot_distance)
 
     def polyhedron_orientation(self,
                                polyhedron: CoordinationPolyhedron) -> OrientationDict:
-        points = polyhedron.abstract_geometry.points_wocs_csc()
+        points = polyhedron.vertex_vectors(reference='central_atom')
         return self.discrete_orientation(points)
