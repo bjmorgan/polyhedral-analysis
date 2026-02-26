@@ -33,7 +33,7 @@ def adjacent_vertex_pairs(polyhedron: CoordinationPolyhedron,
         check (bool, optional): Whether to check if the polyhedron is octahedral. Default is True.
 
     Returns:
-        List[Tuple[Atom, Atom]]: A list of tuples, each containing a pair of adjacent Atom objects.
+        list[tuple[Atom, Atom]]: A list of tuples, each containing a pair of adjacent Atom objects.
 
     Raises:
         ValueError: If the polyhedron is not recognized as an octahedron.
@@ -80,7 +80,7 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
 
 def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
                               check: bool = True) -> tuple[float, float, float]:
-    """For an octahedral polyhedron, return the distances between pairs of cis- vertices.
+    """For an octahedral polyhedron, return the distances between pairs of opposite (trans) vertices.
 
     Args:
         polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
@@ -105,7 +105,7 @@ def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
             is an octahedron. Default is `True`.
 
     Returns:
-        List[np.ndarray]: A list of three numpy arrays, each representing a vector
+        list[np.ndarray]: A list of three numpy arrays, each representing a vector
                           between a pair of trans vertices.
 
     Raises:

@@ -9,10 +9,10 @@ def _process_orientation_data(orientations: list[tuple[float, float]]) -> dict[s
     Process orientation data to prepare for plotting.
 
     Args:
-        orientations (List[Tuple[float, float]]): List of (theta, phi) tuples.
+        orientations (list[tuple[float, float]]): List of (theta, phi) tuples.
 
     Returns:
-        Dict[str, Any]: Dictionary containing processed data for plotting.
+        dict[str, Any]: Dictionary containing processed data for plotting.
 
     Raises:
         ValueError: If orientations is empty, contains invalid data, or results in singular covariance matrix.
@@ -55,11 +55,11 @@ def plot_orientation_distribution(orientations: list[tuple[float, float]],
     Create a contour map of the probability distribution for (phi, theta) orientations.
     
     Args:
-        orientations (List[Tuple[float, float]]): List of (theta, phi) tuples.
-        title (Optional[str], optional): Title for the plot. Defaults to None.
-        figsize (Tuple[int, int], optional): Figure size as (width, height). Defaults to (10, 8).
+        orientations (list[tuple[float, float]]): List of (theta, phi) tuples.
+        title (str | None, optional): Title for the plot. Defaults to None.
+        figsize (tuple[int, int], optional): Figure size as (width, height). Defaults to (10, 8).
         cmap (matplotlib.colors.Colormap, optional): Colormap to use for the contour plot. Defaults to cm.lipari.
-        fontsize (Optional[int], optional): Font size for labels and title. If None, uses matplotlib defaults.
+        fontsize (int | None, optional): Font size for labels and title. If None, uses matplotlib defaults.
         plot (bool, optional): Whether to display the plot immediately. Defaults to False.
     
     Returns:

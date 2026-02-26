@@ -180,7 +180,7 @@ class PolyhedraRecipe:
 
     def central_atom_list(self, 
                           structure: Structure | None = None) -> list[int]:
-        if not self._central_atom_list:
+        if self._central_atom_list is None:
             if structure:
                 self._central_atom_list = list(self._central_atom_list_generator(structure))
             else:
@@ -195,7 +195,7 @@ class PolyhedraRecipe:
 
     def vertex_atom_list(self,
                          structure: Structure | None = None) -> list[int]:
-        if not self._vertex_atom_list:
+        if self._vertex_atom_list is None:
             if structure:
                 self._vertex_atom_list = list(self._vertex_atom_list_generator(structure))
             else:

@@ -161,7 +161,7 @@ class CoordinationPolyhedron:
 
     @property
     def abstract_geometry(self) -> AbstractGeometry:
-        if not self._abstract_geometry:
+        if self._abstract_geometry is None:
             self._abstract_geometry = self.construct_abstract_geometry()
         return self._abstract_geometry
 
@@ -319,7 +319,7 @@ class CoordinationPolyhedron:
                 Can be either 'central_atom' (default) or 'centroid'.
 
         Returns:
-            Tuple[Tuple[float, Optional[str]], ...]: A tuple of length-2 tuples, containing for each vertex the
+            tuple[tuple[float, str | None], ...]: A tuple of length-2 tuples, containing for each vertex the
                 distance from the reference point and the species label of the vertex atom.
 
         Raises:
@@ -476,7 +476,7 @@ class CoordinationPolyhedron:
             None
 
         Returns:
-            List[float]: A list of distances between each vertex and the central atom.
+            list[float]: A list of distances between each vertex and the central atom.
         """
         return list(self.vertex_distances(reference='central_atom'))
 
@@ -698,7 +698,7 @@ class CoordinationPolyhedron:
         Calculate angles between specified pairs of vertices.
 
         Args:
-            vertex_pairs (Tuple[Tuple[int, int], ...]): Pairs of vertex global indices to calculate angles for.
+            vertex_pairs (tuple[tuple[int, int], ...]): Pairs of vertex global indices to calculate angles for.
             reference (Literal['central_atom', 'centroid'], optional): The reference point for vertex vectors. 
                 Defaults to 'central_atom'.
 

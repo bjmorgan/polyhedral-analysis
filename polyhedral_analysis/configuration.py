@@ -48,7 +48,7 @@ class Configuration:
             index (int): The atom index to match.
 
         Returns:
-            Union[Atom, None]: The matching coordination atom. If the desired index does not match
+            Atom | None: The matching coordination atom. If the desired index does not match
                          any of the coordination atoms for this configuration, None is returned.
         """
         coordination_atom_indices = [
@@ -67,7 +67,7 @@ class Configuration:
         """Returns a list of polyhedra for this configuration with matching labels.
 
         Args:
-            (Union[str, List[str]]): Either a single label string, or a list of
+            label (str | list[str]): Either a single label string, or a list of
                 label strings.
 
         Returns:
