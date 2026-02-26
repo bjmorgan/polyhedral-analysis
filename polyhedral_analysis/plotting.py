@@ -2,9 +2,9 @@ import numpy as np
 from scipy.stats import gaussian_kde # type: ignore
 from cmcrameri import cm # type: ignore
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Optional, Dict, Any
+from typing import Any
 
-def _process_orientation_data(orientations: List[Tuple[float, float]]) -> Dict[str, Any]:
+def _process_orientation_data(orientations: list[tuple[float, float]]) -> dict[str, Any]:
     """
     Process orientation data to prepare for plotting.
 
@@ -45,11 +45,11 @@ def _process_orientation_data(orientations: List[Tuple[float, float]]) -> Dict[s
         'z': z
     }
 
-def plot_orientation_distribution(orientations: List[Tuple[float, float]],
-                                  title: Optional[str] = None,
-                                  figsize: Tuple[int, int] = (10, 8),
+def plot_orientation_distribution(orientations: list[tuple[float, float]],
+                                  title: str | None = None,
+                                  figsize: tuple[int, int] = (10, 8),
                                   cmap = cm.lipari,
-                                  fontsize: Optional[int] = None,
+                                  fontsize: int | None = None,
                                   plot: bool = False) -> plt.Figure:
     """
     Create a contour map of the probability distribution for (phi, theta) orientations.

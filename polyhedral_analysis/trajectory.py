@@ -14,12 +14,13 @@ import multiprocessing
 from tqdm import tqdm
 from tqdm.notebook import tqdm as tqdm_notebook
 from functools import partial
-from typing import List, Optional, Union, Callable, Iterator, Any, TypeVar, Dict
+from collections.abc import Callable, Iterator
+from typing import Any, TypeVar
 
 T = TypeVar('T')
 ProgressBarType = Callable[[Iterator[T]], Iterator[T]]
 
-def get_progress_bar(progress: Union[bool, str]) -> ProgressBarType:
+def get_progress_bar(progress: bool | str) -> ProgressBarType:
     if progress == 'notebook':
         return lambda x: tqdm_notebook(x)  # type: ignore
     elif progress:
@@ -30,8 +31,8 @@ def get_progress_bar(progress: Union[bool, str]) -> ProgressBarType:
 class Trajectory:
 
     def __init__(self,
-                 structures: List[Structure],
-                 configurations: List[Configuration]) -> None:
+                 structures: list[Structure],
+                 configurations: list[Configuration]) -> None:
         """TODO"""
         for s in structures:
             if not isinstance( s, Structure ):
@@ -44,17 +45,17 @@ class Trajectory:
 
     @classmethod
     def _get_configuration(cls,
-                           args: Dict[str, Any]) -> Configuration:
+                           args: dict[str, Any]) -> Configuration:
          return Configuration(structure=args['structure'], 
                               recipes=args['recipes'])
     
     @classmethod
     def from_structures(cls,
-                        structures: List[Structure],
-                        recipes: List[PolyhedraRecipe],
+                        structures: list[Structure],
+                        recipes: list[PolyhedraRecipe],
                         verbose: bool = False,
-                        ncores: Optional[int] = None,
-                        progress: Union[bool, str] = False) -> Trajectory:
+                        ncores: int | None = None,
+                        progress: bool | str = False) -> Trajectory:
         """
         Generate a :obj:`Trajectory` object by applying one or more polyhedral recipes to
         a series of `pymatgen` :obj:`Structure` objects.,
@@ -120,20 +121,20 @@ class Trajectory:
         return new_trajectory
 
     @property
-    def structures(self) -> List[Structure]:
+    def structures(self) -> list[Structure]:
         return self._structures
 
     @property
-    def configurations(self) -> List[Configuration]:
+    def configurations(self) -> list[Configuration]:
         return self._configurations
 
     @classmethod
     def from_xdatcar(cls,
                      filename: str,
-                     recipes: List[PolyhedraRecipe],
+                     recipes: list[PolyhedraRecipe],
                      verbose: bool = False,
-                     progress: Union[str, bool] = False,
-                     ncores: Optional[int] = None) -> Trajectory:
+                     progress: str | bool = False,
+                     ncores: int | None = None) -> Trajectory:
         """
         Args:
             filename (str): Filename for a VASP XDATCAR file.
@@ -152,11 +153,11 @@ class Trajectory:
 
     @classmethod
     def from_xdatcars(cls,
-                      filenames: List[str],
-                      recipes: List[PolyhedraRecipe],
+                      filenames: list[str],
+                      recipes: list[PolyhedraRecipe],
                       verbose: bool = False,
-                      ncores: Optional[int] = None,
-                      progress: Union[bool, str] = False) -> Trajectory:
+                      ncores: int | None = None,
+                      progress: bool | str = False) -> Trajectory:
         """
         TODO
         """

@@ -1,6 +1,5 @@
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from polyhedral_analysis.atom import Atom
-from typing import List, Tuple, Dict
 import numpy as np # type: ignore
 
 # Functions for analysing octahedra
@@ -25,7 +24,7 @@ def check_octahedra(polyhedron: CoordinationPolyhedron) -> None:
         raise ValueError( 'This polyhedron is not recognised a an octahedron' )
 
 def adjacent_vertex_pairs(polyhedron: CoordinationPolyhedron,
-                          check: bool = True) -> List[Tuple[Atom, Atom]]:
+                          check: bool = True) -> list[tuple[Atom, Atom]]:
     """
     Find pairs of adjacent vertices in an octahedral polyhedron.
 
@@ -53,7 +52,7 @@ def adjacent_vertex_pairs(polyhedron: CoordinationPolyhedron,
     return adjacent_pairs
 
 def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
-                          check: bool = True) -> List[Tuple[Atom, Atom]]:
+                          check: bool = True) -> list[tuple[Atom, Atom]]:
     """For an octahedral polyhedron, find the pairs of vertices opposite each other.
    
     Args:
@@ -69,7 +68,7 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
         check_octahedra(polyhedron)
     assert {len(n) for n in polyhedron.edge_graph.values()} == {4}, "Edge graph does not describe an octahedron."
     vertex_pairs = []
-    seen_indices: List[int] = []
+    seen_indices: list[int] = []
     for v1 in polyhedron.vertices:
         if v1.index in seen_indices:
             continue
@@ -80,7 +79,7 @@ def opposite_vertex_pairs(polyhedron: CoordinationPolyhedron,
     return [vertex_pairs[0], vertex_pairs[1], vertex_pairs[2]]
 
 def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
-                              check: bool = True) -> Tuple[float, float, float]:
+                              check: bool = True) -> tuple[float, float, float]:
     """For an octahedral polyhedron, return the distances between pairs of cis- vertices.
 
     Args:
@@ -97,7 +96,7 @@ def opposite_vertex_distances(polyhedron: CoordinationPolyhedron,
     return (distances[0], distances[1], distances[2])
 
 def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
-                         check: bool = True) -> List[np.ndarray]:
+                         check: bool = True) -> list[np.ndarray]:
     """For an octahedral polyhedron, return the vectors between pairs of trans vertices.
 
     Args:
@@ -195,7 +194,7 @@ def isomer_is_mer(polyhedron: CoordinationPolyhedron,
     return not isomer_is_fac(polyhedron, check=check)
 
 def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
-                               check: bool = True) -> Tuple[float, float, float]:
+                               check: bool = True) -> tuple[float, float, float]:
     """
     For each trans pair vector, calculate the smallest angle between the vector and 
     the plane defined by the other two vectors.
@@ -206,7 +205,7 @@ def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
             is an octahedron. Default is True.
 
     Returns:
-        Tuple[float, float, float]: A tuple containing the three smallest angles (in degrees) 
+        tuple[float, float, float]: A tuple containing the three smallest angles (in degrees) 
         between each vector and the plane defined by the other two vectors.
 
     Raises:
@@ -216,7 +215,7 @@ def trans_vector_orthogonality(polyhedron: CoordinationPolyhedron,
     if check:
         check_octahedra(polyhedron)
     
-    trans_vectors: List[np.ndarray] = trans_vertex_vectors(polyhedron, check=False)
+    trans_vectors: list[np.ndarray] = trans_vertex_vectors(polyhedron, check=False)
     
     angles = []
     for i in range(3):
