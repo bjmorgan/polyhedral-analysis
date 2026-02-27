@@ -238,6 +238,22 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         polyhedron.vertex_vectors.assert_called_with(reference='central_atom')
         self.assertAlmostEqual(sm['Octahedron'], 0.0)
 
+    def test_symmetry_measure_is_cached(self):
+        polyhedron = self.coordination_polyhedron
+        mock_vectors = np.array([
+            [0.0, 0.0, 2.0],
+            [0.0, 0.0, -2.0],
+            [2.0, 0.0, 0.0],
+            [-2.0, 0.0, 0.0],
+            [0.0, 2.0, 0.0],
+            [0.0, -2.0, 0.0],
+        ])
+        polyhedron.vertex_vectors = Mock(return_value=mock_vectors)
+        _ = polyhedron.symmetry_measure
+        call_count_after_first = polyhedron.vertex_vectors.call_count
+        _ = polyhedron.symmetry_measure
+        self.assertEqual(polyhedron.vertex_vectors.call_count, call_count_after_first)
+
     def test_faces(self):
         polyhedron = self.coordination_polyhedron
         polyhedron.convex_hull = Mock(return_value=Mock(spec=ConvexHull))
