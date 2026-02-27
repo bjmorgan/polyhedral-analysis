@@ -52,6 +52,30 @@ class TestRotationAnalyser(unittest.TestCase):
         self.ra.discrete_orientation.assert_called_once_with('foo')
         self.assertEqual(orientation, 'bar')
 
+    def test_discrete_orientation_identifies_correct_reference(self):
+        """A slightly distorted copy of reference orientation 0 should be identified as such."""
+        rng = np.random.RandomState(42)
+        distorted = self.ra.reference_points[0] + rng.normal(0, 0.05, self.ra.reference_points[0].shape)
+        result = self.ra.discrete_orientation(distorted)
+        self.assertEqual(result['reference_geometry_index'], 0)
+        self.assertAlmostEqual(result['rotational_distance'], 0.0, places=1)
+        self.assertLess(result['symmetry_measure'], 1.0)
+
+    def test_discrete_orientation_identifies_inverted_reference(self):
+        """A slightly distorted copy of reference orientation 1 should be identified as such."""
+        rng = np.random.RandomState(123)
+        distorted = self.ra.reference_points[1] + rng.normal(0, 0.05, self.ra.reference_points[1].shape)
+        result = self.ra.discrete_orientation(distorted)
+        self.assertEqual(result['reference_geometry_index'], 1)
+        self.assertAlmostEqual(result['rotational_distance'], 0.0, places=1)
+
+    def test_discrete_orientation_perfect_geometry_has_zero_csm(self):
+        """A perfect (undistorted) reference geometry should have CSM close to zero."""
+        points = self.ra.reference_points[0].copy()
+        result = self.ra.discrete_orientation(points)
+        self.assertAlmostEqual(result['symmetry_measure'], 0.0, places=5)
+        self.assertAlmostEqual(result['rotational_distance'], 0.0, places=5)
+
 
 if __name__ == '__main__':
     unittest.main()
