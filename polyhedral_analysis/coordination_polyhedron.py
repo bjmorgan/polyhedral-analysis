@@ -168,7 +168,7 @@ class CoordinationPolyhedron:
             for string, sm in symmetry_measures_from_coordination[self.coordination_number].items():
                 msm[string] = sm.minimum_symmetry_measure(self.vertex_vectors(reference='central_atom'))
             self._symmetry_measure = msm
-        return self._symmetry_measure
+        return dict(self._symmetry_measure)
 
     @property
     def best_fit_geometry(self) -> dict[str, str | float]:
