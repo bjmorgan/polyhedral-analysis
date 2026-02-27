@@ -38,6 +38,7 @@ class CoordinationPolyhedron:
             v.in_polyhedra.append(self)
         self._label: str = label if label else central_atom.label
         self._edge_graph: dict[int, list[int]] | None = None
+        self._symmetry_measure: dict[str, float] | None = None
 
     @property
     def label(self) -> str:
@@ -147,7 +148,7 @@ class CoordinationPolyhedron:
         if self._edge_graph is None:
             self._edge_graph = self.construct_edge_graph()
             self.update_vertex_neighbours()
-        return self._edge_graph
+        return {k: list(v) for k, v in self._edge_graph.items()}
 
     def edge_vertex_indices(self) -> tuple[tuple[int, int], ...]:
         edge_pairs: set[tuple[int, int]] = set()
@@ -159,13 +160,15 @@ class CoordinationPolyhedron:
 
     @property
     def symmetry_measure(self) -> dict[str, float]:
-        if self.coordination_number not in symmetry_measures_from_coordination:
-            raise ValueError('No symmetry measure objects for coordination number of {}'.format(
-                self.coordination_number))
-        msm = {}
-        for string, sm in symmetry_measures_from_coordination[self.coordination_number].items():
-            msm[string] = sm.minimum_symmetry_measure(self.vertex_vectors(reference='central_atom'))
-        return msm
+        if self._symmetry_measure is None:
+            if self.coordination_number not in symmetry_measures_from_coordination:
+                raise ValueError('No symmetry measure objects for coordination number of {}'.format(
+                    self.coordination_number))
+            msm = {}
+            for string, sm in symmetry_measures_from_coordination[self.coordination_number].items():
+                msm[string] = sm.minimum_symmetry_measure(self.vertex_vectors(reference='central_atom'))
+            self._symmetry_measure = msm
+        return dict(self._symmetry_measure)
 
     @property
     def best_fit_geometry(self) -> dict[str, str | float]:
