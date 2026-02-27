@@ -6,6 +6,15 @@
 
 - Cached `symmetry_measure` property on `CoordinationPolyhedron` to avoid redundant CSM calculations on repeated access.
 - `edge_graph` and `symmetry_measure` now return defensive copies to prevent callers from corrupting the internal cache.
+- Replaced N! permutation loop in `RotationAnalyser` with symmetry-reduced approach using bsym, giving ~50x speedup for octahedral geometries.
+
+### Bug fixes
+
+- Fixed `OrientationDict.all_rotational_distances` type annotation (`np.ndarray`, not `float`).
+
+### Other changes
+
+- Removed redundant `assert isinstance` checks across the codebase.
 
 ## 0.4.0
 
