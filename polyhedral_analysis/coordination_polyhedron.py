@@ -148,7 +148,7 @@ class CoordinationPolyhedron:
         if self._edge_graph is None:
             self._edge_graph = self.construct_edge_graph()
             self.update_vertex_neighbours()
-        return self._edge_graph
+        return {k: list(v) for k, v in self._edge_graph.items()}
 
     def edge_vertex_indices(self) -> tuple[tuple[int, int], ...]:
         edge_pairs: set[tuple[int, int]] = set()
