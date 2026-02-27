@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Performance
+
+- Cached `symmetry_measure` property on `CoordinationPolyhedron` to avoid redundant CSM calculations on repeated access.
+- `edge_graph` and `symmetry_measure` now return defensive copies to prevent callers from corrupting the internal cache.
+
 ## 0.4.0
 
 ### Breaking changes
@@ -13,11 +20,6 @@
 
 - Added `polyhedral_analysis.csm` module with internal `continuous_symmetry_measure()` function using SVD-based Procrustes analysis.
 - Added `polyhedral_analysis.reference_geometries` module with hardcoded ideal vertex coordinates for 17 reference geometries (CN 4-8).
-
-### Performance
-
-- Cached `symmetry_measure` property on `CoordinationPolyhedron` to avoid redundant CSM calculations on repeated access.
-- `edge_graph` and `symmetry_measure` now return defensive copies to prevent callers from corrupting the internal cache.
 
 ### Other changes
 
