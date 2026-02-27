@@ -190,7 +190,6 @@ class PolyhedraRecipe:
                 self._central_atom_list = list(self._central_atom_list_generator(structure))
             else:
                 raise ValueError('Needs structure argument')
-        assert isinstance(self._central_atom_list, list)
         return self._central_atom_list
 
     def vertex_atom_list(self,
@@ -205,7 +204,6 @@ class PolyhedraRecipe:
                 self._vertex_atom_list = list(self._vertex_atom_list_generator(structure))
             else:
                 raise ValueError('Needs structure argument')
-        assert isinstance(self._vertex_atom_list, list)
         return self._vertex_atom_list
                                              
     def find_polyhedra(self, 

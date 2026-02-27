@@ -112,9 +112,7 @@ class Atom:
 
     @property
     def lattice(self) -> Lattice:
-        l = self.site.lattice
-        assert isinstance(l, Lattice)
-        return l
+        return self.site.lattice
 
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, Atom):
@@ -139,6 +137,4 @@ class Atom:
             float
 
         """
-        d = self.site.distance(other.site)  # type: ignore
-        assert isinstance(d, float)
-        return d
+        return self.site.distance(other.site)  # type: ignore

@@ -544,9 +544,7 @@ class CoordinationPolyhedron:
             float: The volume.
 
         """
-        v = self.convex_hull().volume
-        assert isinstance(v, float)
-        return v
+        return self.convex_hull().volume
 
     @classmethod
     def from_sites(cls,
