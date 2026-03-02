@@ -58,8 +58,6 @@ print(poly.volume)                  # polyhedral volume
 print(poly.coordination_distances())  # list of bond lengths
 ```
 
-For more examples, see the [example notebooks](./docs/examples).
-
 ## Documentation
 
-API documentation is available at [polyhedral-analysis.readthedocs.io](https://polyhedral-analysis.readthedocs.io/en/latest/).
+Full documentation — including a getting started guide, core concepts, and guides for recipes, symmetry measures, neighbour analysis, and trajectory analysis — is available at [polyhedral-analysis.readthedocs.io](https://polyhedral-analysis.readthedocs.io/en/latest/).
