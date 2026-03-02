@@ -71,6 +71,12 @@ class Trajectory:
         Returns:
             A Trajectory object.
         """
+        if not isinstance(progress, bool):
+            raise TypeError(
+                f"progress must be a bool, got {type(progress).__name__!r}. "
+                "The 'notebook' option was removed in v0.6.0; "
+                "use progress=True instead."
+            )
         args = [{'structure': structure,
                  'recipes': recipes} for structure in structures]
         iterable: Iterable[Configuration]
@@ -88,21 +94,19 @@ class Trajectory:
         return cls(structures=structures,
                    configurations=configurations)
 
-    def extend(self, 
-               other: Trajectory,
-               offset: int = 0) -> None:
-        """
-        Extend this Trajectory with the data from another Trajectory.
+    def extend(self,
+               other: Trajectory) -> None:
+        """Extend this Trajectory with the data from another Trajectory.
+
+        Both the structures and configurations lists are extended
+        in place. Configurations are deep-copied to avoid shared
+        mutable state.
 
         Args:
-            other (`Trajectory`): The trajectory to be appended.
-            offset (int): Offset to apply to the frame numbers.
-
-        Returns:
-            None
+            other: The trajectory to be appended.
         """
-        extended_configurations = copy.deepcopy(other.configurations)
-        self.configurations.extend(extended_configurations)
+        self._structures.extend(other.structures)
+        self._configurations.extend(copy.deepcopy(other.configurations))
 
     def __add__(self, other: object) -> Trajectory:
         """Concatenate two trajectories, returning a new Trajectory.
@@ -134,8 +138,8 @@ class Trajectory:
                      filename: str,
                      recipes: list[PolyhedraRecipe],
                      verbose: bool = False,
-                     progress: bool = False,
-                     ncores: int | None = None) -> Trajectory:
+                     ncores: int | None = None,
+                     progress: bool = False) -> Trajectory:
         """Generate a Trajectory from a VASP XDATCAR file.
 
         Args:
@@ -143,9 +147,9 @@ class Trajectory:
             recipes: List of PolyhedraRecipe recipes defining how to
                 construct coordination polyhedra for each configuration.
             verbose: Verbose output while parsing. Default is ``False``.
-            progress: Show a progress bar. Default is ``False``.
             ncores: Number of cores for parallel processing. Default
                 is ``None`` (serial).
+            progress: Show a progress bar. Default is ``False``.
 
         Returns:
             A Trajectory object.

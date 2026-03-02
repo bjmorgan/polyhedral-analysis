@@ -58,14 +58,14 @@ class SymmetryMeasure:
     Args:
         reference_points: An Nx3 array of ideal vertex coordinates for
             the reference geometry.
-        string: A human-readable name for this geometry
+        name: A human-readable name for this geometry
             (e.g. ``'Octahedron'``).
     """
 
     def __init__(self,
                  reference_points: np.ndarray,
-                 string: str) -> None:
-        self.string = string
+                 name: str) -> None:
+        self.name = name
         self.reference_points = reference_points
         self._permutations: np.ndarray | None = None
 
@@ -134,7 +134,7 @@ symmetry_measures_to_construct = {4: ['Tetrahedron'],
                                       'Bicapped octahedron (cap faces with one edge in common)']}
 
 symmetry_measures_from_coordination: dict[int, dict[str, SymmetryMeasure]] = {}
-for coordination_number, strings in symmetry_measures_to_construct.items():
+for coordination_number, names in symmetry_measures_to_construct.items():
     symmetry_measures_from_coordination[coordination_number] = {}
-    for string in strings:
-        symmetry_measures_from_coordination[coordination_number][string] = SymmetryMeasure.from_name(string)
+    for name in names:
+        symmetry_measures_from_coordination[coordination_number][name] = SymmetryMeasure.from_name(name)

@@ -9,11 +9,11 @@ class TestSymmetryMeasureInit( unittest.TestCase ):
 
     def test_symmetry_measure_is_initialised( self ):
         reference_points = np.array( [ [ 1.0, 2.0, 3.0 ], [ 2.0, 3.0, 4.0 ] ] )
-        string = 'polyhedron'
+        name = 'polyhedron'
         symmetry_measure = SymmetryMeasure( reference_points=reference_points,
-                                            string=string )
+                                            name=name )
         np.testing.assert_array_equal( symmetry_measure.reference_points, reference_points )
-        self.assertEqual( symmetry_measure.string, string ) 
+        self.assertEqual( symmetry_measure.name, name ) 
 
     def test_symmetry_measure_from_name( self ):
         octahedral_sm = SymmetryMeasure.from_name( 'Octahedron' )
@@ -24,7 +24,7 @@ class TestSymmetryMeasureInit( unittest.TestCase ):
                                      [0.0, 1.0, 0.0], 
                                      [0.0, -1.0, 0.0]]
         np.testing.assert_array_equal( octahedral_sm.reference_points, expected_reference_points )
-        self.assertEqual( octahedral_sm.string, 'Octahedron' )
+        self.assertEqual( octahedral_sm.name, 'Octahedron' )
 
 class TestSymmetryMeasure( unittest.TestCase ):
 

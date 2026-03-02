@@ -53,6 +53,7 @@ class TestTrajectory(unittest.TestCase):
         trajectory2 = copy.deepcopy(trajectory1)
         trajectory1.extend(trajectory2)
         self.assertEqual(len(trajectory1.configurations), 4)
+        self.assertEqual(len(trajectory1.structures), 4)
 
     def test___len__(self):
         trajectory = self.trajectory

@@ -4,7 +4,14 @@
 
 ### Breaking changes
 
-- The `progress` parameter on `Trajectory.from_structures()`, `Trajectory.from_xdatcar()`, and `Trajectory.from_xdatcars()` is now `bool` instead of `bool | str`. The `"notebook"` option has been removed; `tqdm.auto` now handles automatic terminal/Jupyter detection. Replace `progress="notebook"` with `progress=True`.
+- The `progress` parameter on `Trajectory.from_structures()`, `Trajectory.from_xdatcar()`, and `Trajectory.from_xdatcars()` is now `bool` instead of `bool | str`. The `"notebook"` option has been removed; `tqdm.auto` now handles automatic terminal/Jupyter detection. Replace `progress="notebook"` with `progress=True`. Passing a non-bool now raises `TypeError` with a migration hint.
+- Renamed `SymmetryMeasure.string` attribute to `SymmetryMeasure.name`.
+- Reordered keyword arguments on `Trajectory.from_xdatcar()` from `(verbose, progress, ncores)` to `(verbose, ncores, progress)` to match `from_structures()` and `from_xdatcars()`.
+- Removed unused `offset` parameter from `Trajectory.extend()`.
+
+### Bug fixes
+
+- `Trajectory.extend()` now extends both structures and configurations. Previously only configurations were extended, causing the two lists to fall out of sync.
 
 ### Documentation
 

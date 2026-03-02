@@ -89,7 +89,7 @@ all polyhedra at once:
 
 .. code-block:: python
 
-    config.face_sharing_neighbour_list()
+    config.face_sharing_neighbour_list(labels=['Ti'])
     # {0: (7,), 1: (), 3: (7,), ...}
 
 This returns a dictionary mapping each polyhedron index to a tuple of
