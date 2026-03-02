@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 ### Performance
 
@@ -15,6 +15,7 @@
 ### Other changes
 
 - Removed redundant `assert isinstance` checks across the codebase.
+- Added input shape validation to `RotationAnalyser.discrete_orientation`.
 
 ## 0.4.0
 

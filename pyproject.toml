@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polyhedral-analysis"
-version = "0.4.0"
+version = "0.5.0"
 description = "A library for analysis of coordination polyhedra from molecular dynamics trajectories"
 readme = "README.md"
 license = { text = "MIT" }
