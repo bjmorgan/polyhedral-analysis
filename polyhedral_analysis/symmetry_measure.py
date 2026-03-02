@@ -48,6 +48,19 @@ def _compute_reduced_permutations(reference_points: np.ndarray) -> np.ndarray:
 
 
 class SymmetryMeasure:
+    """Continuous symmetry measure calculator for a reference geometry.
+
+    Wraps a set of ideal reference points and computes the minimum
+    continuous symmetry measure (CSM) over all symmetry-inequivalent
+    vertex permutations. The permutations are computed lazily on first
+    use via :mod:`bsym`.
+
+    Args:
+        reference_points: An Nx3 array of ideal vertex coordinates for
+            the reference geometry.
+        string: A human-readable name for this geometry
+            (e.g. ``'Octahedron'``).
+    """
 
     def __init__(self,
                  reference_points: np.ndarray,
@@ -68,6 +81,19 @@ class SymmetryMeasure:
 
     def minimum_symmetry_measure(self,
                                  distorted_points: np.ndarray) -> float:
+        """Compute the minimum CSM of distorted points against this reference.
+
+        Iterates over all symmetry-inequivalent permutations and returns
+        the smallest continuous symmetry measure.
+
+        Args:
+            distorted_points: An Nx3 array of vertex coordinates to
+                compare against the reference geometry.
+
+        Returns:
+            The minimum symmetry measure value. A value of 0 indicates
+            perfect agreement with the reference geometry.
+        """
         return min(
             continuous_symmetry_measure(distorted_points[perm], self.reference_points).symmetry_measure
             for perm in self.permutations
@@ -75,6 +101,17 @@ class SymmetryMeasure:
 
     @classmethod
     def from_name(cls, name: str) -> SymmetryMeasure:
+        """Construct a SymmetryMeasure from a named reference geometry.
+
+        Args:
+            name: The name of the reference geometry (e.g.
+                ``'Octahedron'``, ``'Tetrahedron'``). See
+                :func:`~polyhedral_analysis.reference_geometries.get_reference_geometry`
+                for available names.
+
+        Returns:
+            A new SymmetryMeasure instance.
+        """
         reference_points = get_reference_geometry(name)
         return cls(reference_points, name)
 

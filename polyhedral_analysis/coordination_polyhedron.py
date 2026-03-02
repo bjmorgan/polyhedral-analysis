@@ -14,6 +14,12 @@ from typing import Literal
 import typing
 
 class CoordinationPolyhedron:
+    """A coordination polyhedron defined by a central atom and its vertex atoms.
+
+    Provides geometric analysis including bond distances, angles, volume,
+    edge connectivity, continuous symmetry measures, and neighbour-sharing
+    relationships with other polyhedra.
+    """
 
     def __init__(self,
                  central_atom: Atom,
@@ -42,12 +48,19 @@ class CoordinationPolyhedron:
 
     @property
     def label(self) -> str:
+        """The label for this polyhedron."""
         return self._label
 
     def set_label(self, label: str) -> None:
+        """Set the label for this polyhedron.
+
+        Args:
+            label: The new label string.
+        """
         self._label = label
 
     def update_vertex_neighbours(self) -> None:
+        """Update the neighbour lists on each vertex atom from the edge graph."""
         for vertex, neighbour_list in zip(self.vertices, self.edge_graph.values()):
             vertex._neighbours[self.index] = neighbour_list
 
@@ -100,6 +113,7 @@ class CoordinationPolyhedron:
 
     @property
     def vertex_indices(self) -> list[int]:
+        """Global indices of the vertex atoms."""
         return [v.index for v in self.vertices]
 
     def vertex_vectors(self,
@@ -129,28 +143,39 @@ class CoordinationPolyhedron:
 
     @property
     def vertex_coords(self) -> np.ndarray:
+        """Cartesian coordinates of the vertex atoms as an Nx3 array."""
         return np.array([v.coords for v in self.vertices])
 
     @property
     def vertex_labels(self) -> list[str | None]:
+        """Species labels of the vertex atoms."""
         return [v.label for v in self.vertices]
 
     @property
     def coordination_number(self) -> int:
+        """Number of vertex atoms in this polyhedron."""
         return len(self.vertices)
 
     @property
     def index(self) -> int:
+        """Global index of the central atom."""
         return self.central_atom.index
 
     @property
     def edge_graph(self) -> dict[int, list[int]]:
+        """Edge connectivity graph for this polyhedron.
+
+        A dictionary mapping each vertex index to a list of indices of
+        vertices connected to it by an edge. Computed lazily from the
+        convex hull on first access.
+        """
         if self._edge_graph is None:
             self._edge_graph = self.construct_edge_graph()
             self.update_vertex_neighbours()
         return {k: list(v) for k, v in self._edge_graph.items()}
 
     def edge_vertex_indices(self) -> tuple[tuple[int, int], ...]:
+        """Return all edges as sorted pairs of vertex indices."""
         edge_pairs: set[tuple[int, int]] = set()
         for v1, v2_list in self.edge_graph.items():
             for v2 in v2_list:
@@ -160,6 +185,15 @@ class CoordinationPolyhedron:
 
     @property
     def symmetry_measure(self) -> dict[str, float]:
+        """Continuous symmetry measures against all reference geometries for this coordination number.
+
+        Returns a dictionary mapping geometry names to CSM values.
+        Computed lazily on first access.
+
+        Raises:
+            ValueError: If no reference geometries are defined for this
+                coordination number.
+        """
         if self._symmetry_measure is None:
             if self.coordination_number not in symmetry_measures_from_coordination:
                 raise ValueError('No symmetry measure objects for coordination number of {}'.format(
@@ -172,11 +206,24 @@ class CoordinationPolyhedron:
 
     @property
     def best_fit_geometry(self) -> dict[str, str | float]:
+        """The reference geometry with the lowest symmetry measure.
+
+        Returns a dictionary with keys ``'geometry'`` (the name) and
+        ``'symmetry_measure'`` (the CSM value).
+        """
         psm = self.symmetry_measure
         best_fit = min(psm, key=psm.get) # type: ignore
         return {'geometry': best_fit, 'symmetry_measure': psm[best_fit]}
 
     def minimum_image_vertex_coordinates(self) -> np.ndarray:
+        """Vertex coordinates under the minimum-image convention.
+
+        Returns Cartesian coordinates for each vertex, shifted to be the
+        closest periodic image to the central atom.
+
+        Returns:
+            np.ndarray: An Nx3 array of minimum-image vertex coordinates.
+        """
         vertex_frac_coords = [v.frac_coords for v in self.vertices]
         pbc_vectors = pbc_shortest_vectors(self.central_atom.lattice,
                                            self.central_atom.frac_coords,
@@ -221,9 +268,20 @@ class CoordinationPolyhedron:
         )
 
     def convex_hull(self) -> ConvexHull:
+        """Compute the convex hull of the minimum-image vertex coordinates."""
         return ConvexHull(self.minimum_image_vertex_coordinates())
 
     def construct_edge_graph(self) -> dict[int, list[int]]:
+        """Build the edge connectivity graph from the convex hull.
+
+        For polyhedra with more than three vertices, edges are derived
+        from the convex hull simplices, merging coplanar faces. For
+        three or fewer vertices, all vertices are connected.
+
+        Returns:
+            A dictionary mapping each vertex index to the indices of
+            its edge-connected neighbours.
+        """
         connected_vertices: dict[int, set[int]] = {
             i: set() for i in range(self.coordination_number)}
         if self.coordination_number > 3:
@@ -270,6 +328,7 @@ class CoordinationPolyhedron:
 
     @property
     def vertex_count(self) -> typing.Counter[str | None]:
+        """Count of vertex atoms grouped by species label."""
         return Counter([v.label for v in self.vertices])
 
     def vertex_distances(self,
@@ -404,15 +463,18 @@ class CoordinationPolyhedron:
         return {p.index: self.intersection(p) for p in self.neighbours()}
 
     def corner_sharing_neighbour_list(self) -> tuple[int, ...]:
-        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+        """Indices of neighbouring polyhedra that share exactly one vertex (corner-sharing)."""
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items()
                      if len(v) == 1)
 
     def edge_sharing_neighbour_list(self) -> tuple[int, ...]:
-        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+        """Indices of neighbouring polyhedra that share exactly two vertices (edge-sharing)."""
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items()
                      if len(v) == 2)
 
     def face_sharing_neighbour_list(self) -> tuple[int, ...]:
-        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items() 
+        """Indices of neighbouring polyhedra that share three or more vertices (face-sharing)."""
+        return tuple(k for k, v in self.neighbours_by_index_and_shared_vertices().items()
                      if len(v) >= 3)
 
     def __eq__(self, other: object) -> bool:
@@ -642,8 +704,10 @@ class CoordinationPolyhedron:
         Calculate the radial distortion parameter for the coordination polyhedron.
 
         The radial distortion parameter is defined as:
-        For MSD: Δ = mean(((d_i - d_mean) / (d_mean if normalize else 1))^2)
-        For MAD: Δ = mean(|d_i - d_mean| / (d_mean if normalize else 1))
+
+        - For MSD: Delta = mean(((d_i - d_mean) / (d_mean if normalize else 1))^2)
+        - For MAD: Delta = mean(abs(d_i - d_mean) / (d_mean if normalize else 1))
+
         where d_i are the N distances from the reference point to each vertex,
         and d_mean is their mean value.
 

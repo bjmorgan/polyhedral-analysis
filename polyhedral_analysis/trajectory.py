@@ -1,39 +1,36 @@
 from __future__ import annotations
 
+import copy
+import multiprocessing
+from collections.abc import Iterable
+from typing import Any
+
 from pymatgen.io.vasp import Xdatcar
 from pymatgen.core.structure import Structure
+from tqdm.auto import tqdm
+
 from polyhedral_analysis.configuration import Configuration
-from polyhedral_analysis.utils import flatten
 from polyhedral_analysis.polyhedra_recipe import PolyhedraRecipe
-from polyhedral_analysis.configuration import Configuration
-import re
-import copy
-from monty.io import zopen # type: ignore
-import pickle
-import multiprocessing
-from tqdm import tqdm
-from tqdm.notebook import tqdm as tqdm_notebook
-from functools import partial
-from collections.abc import Callable, Iterator
-from typing import Any, TypeVar
-
-T = TypeVar('T')
-ProgressBarType = Callable[[Iterator[T]], Iterator[T]]
-
-def get_progress_bar(progress: bool | str) -> ProgressBarType:
-    if progress == 'notebook':
-        return lambda x: tqdm_notebook(x)  # type: ignore
-    elif progress:
-        return lambda x: tqdm(x)  # type: ignore
-    else:
-        return iter
+from polyhedral_analysis.utils import flatten
 
 class Trajectory:
 
     def __init__(self,
                  structures: list[Structure],
                  configurations: list[Configuration]) -> None:
-        """TODO"""
+        """Initialise a Trajectory from pre-built structures and configurations.
+
+        Args:
+            structures: A list of pymatgen Structure objects, one per frame.
+            configurations: A list of Configuration objects corresponding
+                to each structure.
+
+        Raises:
+            TypeError: If any element of ``structures`` is not a
+                :class:`~pymatgen.core.structure.Structure`, or any element
+                of ``configurations`` is not a
+                :class:`~polyhedral_analysis.configuration.Configuration`.
+        """
         for s in structures:
             if not isinstance( s, Structure ):
                 raise TypeError( "structures argument should contain pymatgen Structure objects" )
@@ -55,44 +52,40 @@ class Trajectory:
                         recipes: list[PolyhedraRecipe],
                         verbose: bool = False,
                         ncores: int | None = None,
-                        progress: bool | str = False) -> Trajectory:
-        """
-        Generate a :obj:`Trajectory` object by applying one or more polyhedral recipes to
-        a series of `pymatgen` :obj:`Structure` objects.,
+                        progress: bool = False) -> Trajectory:
+        """Generate a Trajectory by applying recipes to a series of structures.
 
         Args:
-            structures (list(:obj:`pymatgen.Structure`)): A list of `pymatgen` 
-                :obj:`Structure`` objects.
-            recipes (list(PolyhedraRecipe): List of `PolyhedraRecipe` recipes, where each recipe
-                defines how to construct a set of `CoordinationPolyhedra` for each configuration.
-            verbose (:obj:`bool`, optional): verbose output while parsing the input structures.
-                Default is False.
-            ncores (:obj:`int`, optional): TODO.
-            progress (:obj:`str`, optional): Show a progress bar.
-               Setting to ``True`` gives a simple progress bar.
-               Setting to ``"notebook"`` gives a Jupyter notebook compatible progress bar.
-               Default is ``False``.
+            structures: A list of pymatgen Structure objects.
+            recipes: List of PolyhedraRecipe recipes, where each recipe
+                defines how to construct a set of CoordinationPolyhedra
+                for each configuration.
+            verbose: Verbose output while parsing the input structures.
+                Default is ``False``.
+            ncores: Number of cores for parallel processing. Default
+                is ``None`` (serial).
+            progress: Show a progress bar. Uses ``tqdm.auto`` so the
+                correct widget is chosen automatically for terminals
+                and Jupyter notebooks. Default is ``False``.
 
         Returns:
-            None
+            A Trajectory object.
         """
-        args = [{'structure': structure, 
+        args = [{'structure': structure,
                  'recipes': recipes} for structure in structures]
-        progress_bar = get_progress_bar(progress)
-        progress_kwargs: dict[str, Any] = {}
-        if progress:
-            progress_kwargs = {'total': len(args),
-                               'unit': ' configurations'}
-
-        # generate polyhedra configurations
+        iterable: Iterable[Configuration]
         if ncores:
             with multiprocessing.Pool(ncores) as p:
-                configurations = list(progress_bar(p.imap(cls._get_configuration, args), 
-                                                   **progress_kwargs))
+                iterable = p.imap(cls._get_configuration, args)
+                if progress:
+                    iterable = tqdm(iterable, total=len(args), unit=' configs')
+                configurations = list(iterable)
         else:
-            configurations = list(progress_bar(map(cls._get_configuration, args),
-                                               **progress_kwargs))
-        return cls(structures=structures, 
+            iterable = map(cls._get_configuration, args)
+            if progress:
+                iterable = tqdm(iterable, total=len(args), unit=' configs')
+            configurations = list(iterable)
+        return cls(structures=structures,
                    configurations=configurations)
 
     def extend(self, 
@@ -112,7 +105,15 @@ class Trajectory:
         self.configurations.extend(extended_configurations)
 
     def __add__(self, other: object) -> Trajectory:
-        """TODO"""
+        """Concatenate two trajectories, returning a new Trajectory.
+
+        Args:
+            other: Another Trajectory to concatenate with this one.
+
+        Returns:
+            A new Trajectory containing the structures and configurations
+            from both trajectories.
+        """
         if not isinstance(other, Trajectory):
             return NotImplemented
         summed_structures = self.structures + other.structures
@@ -133,18 +134,21 @@ class Trajectory:
                      filename: str,
                      recipes: list[PolyhedraRecipe],
                      verbose: bool = False,
-                     progress: str | bool = False,
+                     progress: bool = False,
                      ncores: int | None = None) -> Trajectory:
-        """
+        """Generate a Trajectory from a VASP XDATCAR file.
+
         Args:
-            filename (str): Filename for a VASP XDATCAR file.
-            recipes (list(:obj:`PolyhedraRecipe`): List of `PolyhedraRecipe` recipes, 
-                where each recipe defines how to construct a set of `CoordinationPolyhedra` 
-                for each configuration.
+            filename: Path to a VASP XDATCAR file.
+            recipes: List of PolyhedraRecipe recipes defining how to
+                construct coordination polyhedra for each configuration.
+            verbose: Verbose output while parsing. Default is ``False``.
+            progress: Show a progress bar. Default is ``False``.
+            ncores: Number of cores for parallel processing. Default
+                is ``None`` (serial).
 
         Returns:
-            (:obj:`Trajectory`): a :obj:`Trajectory` object.
-
+            A Trajectory object.
         """
         xdatcar = Xdatcar( filename )
         structures = xdatcar.structures
@@ -157,9 +161,26 @@ class Trajectory:
                       recipes: list[PolyhedraRecipe],
                       verbose: bool = False,
                       ncores: int | None = None,
-                      progress: bool | str = False) -> Trajectory:
-        """
-        TODO
+                      progress: bool = False) -> Trajectory:
+        """Generate a Trajectory from multiple VASP XDATCAR files.
+
+        This is a convenience method for loading trajectories split across
+        several XDATCAR files (e.g. from consecutive VASP runs). The
+        structures from all files are concatenated before building
+        configurations.
+
+        Args:
+            filenames: List of paths to VASP XDATCAR files.
+            recipes: List of PolyhedraRecipe recipes defining how to
+                construct coordination polyhedra for each configuration.
+            verbose: Verbose output while parsing. Default is ``False``.
+            ncores: Number of cores for parallel processing. If set,
+                both XDATCAR parsing and configuration building are
+                parallelised. Default is ``None`` (serial).
+            progress: Show a progress bar. Default is ``False``.
+
+        Returns:
+            A Trajectory object.
         """
         if ncores and len(filenames) > 1:
             with multiprocessing.Pool(ncores) as p:

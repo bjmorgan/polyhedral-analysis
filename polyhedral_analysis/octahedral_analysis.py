@@ -100,9 +100,9 @@ def trans_vertex_vectors(polyhedron: CoordinationPolyhedron,
     """For an octahedral polyhedron, return the vectors between pairs of trans vertices.
 
     Args:
-        polyhedron (:obj: `CoordinationPolyhedron`): The polyhedron to be analysed.
-        check (Optional, :obj: `bool`): Optional flag to set whether to check that this polyhedron
-            is an octahedron. Default is `True`.
+        polyhedron (:obj:`CoordinationPolyhedron`): The polyhedron to be analysed.
+        check (Optional, :obj:`bool`): Optional flag to set whether to check that this polyhedron
+            is an octahedron. Default is ``True``.
 
     Returns:
         list[np.ndarray]: A list of three numpy arrays, each representing a vector
