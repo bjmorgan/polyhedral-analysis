@@ -4,9 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/bjmorgan/polyhedral-analysis/badge.svg?branch=main)](https://coveralls.io/github/bjmorgan/polyhedral-analysis?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/polyhedral-analysis/badge/?version=latest)](http://polyhedral-analysis.readthedocs.io/en/latest/?badge=latest)
 
-`polyhedral-analysis` is a Python module for analysing coordination polyhedra in crystal structures and molecular dynamics trajectories. It identifies coordination environments around central atoms and computes geometric properties such as distortion measures, bond lengths, angles, volumes, and connectivity.
-
-Built on top of [pymatgen](https://pymatgen.org), the package works with any structure that pymatgen can read.
+`polyhedral-analysis` is a Python module for analysing coordination polyhedra in crystal structures and molecular dynamics trajectories. Built on top of [pymatgen](https://pymatgen.org), it works with any structure that pymatgen can read.
 
 ## Features
 
@@ -16,7 +14,7 @@ Built on top of [pymatgen](https://pymatgen.org), the package works with any str
 - Bond lengths, angles, volumes, and edge connectivity graphs
 - Corner-, edge-, and face-sharing neighbour analysis
 - Off-centre displacement and radial distortion parameters
-- Vertex vector orientation analysis with stereographic projection plotting
+- Vertex vector orientation analysis with orientation distribution plotting
 - Trajectory analysis for tracking polyhedral distortions over molecular dynamics runs
 
 ## Installation
