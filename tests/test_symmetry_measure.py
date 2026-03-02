@@ -13,7 +13,7 @@ class TestSymmetryMeasureInit( unittest.TestCase ):
         symmetry_measure = SymmetryMeasure( reference_points=reference_points,
                                             name=name )
         np.testing.assert_array_equal( symmetry_measure.reference_points, reference_points )
-        self.assertEqual( symmetry_measure.name, name ) 
+        self.assertEqual( symmetry_measure.name, name )
 
     def test_symmetry_measure_from_name( self ):
         octahedral_sm = SymmetryMeasure.from_name( 'Octahedron' )

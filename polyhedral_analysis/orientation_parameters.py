@@ -22,7 +22,7 @@ def projection_xyz(vec_in: np.ndarray) -> float:
     ``theta`` is the angle between ``vec_in`` and that axis. The
     per-axis score ranges from 1.0 (parallel) to -1.0 (perpendicular).
     The function returns the maximum score across the three axes, so
-    the overall range is 1.0 (aligned with an axis) to -0.5 (equally
+    the overall range is 1.0 (aligned with an axis) to -1/3 (equally
     spaced between all three axes, e.g. along [1, 1, 1]).
 
     Args:

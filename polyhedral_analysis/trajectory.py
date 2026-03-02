@@ -50,7 +50,6 @@ class Trajectory:
     def from_structures(cls,
                         structures: list[Structure],
                         recipes: list[PolyhedraRecipe],
-                        verbose: bool = False,
                         ncores: int | None = None,
                         progress: bool = False) -> Trajectory:
         """Generate a Trajectory by applying recipes to a series of structures.
@@ -60,8 +59,6 @@ class Trajectory:
             recipes: List of PolyhedraRecipe recipes, where each recipe
                 defines how to construct a set of CoordinationPolyhedra
                 for each configuration.
-            verbose: Verbose output while parsing the input structures.
-                Default is ``False``.
             ncores: Number of cores for parallel processing. Default
                 is ``None`` (serial).
             progress: Show a progress bar. Uses ``tqdm.auto`` so the
@@ -137,7 +134,6 @@ class Trajectory:
     def from_xdatcar(cls,
                      filename: str,
                      recipes: list[PolyhedraRecipe],
-                     verbose: bool = False,
                      ncores: int | None = None,
                      progress: bool = False) -> Trajectory:
         """Generate a Trajectory from a VASP XDATCAR file.
@@ -146,7 +142,6 @@ class Trajectory:
             filename: Path to a VASP XDATCAR file.
             recipes: List of PolyhedraRecipe recipes defining how to
                 construct coordination polyhedra for each configuration.
-            verbose: Verbose output while parsing. Default is ``False``.
             ncores: Number of cores for parallel processing. Default
                 is ``None`` (serial).
             progress: Show a progress bar. Default is ``False``.
@@ -156,14 +151,13 @@ class Trajectory:
         """
         xdatcar = Xdatcar( filename )
         structures = xdatcar.structures
-        return cls.from_structures(structures, recipes, verbose=verbose, progress=progress,
+        return cls.from_structures(structures, recipes, progress=progress,
                                     ncores=ncores)
 
     @classmethod
     def from_xdatcars(cls,
                       filenames: list[str],
                       recipes: list[PolyhedraRecipe],
-                      verbose: bool = False,
                       ncores: int | None = None,
                       progress: bool = False) -> Trajectory:
         """Generate a Trajectory from multiple VASP XDATCAR files.
@@ -177,7 +171,6 @@ class Trajectory:
             filenames: List of paths to VASP XDATCAR files.
             recipes: List of PolyhedraRecipe recipes defining how to
                 construct coordination polyhedra for each configuration.
-            verbose: Verbose output while parsing. Default is ``False``.
             ncores: Number of cores for parallel processing. If set,
                 both XDATCAR parsing and configuration building are
                 parallelised. Default is ``None`` (serial).
@@ -194,7 +187,6 @@ class Trajectory:
         structures = flatten([x.structures for x in xdatcars])
         return cls.from_structures(structures,
                                    recipes,
-                                   verbose,
                                    ncores=ncores,
                                    progress=progress) 
 
