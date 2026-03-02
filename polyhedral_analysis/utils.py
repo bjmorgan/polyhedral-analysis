@@ -55,7 +55,20 @@ def lattice_mc_string(polyhedron: CoordinationPolyhedron,
 
 def prune_neighbour_list(neighbours: dict[int, tuple[int, ...]],
                          indices: list[int]) -> dict[int, tuple[int, ...]]:
-    """TODO"""
+    """Prune a neighbour list to include only the specified indices.
+
+    Filters both the keys and the values of the neighbour dictionary,
+    keeping only entries whose keys appear in ``indices`` and removing
+    any neighbour references to indices not in the set.
+
+    Args:
+        neighbours: A neighbour list mapping each polyhedron index
+            to a tuple of its neighbour indices.
+        indices: The subset of indices to retain.
+
+    Returns:
+        The pruned neighbour list.
+    """
     pruned_neighbours = {}
     for k, v in neighbours.items():
         if k in indices:

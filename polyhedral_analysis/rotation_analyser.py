@@ -173,11 +173,11 @@ class RotationAnalyser:
         points to the reference orientations and returns the orientation that
         minimises the rotational distance.
 
-        The algorithm uses a two-phase approach to avoid the N! cost of
+        The algorithm uses a two-phase approach to avoid the ``N!`` cost of
         evaluating all vertex permutations:
 
         1. Find the best vertex alignment using symmetry-reduced permutations
-           of the reference points (N!/|G| CSM evaluations instead of N!).
+           of the reference points (``N!`` / ``|G|`` CSM evaluations instead of ``N!``).
         2. Compose the best-fit Procrustes rotation R_best with all proper
            rotation matrices S_i of the reference geometry's point group to
            give the rotation matrix for each orientation: R_i = S_i @ R_best.
@@ -194,10 +194,10 @@ class RotationAnalyser:
         If exact rotation matrices are needed for highly distorted
         geometries, an alternative is a two-phase orbit-expansion approach:
         use reduced permutations to identify the minimum-CSM orbit (phase 1),
-        then expand that orbit to all |G| equivalent permutations and compute
+        then expand that orbit to all ``|G|`` equivalent permutations and compute
         CSM for each to obtain exact rotation matrices (phase 2). This costs
-        N!/|G| + |G| CSM evaluations per reference orientation rather than
-        N!/|G|, but avoids the composition approximation.
+        ``N!`` / ``|G|`` + ``|G|`` CSM evaluations per reference orientation rather than
+        ``N!`` / ``|G|``, but avoids the composition approximation.
 
         Args:
             points: Nx3 numpy array of points describing the coordinates of

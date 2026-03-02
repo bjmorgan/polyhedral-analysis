@@ -12,16 +12,13 @@ import numpy as np
 
 
 class SymmetryMeasureResult(NamedTuple):
-    """Result of a continuous symmetry measure calculation.
+    """Result of a continuous symmetry measure calculation."""
 
-    Attributes:
-        symmetry_measure: The CSM value as a percentage (0--100).
-        rotation_matrix: The optimal 3x3 rotation matrix.
-        scaling_factor: The optimal scaling factor.
-    """
-
+    #: The CSM value as a percentage (0--100).
     symmetry_measure: float
+    #: The optimal 3x3 rotation matrix.
     rotation_matrix: np.ndarray
+    #: The optimal scaling factor.
     scaling_factor: float
 
 

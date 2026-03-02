@@ -16,7 +16,21 @@ def cos_theta(a: np.ndarray,
     return to_return
 
 def projection_xyz(vec_in: np.ndarray) -> float:
-    """TODO"""
+    """Maximum projection score of a vector onto the Cartesian axes.
+
+    For each Cartesian axis, computes ``2 * cos^2(theta) - 1`` where
+    ``theta`` is the angle between ``vec_in`` and that axis. The
+    per-axis score ranges from 1.0 (parallel) to -1.0 (perpendicular).
+    The function returns the maximum score across the three axes, so
+    the overall range is 1.0 (aligned with an axis) to -1/3 (equally
+    spaced between all three axes, e.g. along [1, 1, 1]).
+
+    Args:
+        vec_in: A length-3 vector.
+
+    Returns:
+        The maximum projection score across the three Cartesian axes.
+    """
     scores = []
     for vec in np.array([[1.0, 0.0, 0.0],
                          [0.0, 1.0, 0.0],

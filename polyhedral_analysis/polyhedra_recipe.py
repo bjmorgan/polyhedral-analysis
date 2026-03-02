@@ -178,8 +178,20 @@ class PolyhedraRecipe:
         self.label = label
         self.recalculate = recalculate
 
-    def central_atom_list(self, 
+    def central_atom_list(self,
                           structure: Structure | None = None) -> list[int]:
+        """Return the list of central atom indices for a given structure.
+
+        Args:
+            structure: The structure to select atoms from. Required on
+                first call and whenever ``recalculate`` is ``True``.
+
+        Returns:
+            List of integer site indices for the central atoms.
+
+        Raises:
+            ValueError: If ``structure`` is not provided when needed.
+        """
         if self._central_atom_list is None:
             if structure:
                 self._central_atom_list = list(self._central_atom_list_generator(structure))
@@ -194,6 +206,18 @@ class PolyhedraRecipe:
 
     def vertex_atom_list(self,
                          structure: Structure | None = None) -> list[int]:
+        """Return the list of vertex atom indices for a given structure.
+
+        Args:
+            structure: The structure to select atoms from. Required on
+                first call and whenever ``recalculate`` is ``True``.
+
+        Returns:
+            List of integer site indices for the vertex atoms.
+
+        Raises:
+            ValueError: If ``structure`` is not provided when needed.
+        """
         if self._vertex_atom_list is None:
             if structure:
                 self._vertex_atom_list = list(self._vertex_atom_list_generator(structure))
@@ -206,9 +230,22 @@ class PolyhedraRecipe:
                 raise ValueError('Needs structure argument')
         return self._vertex_atom_list
                                              
-    def find_polyhedra(self, 
+    def find_polyhedra(self,
                        atoms: list[Atom],
                        structure: Structure | None = None) -> list[CoordinationPolyhedron]:
+        """Construct coordination polyhedra from a list of atoms.
+
+        Applies this recipe's method and atom selection rules to build
+        a list of :class:`CoordinationPolyhedron` objects.
+
+        Args:
+            atoms: All atoms in the configuration.
+            structure: The pymatgen Structure, used to resolve atom
+                indices when ``recalculate`` is ``True``.
+
+        Returns:
+            A list of CoordinationPolyhedron objects.
+        """
         central_atom_list = self.central_atom_list(structure)
         vertex_atom_list = self.vertex_atom_list(structure)
         central_atoms = [atom for atom in atoms if atom.index in central_atom_list]
@@ -239,6 +276,17 @@ def polyhedra_from_distance_cutoff(central_atoms: list[Atom],
                                    vertex_atoms: list[Atom],
                                    cutoff: float,
                                    label: str | None = None) -> list[CoordinationPolyhedron]:
+    """Construct polyhedra by including all vertex atoms within a cutoff distance.
+
+    Args:
+        central_atoms: Atoms to use as polyhedron centres.
+        vertex_atoms: Candidate vertex atoms.
+        cutoff: Maximum distance for a vertex atom to be included.
+        label: Optional label for the resulting polyhedra.
+
+    Returns:
+        A list of CoordinationPolyhedron objects.
+    """
     if not central_atoms:
         return []
     polyhedra = []
@@ -257,6 +305,17 @@ def polyhedra_from_nearest_neighbours(central_atoms: list[Atom],
                                       vertex_atoms: list[Atom],
                                       nn: int,
                                       label: str | None = None) -> list[CoordinationPolyhedron]:
+    """Construct polyhedra from the *n* nearest vertex atoms to each centre.
+
+    Args:
+        central_atoms: Atoms to use as polyhedron centres.
+        vertex_atoms: Candidate vertex atoms.
+        nn: Number of nearest neighbours to include.
+        label: Optional label for the resulting polyhedra.
+
+    Returns:
+        A list of CoordinationPolyhedron objects.
+    """
     polyhedra = []
     for c_atom in central_atoms:
         vertices = sorted(vertex_atoms, key=lambda atom: atom.distance(c_atom))[:nn]
@@ -268,6 +327,19 @@ def polyhedra_from_nearest_neighbours(central_atoms: list[Atom],
 def polyhedra_from_closest_centre(central_atoms: list[Atom],
                                   vertex_atoms: list[Atom],
                                   label: str | None = None) -> list[CoordinationPolyhedron]:
+    """Construct polyhedra by assigning each vertex atom to its closest centre.
+
+    Each vertex atom is assigned to the central atom it is nearest to,
+    so every vertex belongs to exactly one polyhedron.
+
+    Args:
+        central_atoms: Atoms to use as polyhedron centres.
+        vertex_atoms: Candidate vertex atoms.
+        label: Optional label for the resulting polyhedra.
+
+    Returns:
+        A list of CoordinationPolyhedron objects.
+    """
     coordination_coords = [co_atom.coords for co_atom in vertex_atoms]
     central_coords = [c_atom.coords for c_atom in central_atoms]
     closest_site_index = [np.argmin([a.distance(c_atom) 

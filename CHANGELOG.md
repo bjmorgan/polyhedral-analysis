@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.6.0
+
+### Breaking changes
+
+- The `progress` parameter on `Trajectory.from_structures()`, `Trajectory.from_xdatcar()`, and `Trajectory.from_xdatcars()` is now `bool` instead of `bool | str`. The `"notebook"` option has been removed; `tqdm.auto` now handles automatic terminal/Jupyter detection. Replace `progress="notebook"` with `progress=True`. Passing a non-bool now raises `TypeError` with a migration hint.
+- Renamed `SymmetryMeasure.string` attribute to `SymmetryMeasure.name`.
+- Removed unused `verbose` parameter from `Trajectory.from_structures()`, `from_xdatcar()`, and `from_xdatcars()`.
+- Removed unused `offset` parameter from `Trajectory.extend()`.
+
+### Bug fixes
+
+- `Trajectory.extend()` now extends both structures and configurations. Previously only configurations were extended, causing the two lists to fall out of sync.
+
+### Documentation
+
+- Comprehensive documentation overhaul with narrative pages, guides, and grouped API reference.
+- Added getting started guide and core concepts page.
+- Added guides for polyhedra recipes, continuous symmetry measures, neighbour analysis, and trajectory analysis.
+- Replaced auto-generated module stubs with a single grouped API reference page.
+- Added citing and changelog pages.
+- Modernised Sphinx configuration: replaced deprecated `recommonmark` with `myst-parser`, added `intersphinx` cross-references to pymatgen, numpy, scipy, and matplotlib.
+- Filled ~30 missing docstrings across the codebase.
+
+### Other changes
+
+- Switched from `tqdm` / `tqdm.notebook` to `tqdm.auto` for progress bars.
+- Removed unused imports from `trajectory` module.
+
 ## 0.5.0
 
 ### Performance
