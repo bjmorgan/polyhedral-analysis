@@ -216,6 +216,11 @@ class RotationAnalyser:
             - ``symmetry_measure`` (float): The continuous symmetry measure
               (CSM) for this polyhedron.
         """
+        expected_n = self.reference_points.shape[1]
+        if points.shape != (expected_n, 3):
+            raise ValueError(
+                f'Expected points with shape ({expected_n}, 3), '
+                f'got {points.shape}.')
         points = points - np.mean(points, axis=0, dtype=float)
         n_refs = len(self.reference_points)
         n_proper = len(self.proper_rotations)
@@ -248,5 +253,18 @@ class RotationAnalyser:
 
     def polyhedron_orientation(self,
                                polyhedron: CoordinationPolyhedron) -> OrientationDict:
+        """Find the discrete orientation of a coordination polyhedron.
+
+        Convenience wrapper around :meth:`discrete_orientation` that
+        extracts vertex vectors from the polyhedron relative to its
+        central atom.
+
+        Args:
+            polyhedron: The coordination polyhedron to analyse.
+
+        Returns:
+            Dictionary describing the orientation.
+            See :meth:`discrete_orientation` for details.
+        """
         points = polyhedron.vertex_vectors(reference='central_atom')
         return self.discrete_orientation(points)

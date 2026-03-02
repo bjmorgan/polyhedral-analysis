@@ -120,6 +120,12 @@ class TestRotationAnalyser(unittest.TestCase):
                 best_csm = csm_result.symmetry_measure
         self.assertAlmostEqual(result['symmetry_measure'], best_csm, places=10)
 
+    def test_discrete_orientation_rejects_wrong_vertex_count(self):
+        """discrete_orientation should raise ValueError for mismatched vertex count."""
+        wrong_shape = np.zeros((3, 3))  # 3 vertices instead of 4
+        with self.assertRaises(ValueError):
+            self.ra.discrete_orientation(wrong_shape)
+
     def test_all_rotational_distances_shape(self):
         """all_rotational_distances should have length n_refs * n_proper."""
         points = self.ra.reference_points[0].copy()
