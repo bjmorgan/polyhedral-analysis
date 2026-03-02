@@ -82,12 +82,16 @@ class OrientationDict(TypedDict):
 class RotationAnalyser:
     """Class for analysing rotational orientation of polyhedra.
 
+    All reference orientations must be rotated copies of the same geometry
+    (i.e. share the same point group). The symmetry analysis is performed
+    once from the first reference orientation and reused for all others.
+
     Attributes:
-        reference_points (np.ndarray): A Mx3xN numpy array of points around the
-            origin ([0.0, 0.0, 0.0]) that define sets of centre-vertex
+        reference_points (np.ndarray): An MxNx3 numpy array of points around
+            the origin ([0.0, 0.0, 0.0]) that define sets of centre-vertex
             vectors for specific reference orientations, e.g. for a single
-            orientation of a tetrahedron, reference points will be a size 1x3x4
-            array, e.g.::
+            orientation of a tetrahedron, reference points will be a size
+            1x4x3 array, e.g.::
 
                 [[[ 1.0, -1.0,  1.0],
                   [-1.0, -1.0, -1.0],
@@ -101,13 +105,13 @@ class RotationAnalyser:
         """Initialise a RotationAnalyser instance.
 
         Args:
-            reference_points: Either a 3xN or Mx3xN numpy array of points
+            reference_points: Either an Nx3 or MxNx3 numpy array of points
                 around the origin ([0.0, 0.0, 0.0]) that define sets of
                 centre-vertex vectors, and are used to classify the rotational
                 orientation of polyhedra.
 
-                If a 3xN array is passed in, this will be converted to a
-                1x3xN array.
+                If an Nx3 array is passed in, this will be converted to a
+                1xNx3 array.
         """
         if len(reference_points.shape) == 2:
             reference_points = np.array([reference_points])
@@ -207,31 +211,21 @@ class RotationAnalyser:
               (CSM) for this polyhedron.
         """
         points = points - np.mean(points, axis=0, dtype=float)
-        # Phase 1: find best alignment using reduced permutations
-        best_csm = float('inf')
-        best_rotation = np.eye(3)
-        best_ref_index = 0
+        n_refs = len(self.reference_points)
+        n_proper = len(self.proper_rotations)
+        # Phase 1: find best alignment per reference orientation
+        best_csm_per_ref = np.full(n_refs, float('inf'))
+        best_rotation_per_ref: list[np.ndarray] = [np.eye(3)] * n_refs
         for i, rp in enumerate(self.reference_points):
             for perm in self.reduced_permutations:
                 result = continuous_symmetry_measure(points, rp[perm])
-                if result.symmetry_measure < best_csm:
-                    best_csm = result.symmetry_measure
-                    best_rotation = result.rotation_matrix
-                    best_ref_index = i
+                if result.symmetry_measure < best_csm_per_ref[i]:
+                    best_csm_per_ref[i] = result.symmetry_measure
+                    best_rotation_per_ref[i] = result.rotation_matrix
         # Phase 2: compose best-fit rotation with proper symmetry operations
-        n_proper = len(self.proper_rotations)
-        all_rot_distances = np.empty(len(self.reference_points) * n_proper)
-        for i, rp in enumerate(self.reference_points):
-            # Find best rotation for this specific reference orientation
-            if i == best_ref_index:
-                R_i = best_rotation
-            else:
-                R_i = min(
-                    (continuous_symmetry_measure(points, rp[perm])
-                     for perm in self.reduced_permutations),
-                    key=lambda r: r.symmetry_measure,
-                ).rotation_matrix
-            composed = self.proper_rotations @ R_i
+        all_rot_distances = np.empty(n_refs * n_proper)
+        for i in range(n_refs):
+            composed = self.proper_rotations @ best_rotation_per_ref[i]
             traces = np.trace(composed, axis1=1, axis2=2)
             start = i * n_proper
             all_rot_distances[start:start + n_proper] = np.arccos(
@@ -242,7 +236,7 @@ class RotationAnalyser:
             orientation_index=index,
             reference_geometry_index=reference_geometry_index,
             rotational_distance=all_rot_distances[index],
-            symmetry_measure=best_csm,
+            symmetry_measure=float(best_csm_per_ref[reference_geometry_index]),
             all_rotational_distances=all_rot_distances,
         )
 
