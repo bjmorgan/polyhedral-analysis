@@ -38,8 +38,11 @@ def _analyse_point_group(reference_points: np.ndarray) -> tuple[np.ndarray, np.n
     # Extract proper 3x3 rotation matrices
     proper_rotations = np.array([
         op.rotation_matrix for op in symm_ops
-        if np.linalg.det(op.rotation_matrix) > 0
+        if np.linalg.det(op.rotation_matrix) > 0.5
     ])
+    if len(proper_rotations) == 0:
+        raise RuntimeError(
+            'No proper rotations found for the reference geometry.')
 
     # Convert symmetry operations to permutation representations for bsym
     coords = mol.cart_coords
@@ -48,8 +51,12 @@ def _analyse_point_group(reference_points: np.ndarray) -> tuple[np.ndarray, np.n
     for op in symm_ops:
         mapped_coords = op.operate_multi(coords)
         new_mol = Molecule(mol.species, mapped_coords)
-        mapping = [x + 1 for x in coord_list_mapping(
-            new_mol.cart_coords, coords)]
+        mapping_zero = coord_list_mapping(new_mol.cart_coords, coords)
+        if len(set(mapping_zero)) != n:
+            raise RuntimeError(
+                'coord_list_mapping did not produce a bijection; '
+                'symmetry operation maps multiple vertices to the same target.')
+        mapping = [x + 1 for x in mapping_zero]
         key = tuple(mapping)
         if key not in seen:
             seen.add(key)
@@ -78,6 +85,7 @@ class OrientationDict(TypedDict):
     rotational_distance: float
     symmetry_measure: float
     all_rotational_distances: np.ndarray
+
 
 class RotationAnalyser:
     """Class for analysing rotational orientation of polyhedra.
@@ -119,18 +127,18 @@ class RotationAnalyser:
             raise ValueError(
                 'Reference points must all contain the same number of coordinates')
         self.reference_points = reference_points
-        self._reduced_permutations: np.ndarray | None = None
-        self._proper_rotations: np.ndarray | None = None
+        self._symmetry_data: tuple[np.ndarray, np.ndarray] | None = None
 
-    def _ensure_symmetry_analysis(self) -> None:
+    def _ensure_symmetry_analysis(self) -> tuple[np.ndarray, np.ndarray]:
         """Run point group analysis if not already done.
 
-        Populates both ``_reduced_permutations`` and ``_proper_rotations``
-        from a single symmetry analysis.
+        Returns:
+            A tuple of (reduced_permutations, proper_rotations) from
+            a single symmetry analysis.
         """
-        if self._reduced_permutations is None:
-            self._reduced_permutations, self._proper_rotations = (
-                _analyse_point_group(self.reference_points[0]))
+        if self._symmetry_data is None:
+            self._symmetry_data = _analyse_point_group(self.reference_points[0])
+        return self._symmetry_data
 
     @property
     def reduced_permutations(self) -> np.ndarray:
@@ -138,8 +146,7 @@ class RotationAnalyser:
 
         Computed lazily on first access.
         """
-        self._ensure_symmetry_analysis()
-        return self._reduced_permutations  # type: ignore[return-value]
+        return self._ensure_symmetry_analysis()[0]
 
     @property
     def proper_rotations(self) -> np.ndarray:
@@ -147,8 +154,7 @@ class RotationAnalyser:
 
         Computed lazily on first access.
         """
-        self._ensure_symmetry_analysis()
-        return self._proper_rotations  # type: ignore[return-value]
+        return self._ensure_symmetry_analysis()[1]
 
     def discrete_orientation(self,
                              points: np.ndarray) -> OrientationDict:
@@ -215,7 +221,7 @@ class RotationAnalyser:
         n_proper = len(self.proper_rotations)
         # Phase 1: find best alignment per reference orientation
         best_csm_per_ref = np.full(n_refs, float('inf'))
-        best_rotation_per_ref: list[np.ndarray] = [np.eye(3)] * n_refs
+        best_rotation_per_ref: list[np.ndarray] = [np.eye(3) for _ in range(n_refs)]
         for i, rp in enumerate(self.reference_points):
             for perm in self.reduced_permutations:
                 result = continuous_symmetry_measure(points, rp[perm])
