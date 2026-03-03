@@ -380,9 +380,9 @@ c
     polyhedra = []
     for ic, iv in zip(central_indices, vertex_indices):
         central_atom = next(atom for atom in central_atoms if atom.index == ic)
-        vertex_atoms = [atom for atom in vertex_atoms if atom.index in iv]
+        vertices = [atom for atom in vertex_atoms if atom.index in iv]
         polyhedra.append(CoordinationPolyhedron(central_atom=central_atom,
-                                                vertices=vertex_atoms,
+                                                vertices=vertices,
                                                 label=label))
     return polyhedra 
 

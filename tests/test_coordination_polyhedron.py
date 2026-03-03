@@ -645,5 +645,251 @@ class TestCoordinationPolyhedron(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.coordination_polyhedron.vertex_vector_orientations(reference='invalid')
 
+class TestCoordinationPolyhedronLabel(unittest.TestCase):
+
+    def test_default_label_from_central_atom(self):
+        mock_central_atom = Mock(spec=Atom)
+        mock_central_atom.in_polyhedra = []
+        mock_central_atom.index = 0
+        mock_central_atom.label = 'Ti'
+        mock_vertices = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly = CoordinationPolyhedron(
+            central_atom=mock_central_atom, vertices=mock_vertices)
+        self.assertEqual(poly.label, 'Ti')
+
+    def test_explicit_label_overrides_central_atom(self):
+        mock_central_atom = Mock(spec=Atom)
+        mock_central_atom.in_polyhedra = []
+        mock_central_atom.index = 0
+        mock_central_atom.label = 'Ti'
+        mock_vertices = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly = CoordinationPolyhedron(
+            central_atom=mock_central_atom, vertices=mock_vertices,
+            label='oct')
+        self.assertEqual(poly.label, 'oct')
+
+    def test_set_label(self):
+        mock_central_atom = Mock(spec=Atom)
+        mock_central_atom.in_polyhedra = []
+        mock_central_atom.index = 0
+        mock_central_atom.label = 'Ti'
+        mock_vertices = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly = CoordinationPolyhedron(
+            central_atom=mock_central_atom, vertices=mock_vertices)
+        poly.set_label('tet')
+        self.assertEqual(poly.label, 'tet')
+
+
+class TestCoordinationPolyhedronEquality(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_central_atom_a = Mock(spec=Atom)
+        self.mock_central_atom_a.in_polyhedra = []
+        self.mock_central_atom_a.index = 0
+        self.mock_central_atom_a.label = 'A'
+        self.mock_central_atom_a.__eq__ = mock_atom_eq
+        self.mock_vertices_a = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(self.mock_vertices_a, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.__eq__ = mock_atom_eq
+            v.in_polyhedra = []
+        self.poly_a = CoordinationPolyhedron(
+            central_atom=self.mock_central_atom_a,
+            vertices=self.mock_vertices_a)
+
+    def test_equal_vertices_true_for_same_indices(self):
+        mock_central_atom_b = Mock(spec=Atom)
+        mock_central_atom_b.in_polyhedra = []
+        mock_central_atom_b.index = 10
+        mock_central_atom_b.label = 'B'
+        mock_vertices_b = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices_b, 1):
+            v._neighbours = {}
+            v.index = i  # same indices as poly_a
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly_b = CoordinationPolyhedron(
+            central_atom=mock_central_atom_b, vertices=mock_vertices_b)
+        self.assertTrue(self.poly_a.equal_vertices(poly_b))
+
+    def test_equal_vertices_false_for_different_indices(self):
+        mock_central_atom_b = Mock(spec=Atom)
+        mock_central_atom_b.in_polyhedra = []
+        mock_central_atom_b.index = 10
+        mock_central_atom_b.label = 'B'
+        mock_vertices_b = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices_b, 11):
+            v._neighbours = {}
+            v.index = i  # different indices
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly_b = CoordinationPolyhedron(
+            central_atom=mock_central_atom_b, vertices=mock_vertices_b)
+        self.assertFalse(self.poly_a.equal_vertices(poly_b))
+
+    def test_eq_delegates_to_equal_edge_graph(self):
+        poly_b = copy.deepcopy(self.poly_a)
+        edge_graph = {1: [2, 3], 2: [1, 3], 3: [1, 2], 4: []}
+        self.poly_a._edge_graph = edge_graph
+        poly_b._edge_graph = edge_graph
+        self.assertEqual(self.poly_a, poly_b)
+
+    def test_eq_false_for_different_edge_graphs(self):
+        poly_b = copy.deepcopy(self.poly_a)
+        self.poly_a._edge_graph = {1: [2, 3], 2: [1, 3], 3: [1, 2], 4: []}
+        poly_b._edge_graph = {1: [2], 2: [1], 3: [4], 4: [3]}
+        self.assertNotEqual(self.poly_a, poly_b)
+
+    def test_eq_returns_not_implemented_for_non_polyhedron(self):
+        result = self.poly_a.__eq__('not a polyhedron')
+        self.assertIs(result, NotImplemented)
+
+
+class TestCoordinationPolyhedronFromSitesOctahedron(unittest.TestCase):
+    """Tests using a real octahedron built from pymatgen PeriodicSite objects."""
+
+    def setUp(self):
+        from pymatgen.core import Lattice
+        from pymatgen.core.sites import PeriodicSite
+        lattice = Lattice.cubic(10.0)
+        central = PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice)
+        vertices = [
+            PeriodicSite('O', [0.6, 0.5, 0.5], lattice),
+            PeriodicSite('O', [0.4, 0.5, 0.5], lattice),
+            PeriodicSite('O', [0.5, 0.6, 0.5], lattice),
+            PeriodicSite('O', [0.5, 0.4, 0.5], lattice),
+            PeriodicSite('O', [0.5, 0.5, 0.6], lattice),
+            PeriodicSite('O', [0.5, 0.5, 0.4], lattice),
+        ]
+        self.poly = CoordinationPolyhedron.from_sites(central, vertices)
+
+    def test_best_fit_geometry_is_octahedron(self):
+        result = self.poly.best_fit_geometry
+        self.assertEqual(result['geometry'], 'Octahedron')
+        self.assertAlmostEqual(result['symmetry_measure'], 0.0)
+
+    def test_best_fit_geometry_has_expected_keys(self):
+        result = self.poly.best_fit_geometry
+        self.assertIn('geometry', result)
+        self.assertIn('symmetry_measure', result)
+
+    def test_volume_of_regular_octahedron(self):
+        # Vertices at ±1 from centre: volume = 4/3 * a^3 where a = 1
+        self.assertAlmostEqual(self.poly.volume, 4.0 / 3.0, places=5)
+
+    def test_edge_graph_each_vertex_has_four_neighbours(self):
+        for neighbours in self.poly.edge_graph.values():
+            self.assertEqual(len(neighbours), 4)
+
+    def test_edge_graph_opposite_vertices_not_connected(self):
+        edge_graph = self.poly.edge_graph
+        vi = self.poly.vertex_indices
+        # Vertices 0,1 are ±x; 2,3 are ±y; 4,5 are ±z
+        opposite_pairs = [(vi[0], vi[1]), (vi[2], vi[3]), (vi[4], vi[5])]
+        for v1, v2 in opposite_pairs:
+            self.assertNotIn(v2, edge_graph[v1])
+            self.assertNotIn(v1, edge_graph[v2])
+
+    def test_faces_returns_eight_triangles(self):
+        faces = self.poly.faces()
+        self.assertEqual(len(faces), 8)
+        for face in faces:
+            self.assertEqual(len(face), 3)
+
+    def test_faces_are_sorted_tuples(self):
+        for face in self.poly.faces():
+            self.assertIsInstance(face, tuple)
+            self.assertEqual(list(face), sorted(face))
+
+
+class TestMinimumImageVertexCoordinates(unittest.TestCase):
+
+    def test_vertex_wraps_across_periodic_boundary(self):
+        from pymatgen.core import Lattice
+        from pymatgen.core.sites import PeriodicSite
+        lattice = Lattice.cubic(10.0)
+        central = PeriodicSite('Ti', [0.95, 0.5, 0.5], lattice)
+        vertices = [
+            PeriodicSite('O', [0.05, 0.5, 0.5], lattice),  # wraps across x
+            PeriodicSite('O', [0.95, 0.6, 0.5], lattice),
+            PeriodicSite('O', [0.95, 0.4, 0.5], lattice),
+            PeriodicSite('O', [0.95, 0.5, 0.6], lattice),
+            PeriodicSite('O', [0.95, 0.5, 0.4], lattice),
+            PeriodicSite('O', [0.85, 0.5, 0.5], lattice),
+        ]
+        poly = CoordinationPolyhedron.from_sites(central, vertices)
+        min_image_coords = poly.minimum_image_vertex_coordinates()
+        # Vertex at frac [0.05] wraps to image at frac [1.05] → 10.5 Angstrom
+        # Central atom is at 9.5 Angstrom, so distance is 1.0 Angstrom
+        np.testing.assert_array_almost_equal(
+            min_image_coords[0], [10.5, 5.0, 5.0])
+
+
+class TestIntersectionNoSharedVertices(unittest.TestCase):
+
+    def test_no_shared_vertices_returns_empty_tuple(self):
+        mock_central_a = Mock(spec=Atom)
+        mock_central_a.in_polyhedra = []
+        mock_central_a.index = 0
+        mock_central_a.label = 'Li'
+        mock_central_b = Mock(spec=Atom)
+        mock_central_b.in_polyhedra = []
+        mock_central_b.index = 1
+        mock_central_b.label = 'Li'
+        verts_a = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(verts_a, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        verts_b = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(verts_b, 11):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly_a = CoordinationPolyhedron(
+            central_atom=mock_central_a, vertices=verts_a)
+        poly_b = CoordinationPolyhedron(
+            central_atom=mock_central_b, vertices=verts_b)
+        self.assertEqual(poly_a.intersection(poly_b), ())
+
+
+class TestPolyhedronNotOwnNeighbour(unittest.TestCase):
+
+    def test_polyhedron_is_not_its_own_neighbour(self):
+        mock_central = Mock(spec=Atom)
+        mock_central.in_polyhedra = []
+        mock_central.index = 0
+        mock_central.label = 'Li'
+        mock_vertices = [Mock(spec=Atom) for _ in range(4)]
+        for i, v in enumerate(mock_vertices, 1):
+            v._neighbours = {}
+            v.index = i
+            v.__lt__ = mock_atom_lt
+            v.in_polyhedra = []
+        poly = CoordinationPolyhedron(
+            central_atom=mock_central, vertices=mock_vertices)
+        poly._edge_graph = Mock()
+        self.assertNotIn(poly, poly.neighbours())
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,8 @@
 import unittest
+import tempfile
+import os
 from unittest.mock import Mock, patch
+import numpy as np
 from pymatgen.core.structure import Structure
 from pymatgen.core.sites import Site
 from polyhedral_analysis.configuration import Configuration
@@ -78,6 +81,47 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(len(p), 1)
         self.assertEqual(p[0].label, 'foo')
         self.assertEqual(p[0].central_atom.index, 0)
+
+    def test_polyhedra_by_label_with_list(self):
+        p = self.configuration.polyhedra_by_label(['foo', 'bar'])
+        self.assertEqual(len(p), 2)
+
+    def test_polyhedra_by_label_raises_type_error_for_invalid_type(self):
+        with self.assertRaises(TypeError):
+            self.configuration.polyhedra_by_label(123)
+
+    def test_face_sharing_neighbour_list(self):
+        self.configuration.polyhedra[0].index = 0
+        self.configuration.polyhedra[1].index = 2
+        self.configuration.polyhedra[0].face_sharing_neighbour_list = Mock(
+            return_value=(2,))
+        self.configuration.polyhedra[1].face_sharing_neighbour_list = Mock(
+            return_value=())
+        result = self.configuration.face_sharing_neighbour_list(['foo', 'bar'])
+        self.assertEqual(result, {0: (2,), 2: ()})
+
+    def test_to_lattice_mc_writes_file(self):
+        self.configuration.polyhedra[0].index = 0
+        self.configuration.polyhedra[1].index = 2
+        self.configuration.polyhedra[0].central_atom.coords = np.array(
+            [1.0, 2.0, 3.0])
+        self.configuration.polyhedra[1].central_atom.coords = np.array(
+            [4.0, 5.0, 6.0])
+        neighbour_list = {0: (2,), 2: (0,)}
+        fd, fname = tempfile.mkstemp(suffix='.txt')
+        os.close(fd)
+        try:
+            self.configuration.to_lattice_mc(
+                fname, ['foo', 'bar'], neighbour_list)
+            with open(fname) as f:
+                content = f.read()
+            self.assertTrue(content.startswith('2\n\n'))
+            self.assertIn('site: 0', content)
+            self.assertIn('site: 2', content)
+            self.assertIn('label: foo', content)
+            self.assertIn('label: bar', content)
+        finally:
+            os.unlink(fname)
 
 
 if __name__ == '__main__':
