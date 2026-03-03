@@ -5,9 +5,11 @@ from polyhedral_analysis.polyhedra_recipe import (PolyhedraRecipe,
                                                   polyhedra_from_distance_cutoff,
                                                   generator_from_atom_argument,
                                                   polyhedra_from_nearest_neighbours,
-                                                  polyhedra_from_closest_centre)
+                                                  polyhedra_from_closest_centre,
+                                                  polyhedra_from_atom_indices)
 from polyhedral_analysis.coordination_polyhedron import CoordinationPolyhedron
 from pymatgen.core import Structure, Lattice
+from pymatgen.core.sites import PeriodicSite
 from polyhedral_analysis.atom import Atom
 from unittest.mock import Mock, patch
 
@@ -150,7 +152,201 @@ class TestPolyhedraGenerationFunctions(unittest.TestCase):
 
         for atom in self.mock_central_atoms + self.mock_vertex_atoms:
             atom.distance = distance.__get__(atom)
-            
+
+
+class TestGeneratorFromAtomArgument(unittest.TestCase):
+
+    def test_callable_is_returned_directly(self):
+        fn = lambda structure: [0, 1]
+        result = generator_from_atom_argument(fn)
+        self.assertIs(result, fn)
+
+    def test_list_of_ints_returns_those_indices(self):
+        gen = generator_from_atom_argument([3, 7])
+        lattice = Lattice.cubic(10.0)
+        structure = Structure(lattice, ['Ti'] * 8,
+                              [[i / 8, 0.5, 0.5] for i in range(8)])
+        self.assertEqual(list(gen(structure)), [3, 7])
+
+    def test_raises_type_error_for_invalid_argument(self):
+        with self.assertRaises(TypeError):
+            generator_from_atom_argument(42)
+
+
+class TestPolyhedraFromDistanceCutoff(unittest.TestCase):
+
+    def test_includes_vertices_within_cutoff(self):
+        lattice = Lattice.cubic(10.0)
+        central = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        close_coords = [
+            [0.6, 0.5, 0.5], [0.4, 0.5, 0.5],
+            [0.5, 0.6, 0.5], [0.5, 0.4, 0.5],
+            [0.5, 0.5, 0.6], [0.5, 0.5, 0.4],
+        ]
+        far_coords = [[0.8, 0.5, 0.5], [0.2, 0.5, 0.5]]
+        vertex_atoms = [Atom(i + 1, PeriodicSite('O', c, lattice))
+                        for i, c in enumerate(close_coords + far_coords)]
+        # Cutoff of 1.5 Angstrom: close vertices are 1.0 Angstrom away,
+        # far vertices are 3.0 Angstrom away.
+        polyhedra = polyhedra_from_distance_cutoff(
+            central_atoms=[central], vertex_atoms=vertex_atoms, cutoff=1.5)
+        self.assertEqual(len(polyhedra), 1)
+        self.assertEqual(polyhedra[0].coordination_number, 6)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [1, 2, 3, 4, 5, 6])
+
+
+class TestPolyhedraFromNearestNeighbours(unittest.TestCase):
+
+    def test_selects_n_nearest_vertex_atoms(self):
+        lattice = Lattice.cubic(10.0)
+        central = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        close_coords = [
+            [0.6, 0.5, 0.5], [0.4, 0.5, 0.5],
+            [0.5, 0.6, 0.5], [0.5, 0.4, 0.5],
+            [0.5, 0.5, 0.6], [0.5, 0.5, 0.4],
+        ]
+        far_coords = [[0.8, 0.5, 0.5], [0.2, 0.5, 0.5]]
+        vertex_atoms = [Atom(i + 1, PeriodicSite('O', c, lattice))
+                        for i, c in enumerate(close_coords + far_coords)]
+        polyhedra = polyhedra_from_nearest_neighbours(
+            central_atoms=[central], vertex_atoms=vertex_atoms, nn=6)
+        self.assertEqual(len(polyhedra), 1)
+        self.assertEqual(polyhedra[0].coordination_number, 6)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [1, 2, 3, 4, 5, 6])
+
+    def test_each_central_atom_gets_n_neighbours(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.2, 0.5, 0.5], lattice))
+        c2 = Atom(1, PeriodicSite('Ti', [0.8, 0.5, 0.5], lattice))
+        vertex_coords = [
+            [0.15, 0.5, 0.5], [0.25, 0.5, 0.5],
+            [0.2, 0.55, 0.5], [0.2, 0.45, 0.5],
+            [0.75, 0.5, 0.5], [0.85, 0.5, 0.5],
+            [0.8, 0.55, 0.5], [0.8, 0.45, 0.5],
+        ]
+        vertex_atoms = [Atom(i + 2, PeriodicSite('O', c, lattice))
+                        for i, c in enumerate(vertex_coords)]
+        polyhedra = polyhedra_from_nearest_neighbours(
+            central_atoms=[c1, c2], vertex_atoms=vertex_atoms, nn=4)
+        self.assertEqual(len(polyhedra), 2)
+        for p in polyhedra:
+            self.assertEqual(p.coordination_number, 4)
+
+
+class TestPolyhedraFromClosestCentre(unittest.TestCase):
+
+    def test_each_vertex_assigned_to_nearest_centre(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.2, 0.5, 0.5], lattice))
+        c2 = Atom(1, PeriodicSite('Ti', [0.8, 0.5, 0.5], lattice))
+        v1 = Atom(2, PeriodicSite('O', [0.25, 0.5, 0.5], lattice))
+        v2 = Atom(3, PeriodicSite('O', [0.15, 0.5, 0.5], lattice))
+        v3 = Atom(4, PeriodicSite('O', [0.75, 0.5, 0.5], lattice))
+        v4 = Atom(5, PeriodicSite('O', [0.85, 0.5, 0.5], lattice))
+        polyhedra = polyhedra_from_closest_centre(
+            central_atoms=[c1, c2], vertex_atoms=[v1, v2, v3, v4])
+        self.assertEqual(len(polyhedra), 2)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [2, 3])
+        self.assertEqual(sorted(polyhedra[1].vertex_indices), [4, 5])
+
+    def test_no_vertex_assigned_to_multiple_polyhedra(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.2, 0.5, 0.5], lattice))
+        c2 = Atom(1, PeriodicSite('Ti', [0.8, 0.5, 0.5], lattice))
+        vertex_atoms = [
+            Atom(2, PeriodicSite('O', [0.25, 0.5, 0.5], lattice)),
+            Atom(3, PeriodicSite('O', [0.15, 0.5, 0.5], lattice)),
+            Atom(4, PeriodicSite('O', [0.75, 0.5, 0.5], lattice)),
+            Atom(5, PeriodicSite('O', [0.85, 0.5, 0.5], lattice)),
+        ]
+        polyhedra = polyhedra_from_closest_centre(
+            central_atoms=[c1, c2], vertex_atoms=vertex_atoms)
+        all_vertex_indices = []
+        for p in polyhedra:
+            all_vertex_indices.extend(p.vertex_indices)
+        self.assertEqual(len(all_vertex_indices), len(set(all_vertex_indices)))
+
+
+class TestPolyhedraFromAtomIndices(unittest.TestCase):
+
+    def test_correct_assignment_from_explicit_indices(self):
+        # Regression test for #15: vertex_atoms parameter was shadowed
+        # inside the loop, so only the first polyhedron got correct vertices.
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.2, 0.5, 0.5], lattice))
+        c2 = Atom(1, PeriodicSite('Ti', [0.8, 0.5, 0.5], lattice))
+        v1 = Atom(2, PeriodicSite('O', [0.25, 0.5, 0.5], lattice))
+        v2 = Atom(3, PeriodicSite('O', [0.15, 0.5, 0.5], lattice))
+        v3 = Atom(4, PeriodicSite('O', [0.75, 0.5, 0.5], lattice))
+        v4 = Atom(5, PeriodicSite('O', [0.85, 0.5, 0.5], lattice))
+        polyhedra = polyhedra_from_atom_indices(
+            central_atoms=[c1, c2],
+            vertex_atoms=[v1, v2, v3, v4],
+            central_indices=[0, 1],
+            vertex_indices=[[2, 3], [4, 5]])
+        self.assertEqual(len(polyhedra), 2)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [2, 3])
+        self.assertEqual(sorted(polyhedra[1].vertex_indices), [4, 5])
+
+    def test_raises_for_mismatched_index_lengths(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        v1 = Atom(1, PeriodicSite('O', [0.6, 0.5, 0.5], lattice))
+        with self.assertRaises(ValueError):
+            polyhedra_from_atom_indices(
+                central_atoms=[c1],
+                vertex_atoms=[v1],
+                central_indices=[0, 1],
+                vertex_indices=[[1]])
+
+
+class TestFindPolyhedraNearestNeighbours(unittest.TestCase):
+
+    def test_end_to_end_nearest_neighbours(self):
+        lattice = Lattice.cubic(10.0)
+        species = ['Ti'] + ['O'] * 8
+        coords = [
+            [0.5, 0.5, 0.5],
+            [0.6, 0.5, 0.5], [0.4, 0.5, 0.5],
+            [0.5, 0.6, 0.5], [0.5, 0.4, 0.5],
+            [0.5, 0.5, 0.6], [0.5, 0.5, 0.4],
+            [0.8, 0.5, 0.5], [0.2, 0.5, 0.5],
+        ]
+        structure = Structure(lattice, species, coords)
+        atoms = [Atom(i, site) for i, site in enumerate(structure.sites)]
+        recipe = PolyhedraRecipe(
+            method='nearest neighbours',
+            central_atoms='Ti',
+            vertex_atoms='O',
+            n_neighbours=6)
+        polyhedra = recipe.find_polyhedra(atoms, structure)
+        self.assertEqual(len(polyhedra), 1)
+        self.assertEqual(polyhedra[0].coordination_number, 6)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [1, 2, 3, 4, 5, 6])
+
+
+class TestFindPolyhedraClosestCentre(unittest.TestCase):
+
+    def test_end_to_end_closest_centre(self):
+        lattice = Lattice.cubic(10.0)
+        species = ['Ti', 'Ti', 'O', 'O', 'O', 'O']
+        coords = [
+            [0.2, 0.5, 0.5], [0.8, 0.5, 0.5],
+            [0.25, 0.5, 0.5], [0.15, 0.5, 0.5],
+            [0.75, 0.5, 0.5], [0.85, 0.5, 0.5],
+        ]
+        structure = Structure(lattice, species, coords)
+        atoms = [Atom(i, site) for i, site in enumerate(structure.sites)]
+        recipe = PolyhedraRecipe(
+            method='closest centre',
+            central_atoms='Ti',
+            vertex_atoms='O')
+        polyhedra = recipe.find_polyhedra(atoms, structure)
+        self.assertEqual(len(polyhedra), 2)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [2, 3])
+        self.assertEqual(sorted(polyhedra[1].vertex_indices), [4, 5])
+
+
 if __name__ == '__main__':
     unittest.main()
 
