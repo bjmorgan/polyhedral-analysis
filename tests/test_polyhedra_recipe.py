@@ -154,6 +154,47 @@ class TestPolyhedraGenerationFunctions(unittest.TestCase):
             atom.distance = distance.__get__(atom)
 
 
+class TestGeneratorFromAtomArgument(unittest.TestCase):
+
+    def test_callable_is_returned_directly(self):
+        fn = lambda structure: [0, 1]
+        result = generator_from_atom_argument(fn)
+        self.assertIs(result, fn)
+
+    def test_list_of_ints_returns_those_indices(self):
+        gen = generator_from_atom_argument([3, 7])
+        lattice = Lattice.cubic(10.0)
+        structure = Structure(lattice, ['Ti'] * 8,
+                              [[i / 8, 0.5, 0.5] for i in range(8)])
+        self.assertEqual(list(gen(structure)), [3, 7])
+
+    def test_raises_type_error_for_invalid_argument(self):
+        with self.assertRaises(TypeError):
+            generator_from_atom_argument(42)
+
+
+class TestPolyhedraFromDistanceCutoff(unittest.TestCase):
+
+    def test_includes_vertices_within_cutoff(self):
+        lattice = Lattice.cubic(10.0)
+        central = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        close_coords = [
+            [0.6, 0.5, 0.5], [0.4, 0.5, 0.5],
+            [0.5, 0.6, 0.5], [0.5, 0.4, 0.5],
+            [0.5, 0.5, 0.6], [0.5, 0.5, 0.4],
+        ]
+        far_coords = [[0.8, 0.5, 0.5], [0.2, 0.5, 0.5]]
+        vertex_atoms = [Atom(i + 1, PeriodicSite('O', c, lattice))
+                        for i, c in enumerate(close_coords + far_coords)]
+        # Cutoff of 1.5 Angstrom: close vertices are 1.0 Angstrom away,
+        # far vertices are 3.0 Angstrom away.
+        polyhedra = polyhedra_from_distance_cutoff(
+            central_atoms=[central], vertex_atoms=vertex_atoms, cutoff=1.5)
+        self.assertEqual(len(polyhedra), 1)
+        self.assertEqual(polyhedra[0].coordination_number, 6)
+        self.assertEqual(sorted(polyhedra[0].vertex_indices), [1, 2, 3, 4, 5, 6])
+
+
 class TestPolyhedraFromNearestNeighbours(unittest.TestCase):
 
     def test_selects_n_nearest_vertex_atoms(self):
@@ -229,6 +270,8 @@ class TestPolyhedraFromClosestCentre(unittest.TestCase):
 class TestPolyhedraFromAtomIndices(unittest.TestCase):
 
     def test_correct_assignment_from_explicit_indices(self):
+        # Regression test for #15: vertex_atoms parameter was shadowed
+        # inside the loop, so only the first polyhedron got correct vertices.
         lattice = Lattice.cubic(10.0)
         c1 = Atom(0, PeriodicSite('Ti', [0.2, 0.5, 0.5], lattice))
         c2 = Atom(1, PeriodicSite('Ti', [0.8, 0.5, 0.5], lattice))
