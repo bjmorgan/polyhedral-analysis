@@ -50,6 +50,9 @@ Quick example
    guides/recipes
    guides/symmetry-measures
    guides/neighbour-analysis
+   guides/geometry
+   guides/octahedral-analysis
+   guides/orientations
    guides/trajectories
 
 .. toctree::

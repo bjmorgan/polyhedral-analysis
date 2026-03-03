@@ -101,6 +101,51 @@ one per frame:
             print(poly.best_fit_geometry)
 
 
+Working with configurations
+---------------------------
+
+Each :class:`~polyhedral_analysis.configuration.Configuration` provides
+convenience attributes and methods for querying its polyhedra and atoms.
+
+**Filtering polyhedra by label:**
+
+When you define a recipe with a ``label`` argument (see
+:doc:`recipes`), you can retrieve matching polyhedra with
+:meth:`~polyhedral_analysis.configuration.Configuration.polyhedra_by_label`:
+
+.. code-block:: python
+
+    config.polyhedra_by_label('Ti')          # all polyhedra labelled 'Ti'
+    config.polyhedra_by_label(['Ti', 'Nb'])  # multiple labels
+
+The
+:attr:`~polyhedral_analysis.configuration.Configuration.polyhedra_labels`
+property lists the labels of all polyhedra:
+
+.. code-block:: python
+
+    config.polyhedra_labels  # ['Ti', 'Ti', 'Ti', ...]
+
+**Accessing atoms:**
+
+The
+:attr:`~polyhedral_analysis.configuration.Configuration.central_atoms`
+and
+:attr:`~polyhedral_analysis.configuration.Configuration.coordination_atoms`
+properties return the central and vertex atoms respectively:
+
+.. code-block:: python
+
+    config.central_atoms       # list of central Atom objects
+    config.coordination_atoms  # list of vertex Atom objects
+
+To look up a specific coordination atom by its global index:
+
+.. code-block:: python
+
+    config.coordination_atom_by_index(12)  # Atom or None
+
+
 Polyhedron trajectories
 -----------------------
 
@@ -117,6 +162,22 @@ frames of a trajectory:
         polyhedra=[config.polyhedra[0] for config in trajectory.configurations],
     )
 
+The ``polyhedra`` attribute gives access to the individual
+:class:`~polyhedral_analysis.coordination_polyhedron.CoordinationPolyhedron`
+objects. You can extract time-series data for any polyhedron property
+(see :doc:`geometry` for all available properties):
+
+.. code-block:: python
+
+    # Off-centre displacement over time
+    displacements = [p.off_centre_displacement for p in poly_traj.polyhedra]
+
+    # Symmetry measure over time
+    csm_values = [p.best_fit_geometry['symmetry_measure'] for p in poly_traj.polyhedra]
+
+    # Coordination number over time
+    cn_values = [p.coordination_number for p in poly_traj.polyhedra]
+
 
 Combining trajectories
 ----------------------
@@ -132,3 +193,19 @@ Or extend an existing trajectory in place:
 .. code-block:: python
 
     trajectory_1.extend(trajectory_2)
+
+
+Exporting to lattice_mc
+------------------------
+
+The
+:meth:`~polyhedral_analysis.configuration.Configuration.to_lattice_mc`
+method exports a connectivity description for use with the
+`lattice_mc <https://github.com/bjmorgan/lattice_mc>`_ Monte Carlo code.
+It takes a filename, a list of polyhedra labels, and a neighbour list
+(typically the face-sharing neighbour list):
+
+.. code-block:: python
+
+    neighbour_list = config.face_sharing_neighbour_list(labels=['Ti'])
+    config.to_lattice_mc('lattice.dat', labels=['Ti'], neighbour_list=neighbour_list)

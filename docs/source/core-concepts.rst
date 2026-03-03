@@ -138,4 +138,10 @@ What next
   best-fit geometry identification.
 - :doc:`guides/neighbour-analysis` -- corner-, edge-, and face-sharing
   analysis.
+- :doc:`guides/geometry` -- detailed geometric analysis: distortion,
+  displacement, vertex species, projections, and topology.
+- :doc:`guides/octahedral-analysis` -- cis/trans and fac/mer isomer
+  identification for mixed-anion octahedra.
+- :doc:`guides/orientations` -- classifying and tracking polyhedral
+  rotational orientations.
 - :doc:`guides/trajectories` -- analysing molecular dynamics trajectories.
