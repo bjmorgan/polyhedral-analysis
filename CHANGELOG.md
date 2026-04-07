@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.1
+
+### Bug fixes
+
+- Fixed variable shadowing in `polyhedra_from_atom_indices` that caused only the first polyhedron to receive correct vertices.
+- Invalid atom indices passed to `polyhedra_from_atom_indices` now raise `ValueError` with a descriptive message instead of a raw `KeyError`.
+
+### Performance
+
+- `polyhedra_from_atom_indices` now uses precomputed index-to-atom mappings for O(1) lookups instead of repeated linear scans.
+
+### Testing
+
+- Expanded test coverage across `configuration`, `coordination_polyhedron`, `orientation_parameters`, `polyhedra_recipe`, `trajectory`, and `utils` modules.
+
 ## 0.6.0
 
 ### Breaking changes
