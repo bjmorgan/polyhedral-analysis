@@ -299,6 +299,28 @@ class TestPolyhedraFromAtomIndices(unittest.TestCase):
                 central_indices=[0, 1],
                 vertex_indices=[[1]])
 
+    def test_raises_for_invalid_central_index(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        v1 = Atom(1, PeriodicSite('O', [0.6, 0.5, 0.5], lattice))
+        with self.assertRaisesRegex(ValueError, 'Central atom index 99'):
+            polyhedra_from_atom_indices(
+                central_atoms=[c1],
+                vertex_atoms=[v1],
+                central_indices=[99],
+                vertex_indices=[[1]])
+
+    def test_raises_for_invalid_vertex_index(self):
+        lattice = Lattice.cubic(10.0)
+        c1 = Atom(0, PeriodicSite('Ti', [0.5, 0.5, 0.5], lattice))
+        v1 = Atom(1, PeriodicSite('O', [0.6, 0.5, 0.5], lattice))
+        with self.assertRaisesRegex(ValueError, 'Vertex atom indices'):
+            polyhedra_from_atom_indices(
+                central_atoms=[c1],
+                vertex_atoms=[v1],
+                central_indices=[0],
+                vertex_indices=[[88, 99]])
+
 
 class TestFindPolyhedraNearestNeighbours(unittest.TestCase):
 

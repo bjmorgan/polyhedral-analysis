@@ -381,8 +381,17 @@ c
     vertex_atom_map = {atom.index: atom for atom in vertex_atoms}
     polyhedra = []
     for ic, iv in zip(central_indices, vertex_indices):
-        central_atom = central_atom_map[ic]
-        vertices = [vertex_atom_map[i] for i in iv]
+        try:
+            central_atom = central_atom_map[ic]
+        except KeyError:
+            raise ValueError(
+                f'Central atom index {ic} not found in central_atoms.') from None
+        try:
+            vertices = [vertex_atom_map[i] for i in iv]
+        except KeyError:
+            missing = [i for i in iv if i not in vertex_atom_map]
+            raise ValueError(
+                f'Vertex atom indices {missing} not found in vertex_atoms.') from None
         polyhedra.append(CoordinationPolyhedron(central_atom=central_atom,
                                                 vertices=vertices,
                                                 label=label))
