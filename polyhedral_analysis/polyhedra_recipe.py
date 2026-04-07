@@ -377,12 +377,23 @@ c
     if len(central_indices) != len(vertex_indices):
         raise ValueError('central_indices and vertex_indices are different lengths: '
                          f'{len(central_indices)} vs. {len(vertex_indices)}.')
+    central_atom_map = {atom.index: atom for atom in central_atoms}
+    vertex_atom_map = {atom.index: atom for atom in vertex_atoms}
     polyhedra = []
     for ic, iv in zip(central_indices, vertex_indices):
-        central_atom = next(atom for atom in central_atoms if atom.index == ic)
-        vertex_atoms = [atom for atom in vertex_atoms if atom.index in iv]
+        try:
+            central_atom = central_atom_map[ic]
+        except KeyError:
+            raise ValueError(
+                f'Central atom index {ic} not found in central_atoms.') from None
+        try:
+            vertices = [vertex_atom_map[i] for i in iv]
+        except KeyError:
+            missing = [i for i in iv if i not in vertex_atom_map]
+            raise ValueError(
+                f'Vertex atom indices {missing} not found in vertex_atoms.') from None
         polyhedra.append(CoordinationPolyhedron(central_atom=central_atom,
-                                                vertices=vertex_atoms,
+                                                vertices=vertices,
                                                 label=label))
     return polyhedra 
 
